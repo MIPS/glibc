@@ -20,6 +20,15 @@
 
 #include <sysdeps/generic/sysdep.h>
 
+/* It is desirable that the names of PIC thunks match those used by
+   GCC so that multiple copies are eliminated by the linker.  Because
+   GCC 4.6 and earlier use __i686 in the names, it is necessary to
+   override that predefined macro.  */
+#if defined __i686 && defined __ASSEMBLER__
+#undef __i686
+#define __i686 __i686
+#endif
+
 #ifdef	__ASSEMBLER__
 
 /* Syntactic details of assembler.  */
