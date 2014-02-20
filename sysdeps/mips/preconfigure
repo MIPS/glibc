@@ -1,3 +1,8 @@
+echo "machine = $machine"
+echo "config_machine = $config_machine"
+echo "config_vendor = $config_vendor"
+echo "config_os = $config_os"
+
 case "$machine" in
 mips64*)	base_machine=mips64
 		case "$CC $CFLAGS $CPPFLAGS " in
@@ -12,13 +17,23 @@ mips64*)	base_machine=mips64
 		*abi32*|*abio32*) mips_config_abi=32 ;;
 		*) mips_config_abi=$mips_cc_abi ;;
 		esac
-		case $mips_config_abi in
-		default) machine=mips/mips64/n32 mips_config_abi=n32 ;;
-		n32) machine=mips/mips64/n32 ;;
-		64) machine=mips/mips64/n64 ;;
-		32) machine=mips/mips32/kern64 ;;
-		esac
-		machine=$machine/$config_machine
+		if [ "$config_vendor" = "img" ] ; then
+			case $mips_config_abi in
+			default) machine=mips/mips64r6/n32
+				 mips_config_abi=n32 ;;
+			n32)	 machine=mips/mips64r6/n32 ;;
+			64)	 machine=mips/mips64r6/n64 ;;
+			32)	 machine=mips/mips32r6 ;;
+			esac
+		else
+			case $mips_config_abi in
+			default) machine=mips/mips64/n32 mips_config_abi=n32 ;;
+			n32) machine=mips/mips64/n32 ;;
+			64) machine=mips/mips64/n64 ;;
+			32) machine=mips/mips32/kern64 ;;
+			esac
+			machine=$machine/$config_machine
+		fi
 		if test $mips_config_abi != $mips_cc_abi; then
 		  # This won't make it to config.make, but we want to
 		  # set this in case configure tests depend on it.
@@ -26,9 +41,16 @@ mips64*)	base_machine=mips64
 		fi
 		;;
 mips*)		base_machine=mips
-		case "$CC $CFLAGS $CPPFLAGS " in
-		*" -mips16 "*) machine=mips/mips32/mips16/$machine ;;
-		*) machine=mips/mips32/$machine ;;
-		esac
+		if [ "$config_vendor" = "img" ] ; then
+			machine=mips/mips32r6
+		else
+			case "$CC $CFLAGS $CPPFLAGS " in
+			*" -mips16 "*) machine=mips/mips32/mips16/$machine ;;
+			*) machine=mips/mips32/$machine ;;
+			esac
+		fi
 		;;
 esac
+
+echo "base_machine = $base_machine"
+echo "machine = $machine"
