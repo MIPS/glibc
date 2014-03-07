@@ -244,7 +244,7 @@ do {									\
 
 #ifndef __mips16
 #if __mips_isa_rev < 6
-#define LOAD_31 STRINGXP(bltzal $8, .Lcoff)
+#define LOAD_31 STRINGXP(bltzal $8) "," STRINGXP(.Lcoff)
 #else
 #define LOAD_31 STRINGXP(bal .Lcoff)
 #endif
