@@ -1,5 +1,8 @@
 2014-03-14  Roland McGrath  <roland@hack.frob.com>
 
+	* sysdeps/unix/sysv/linux/bits/mman-linux.h: Moved to ...
+	* bits/mman-linux.h: ... here.
+
 	* Makeconfig (+gccwarn): Add -Wundef.
 	* include/errno.h [IS_IN_rtld] [!RTLD_PRIVATE_ERRNO]: #error to catch
 	a dl-sysdep.h breaking its contract.
