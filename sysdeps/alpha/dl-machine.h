@@ -42,6 +42,16 @@ elf_machine_matches_host (const Elf64_Ehdr *ehdr)
   return ehdr->e_machine == EM_ALPHA;
 }
 
+/* Return nonzero iff ELF program headers are compatible with the running
+   host.  */
+static inline bool
+elf_machine_phdr_check (const ElfW(Phdr) *phdr, ElfW(Half) phnum,
+			const char *buf, ssize_t len, int fd,
+			struct link_map *map)
+{
+  return true;
+}
+
 /* Return the link-time address of _DYNAMIC.  The multiple-got-capable
    linker no longer allocates the first .got entry for this.  But not to
    worry, no special tricks are needed.  */
