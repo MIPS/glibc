@@ -80,6 +80,15 @@ elf_host_tolerates_class (const Elf64_Ehdr *ehdr)
   return ehdr->e_ident[EI_CLASS] == ELFCLASS32;
 }
 
+/* Return nonzero iff ELF program headers are compatible with the running
+   host.  */
+static inline bool
+elf_machine_phdr_check (const ElfW(Phdr) *phdr, ElfW(Half) phnum,
+			const char *buf, ssize_t len, int fd,
+			struct link_map *map)
+{
+  return true;
+}
 
 /* Return the run-time load address of the shared object, assuming it
    was originally linked at zero.  */
