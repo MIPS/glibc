@@ -1,5 +1,8 @@
 2014-05-05  Roland McGrath  <roland@hack.frob.com>
 
+	* sysdeps/unix/sysv/linux/arm/nptl/unwind.h: File moved to ...
+	* sysdeps/arm/unwind.h: ... here.
+
 	* elf/Makefile (others, install-bin): Remove pldd.
 	(pldd-modules): Variable removed.
 	($(objpfx)pldd): Target removed.
