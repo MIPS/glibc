@@ -1,8 +1,3 @@
-echo "machine = $machine"
-echo "config_machine = $config_machine"
-echo "config_vendor = $config_vendor"
-echo "config_os = $config_os"
-
 case "$machine" in
 mips64*)	base_machine=mips64
 		case "$CC $CFLAGS $CPPFLAGS " in
@@ -23,9 +18,7 @@ mips64*)	base_machine=mips64
 		64) machine=mips/mips64/n64 ;;
 		32) machine=mips/mips32/kern64 ;;
 		esac
-		if [ "$config_vendor" = "img" ] ; then
-			machine=$machine/mips64r6
-		fi
+		machine=$machine/$config_machine
 		if test $mips_config_abi != $mips_cc_abi; then
 		  # This won't make it to config.make, but we want to
 		  # set this in case configure tests depend on it.
@@ -34,14 +27,8 @@ mips64*)	base_machine=mips64
 		;;
 mips*)		base_machine=mips
 		case "$CC $CFLAGS $CPPFLAGS " in
-		*" -mips16 "*) machine=mips/mips32/mips16 ;;
-		*) machine=mips/mips32 ;;
+		*" -mips16 "*) machine=mips/mips32/mips16/$machine ;;
+		*) machine=mips/mips32/$machine ;;
 		esac
-		if [ "$config_vendor" = "img" ] ; then
-			machine=$machine/mips32r6
-		fi
 		;;
 esac
-
-echo "base_machine = $base_machine"
-echo "machine = $machine"
