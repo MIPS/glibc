@@ -259,8 +259,6 @@ L(aligned):
 L(double_aligned):
 # endif
 #else /* __mips_isa_rev < 6 */
-
-#if 0
 	andi	t2,a0,1
 	beq	t2,zero,L(align2)
 	PTR_SUBU a2,a2,t2
@@ -278,14 +276,9 @@ L(align4):
 	beq	t2,zero,L(align8)
 	PTR_SUBU a2,a2,t2
 	sw	a1,0(a0)
-	PTR_SUBU a0,a0,t2
+	PTR_ADDU a0,a0,t2
 L(align8):
 #endif
-
-#else /* 0 */
-
-	j	L(lastb)
-
 #endif /* 0 */
 
 #endif /* __mips_isa_rev < 6 */
