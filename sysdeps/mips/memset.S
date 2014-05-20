@@ -279,8 +279,6 @@ L(align4):
 	PTR_ADDU a0,a0,t2
 L(align8):
 #endif
-#endif /* 0 */
-
 #endif /* __mips_isa_rev < 6 */
 
 
