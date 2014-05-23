@@ -42,30 +42,21 @@
 
 extern __typeof (vfork) __libc_vfork;   /* Defined in libc.  */
 
-attribute_hidden __attribute__ ((used))
-__typeof (vfork) *
-vfork_ifunc (void)
+static __typeof (vfork) *
+vfork_resolve (void)
 {
   return &__libc_vfork;
 }
 
-# ifdef HAVE_ASM_SET_DIRECTIVE
-#  define DEFINE_VFORK(name) \
-  asm (".set " #name ", vfork_ifunc\n" \
-       ".globl " #name "\n" \
-       ".type " #name ", %gnu_indirect_function");
-# else
-#  define DEFINE_VFORK(name) \
-  asm (#name " = vfork_ifunc\n" \
-       ".globl " #name "\n" \
-       ".type " #name ", %gnu_indirect_function");
-# endif
+void *vfork_ifunc(void *, const void *, size_t)
+     __attribute__ ((ifunc ("vfork_resolve")));
 #endif
 
 #if SHLIB_COMPAT (libpthread, GLIBC_2_0, GLIBC_2_20)
-DEFINE_VFORK (vfork)
+compat_symbol (libpthread, vfork_ifunc, vfork, GLIBC_2_0);
 #endif
 
 #if SHLIB_COMPAT (libpthread, GLIBC_2_1_2, GLIBC_2_20)
-DEFINE_VFORK (__vfork)
+strong_alias (vfork_ifunc, vfork_ifunc2)
+compat_symbol (libpthread, vfork_ifunc2, __vfork, GLIBC_2_1_2);
 #endif
