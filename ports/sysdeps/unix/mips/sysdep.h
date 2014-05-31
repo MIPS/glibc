@@ -19,6 +19,9 @@
 #include <sgidefs.h>
 #include <sysdeps/unix/sysdep.h>
 
+#define _SYS_AUXV_H 1
+#include <bits/hwcap.h>
+
 #ifdef __ASSEMBLER__
 
 #include <regdef.h>
