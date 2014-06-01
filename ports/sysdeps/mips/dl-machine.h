@@ -356,7 +356,11 @@ elf_machine_phdr_check (const ElfW(Phdr) *phdr, ElfW(Half) phnum,
 	    _dl_signal_error (0, map->l_name, NULL,
 			      "hardware failed to set FR mode");
 	}
+#if __mips_isa_rev < 6
       else if (req_abi == Val_GNU_MIPS_ABI_FP_64)
+#else
+      else if (req_abi == Val_GNU_MIPS_ABI_FP_DOUBLE)
+#endif
 	{
 	  if (__glibc_unlikely (GLRO(dl_debug_mask) & DL_DEBUG_LIBS))
 	    _dl_debug_printf (
