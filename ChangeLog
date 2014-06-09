@@ -1,5 +1,9 @@
 2014-06-09  Roland McGrath  <roland@hack.frob.com>
 
+	* nptl/sysdeps/sparc/tls.h (TLS_DEFINE_INIT_TP): New macro.
+
+2014-06-09  Roland McGrath  <roland@hack.frob.com>
+
 	* sysdeps/aarch64/nptl/tls.h (TLS_DEFINE_INIT_TP): New macro.
 	* sysdeps/unix/sysv/linux/aarch64/nptl/createthread.c: File removed.
 
