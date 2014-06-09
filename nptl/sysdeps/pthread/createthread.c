@@ -25,6 +25,7 @@
 #include <tls.h>
 #include <stdint.h>
 
+#include <arch-fork.h>
 #include "kernel-features.h"
 
 
