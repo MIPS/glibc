@@ -50,9 +50,9 @@ _dl_string_platform (const char *str)
   return -1;
 };
 
-#define _DL_HWCAP_COUNT	1
+#define _DL_HWCAP_COUNT	4
 
-#define HWCAP_IMPORTANT         (HWCAP_MIPS_UFR)
+#define HWCAP_IMPORTANT         (HWCAP_MIPS_UFR | HWCAP_MIPS_MSA)
 
 static inline int
 __attribute__ ((unused))

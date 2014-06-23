@@ -1841,7 +1841,9 @@ enum
   /* Using -mfpxx.  */
   Val_GNU_MIPS_ABI_FP_XX = 5,
   /* Using -mips32r2 -mfp64.  */
-  Val_GNU_MIPS_ABI_FP_64 = 6
+  Val_GNU_MIPS_ABI_FP_64 = 6,
+  /* Using -mips32r2 -mfp64 -mno-odd-spreg.  */
+  Val_GNU_MIPS_ABI_FP_64C = 7
 };
 
 /* HPPA specific definitions.  */
