@@ -1825,6 +1825,9 @@ typedef struct
 #define AFL_EXT_LOONGSON_2E	17  /* ST Microelectronics Loongson 2E.  */
 #define AFL_EXT_LOONGSON_2F	18  /* ST Microelectronics Loongson 2F.  */
 
+/* Masks for the flags1 word of an ABI flags structure.  */
+#define AFL_FLAGS1_ODDSPREG   1  /* Uses odd single-precision registers.  */
+
 /* Object attribute values.  */
 enum
 {
@@ -1841,7 +1844,9 @@ enum
   /* Using -mfpxx.  */
   Val_GNU_MIPS_ABI_FP_XX = 5,
   /* Using -mips32r2 -mfp64.  */
-  Val_GNU_MIPS_ABI_FP_64 = 6
+  Val_GNU_MIPS_ABI_FP_64 = 6,
+  /* Using -mips32r2 -mfp64 -mno-odd-spreg.  */
+  Val_GNU_MIPS_ABI_FP_64A = 7
 };
 
 /* HPPA specific definitions.  */

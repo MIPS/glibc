@@ -62,11 +62,11 @@ PROCINFO_CLASS const char _dl_mips_platforms[4][11]
 #if !defined PROCINFO_DECL && defined SHARED
   ._dl_mips_cap_flags
 #else
-PROCINFO_CLASS const char _dl_mips_cap_flags[1][4]
+PROCINFO_CLASS const char _dl_mips_cap_flags[1][5]
 #endif
 #ifndef PROCINFO_DECL
 = {
-    "ufr"
+    "ufr", "msa", "ufre", "fr1"
   }
 #endif
 #if !defined SHARED || defined PROCINFO_DECL
