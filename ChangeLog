@@ -1,5 +1,11 @@
 2014-06-25  Roland McGrath  <roland@hack.frob.com>
 
+	* sysdeps/unix/sysv/linux/mips/vfork.S: Incorporate
+	SAVE_PID and RESTORE_PID blocks from nptl/pt-vfork.S.
+	* sysdeps/unix/sysv/linux/mips/nptl/vfork.S: File removed.
+	* sysdeps/unix/sysv/linux/mips/nptl/pt-vfork.S: File removed.
+	* sysdeps/unix/sysv/linux/mips/pt-vfork.S: New file.
+
 	* sysdeps/unix/sysv/linux/mips/clone.S: Deconditionalize the code
 	that was previously under [RESET_PID].
 	* sysdeps/unix/sysv/linux/mips/nptl/clone.S: File removed.
