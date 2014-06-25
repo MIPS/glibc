@@ -1,5 +1,10 @@
 2014-06-25  Roland McGrath  <roland@hack.frob.com>
 
+	* sysdeps/unix/sysv/linux/microblaze/nptl/vfork.S: Moved ...
+	* sysdeps/unix/sysv/linux/microblaze/vfork.S: ... here.
+	* sysdeps/unix/sysv/linux/microblaze/nptl/pt-vfork.S: File removed.
+	* sysdeps/unix/sysv/linux/microblaze/pt-vfork.S: New file.
+
 	* sysdeps/unix/sysv/linux/microblaze/nptl/bits/pthreadtypes.h:
 	Moved ...
 	* sysdeps/microblaze/nptl/bits/pthreadtypes.h: ... here.
