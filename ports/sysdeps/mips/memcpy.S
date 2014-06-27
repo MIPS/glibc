@@ -26,7 +26,12 @@
 #include <regdef.h>
 #include <sys/asm.h>
 #define PREFETCH_LOAD_HINT PREFETCH_HINT_LOAD_STREAMED
+#if __mips_isa_rev < 6
 #define PREFETCH_STORE_HINT PREFETCH_HINT_PREPAREFORSTORE
+#else
+#define PREFETCH_STORE_HINT PREFETCH_HINT_STORE_STREAMED
+#define DISABLE_DOUBLE
+#endif
 #elif _COMPILING_NEWLIB
 #include "machine/asm.h"
 #include "machine/regdef.h"
@@ -285,6 +290,9 @@ L(memcpy):
 #else
 	move	v0,a0
 #endif
+
+#if __mips_isa_rev < 6
+
 /*
  * If src and dst have different alignments, go to L(unaligned), if they
  * have the same alignment (but are not actually aligned) do a partial
@@ -305,6 +313,38 @@ L(memcpy):
 	C_STHI	t8,0(a0)
 	PTR_ADDU a0,a0,a3
 
+L(aligned):
+
+#else /* __mips_isa_rev < 6 */
+
+/* Align the destination and then check to see if the source is also aligned.
+ */
+	andi	t8,a0,1
+	beq	t8,zero,L(align2)
+	PTR_SUBU a2,a2,t8
+	lb	a3,0(a1)
+	PTR_ADDU a1,a1,t8
+	sb	a3,0(a0)
+	PTR_ADDU a0,a0,t8
+L(align2):
+	andi	t8,a0,2
+	beq	t8,zero,L(align4)
+	PTR_SUBU a2,a2,t8
+	lh	a3,0(a1)
+	PTR_ADDU a1,a1,t8
+	sh	a3,0(a0)
+	PTR_ADDU a0,a0,t8
+L(align4):
+	andi	t8,a1,3
+	beq	t8,zero,L(aligned)
+	nop
+
+	j	L(lastb)
+
+L(aligned):
+
+#endif /* __mips_isa_rev < 6 */
+
 /*
  * Now dst/src are both aligned to (word or double word) aligned addresses
  * Set a2 to count how many bytes we have to copy after all the 64/128 byte
@@ -313,7 +353,6 @@ L(memcpy):
  * equals a3.
  */
 
-L(aligned):
 	andi	t8,a2,NSIZEDMASK /* any whole 64-byte/128-byte chunks? */
 	beq	a2,t8,L(chkw)	 /* if a2==t8, no 64-byte/128-byte chunks */
 	PTR_SUBU a3,a2,t8	 /* subtract from a2 the reminder */
@@ -476,6 +515,8 @@ L(lastbloop):
 L(leave):
 	j	ra
 	nop
+
+#if __mips_isa_rev < 6
 /*
  * UNALIGNED case, got here with a3 = "negu a0"
  * This code is nearly identical to the aligned code above
@@ -666,6 +707,8 @@ L(ua_smallCopy_loop):
 
 	j	ra
 	nop
+
+#endif /* __mips_isa_rev < 6 */
 
 	.set	at
 	.set	reorder
