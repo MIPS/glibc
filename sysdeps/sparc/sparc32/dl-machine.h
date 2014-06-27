@@ -48,6 +48,16 @@ elf_machine_matches_host (const Elf32_Ehdr *ehdr)
     return 0;
 }
 
+/* Return nonzero iff ELF program headers are compatible with the running
+   host.  */
+static inline bool
+elf_machine_phdr_check (const ElfW(Phdr) *phdr, ElfW(Half) phnum,
+			const char *buf, ssize_t len, int fd,
+			struct link_map *map)
+{
+  return true;
+}
+
 /* We have to do this because elf_machine_{dynamic,load_address} can be
    invoked from functions that have no GOT references, and thus the compiler
    has no obligation to load the PIC register.  */
