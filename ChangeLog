@@ -1,5 +1,12 @@
 2014-07-01  Roland McGrath  <roland@hack.frob.com>
 
+	* sysdeps/unix/sysv/linux/hppa/nptl/bits/pthreadtypes.h: Moved ...
+	* sysdeps/hppa/nptl/bits/pthreadtypes.h: ... here.
+	* sysdeps/unix/sysv/linux/hppa/nptl/bits/semaphore.h: Moved ...
+	* sysdeps/hppa/nptl/bits/semaphore.h: ... here.
+
+2014-07-01  Roland McGrath  <roland@hack.frob.com>
+
 	* sysdeps/unix/sysv/linux/hppa/clone.S: Include <tcb-offsets.h>.
 	Deconditionalize the code that was previously under [RESET_PID].
 	* sysdeps/unix/sysv/linux/hppa/nptl/clone.S: File removed.
