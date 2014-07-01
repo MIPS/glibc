@@ -1,5 +1,11 @@
 2014-07-01  Roland McGrath  <roland@hack.frob.com>
 
+	* sysdeps/unix/sysv/linux/hppa/clone.S: Include <tcb-offsets.h>.
+	Deconditionalize the code that was previously under [RESET_PID].
+	* sysdeps/unix/sysv/linux/hppa/nptl/clone.S: File removed.
+
+2014-07-01  Roland McGrath  <roland@hack.frob.com>
+
 	* sysdeps/unix/sysv/linux/hppa/arch-fork.h: New file.
 	* sysdeps/unix/sysv/linux/hppa/nptl/fork.c: File removed.
 
