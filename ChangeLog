@@ -1,3 +1,8 @@
+2014-07-01  Roland McGrath  <roland@hack.frob.com>
+
+	* sysdeps/unix/sysv/linux/hppa/arch-fork.h: New file.
+	* sysdeps/unix/sysv/linux/hppa/nptl/fork.c: File removed.
+
 2014-07-07  Roland McGrath  <roland@hack.frob.com>
 
 	* sysdeps/nptl/lowlevellock.h: File removed.
