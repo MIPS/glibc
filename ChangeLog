@@ -1,5 +1,12 @@
 2014-07-03  Roland McGrath  <roland@hack.frob.com>
 
+	* nptl/sysdeps/pthread/createthread.c: Include <arch-fork.h>.
+	* sysdeps/unix/sysv/linux/ia64/arch-fork.h (ARCH_CLONE): New macro.
+	* sysdeps/ia64/nptl/tls.h (TLS_DEFINE_INIT_TP): New macro.
+	* sysdeps/unix/sysv/linux/ia64/nptl/createthread.c: File removed.
+
+2014-07-03  Roland McGrath  <roland@hack.frob.com>
+
 	* sysdeps/unix/sysv/linux/ia64/clone2.S: Deconditionalize the code
 	that was previously under [RESET_PID].
 	* sysdeps/unix/sysv/linux/ia64/nptl/clone2.S: File removed.
