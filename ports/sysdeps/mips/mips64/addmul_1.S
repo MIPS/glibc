@@ -48,7 +48,7 @@ ENTRY (__mpn_addmul_1)
 	dmultu	$8,$7
 #else
 	dmulu	$11,$8,$7
-	dmulu	$12,$8,$7
+	dmuhu	$12,$8,$7
 #endif
 
 	daddiu	$6,$6,-1
@@ -73,7 +73,7 @@ L(Loop):	ld	$10,0($4)
 	dmultu	$8,$7
 #else
 	dmulu	$11,$8,$7
-	dmulu	$12,$8,$7
+	dmuhu	$12,$8,$7
 #endif
 	ld	$8,0($5)	# load new s1 limb as early as possible
 	daddiu	$6,$6,-1	# decrement loop counter
@@ -101,7 +101,7 @@ L(LC1):	ld	$10,0($4)
 	dmultu	$8,$7
 #else
 	dmulu	$11,$8,$7
-	dmulu	$12,$8,$7
+	dmuhu	$12,$8,$7
 #endif
 	daddu	$3,$10,$3
 	sltu	$10,$3,$10
