@@ -25,6 +25,22 @@
 
 #include <entry.h>
 
+#ifndef HWCAP_MIPS_FR1
+#define HWCAP_MIPS_FR1 (1 << 0)
+#endif
+
+#ifndef HWCAP_MIPS_MSA
+#define HWCAP_MIPS_MSA (1 << 1)
+#endif
+
+#ifndef HWCAP_MIPS_FRE
+#define HWCAP_MIPS_FRE (1 << 2)
+#endif
+
+#ifndef HWCAP_MIPS_R6
+#define HWCAP_MIPS_R6 (1 << 3)
+#endif
+
 #ifndef ENTRY_POINT
 #error ENTRY_POINT needs to be defined for MIPS.
 #endif
@@ -33,6 +49,23 @@
 #include <sys/asm.h>
 #include <dl-tls.h>
 #include <unistd.h>
+
+
+#ifndef PR_SET_FP_MODE
+#define PR_SET_FP_MODE 43
+#endif
+
+#ifndef PR_GET_FP_MODE
+#define PR_GET_FP_MODE 44
+#endif
+
+#ifndef PR_FP_MODE_FR
+#define PR_FP_MODE_FR  (1 << 0)
+#endif
+
+#ifndef PR_FP_MODE_FRE
+#define PR_FP_MODE_FRE (1 << 1)
+#endif
 
 /* The offset of gp from GOT might be system-dependent.  It's set by
    ld.  The same value is also */
@@ -120,58 +153,6 @@ find_mips_abiflags (const ElfW(Phdr) *phdr, ElfW(Half) phnum)
   return NULL;
 }
 
-#if _MIPS_SIM == _ABIO32 && __mips_hard_float
-/* Modify the mode of the floating-point registers.  This function must not
-   be inlined as it relies on the calling-convention to only need to save
-   and restore the callee-saved registers around the mode switch.  */
-
-static __attribute__ ((noinline)) __attribute__ ((nomips16)) void
-switch_frmode_to (int newmode)
-{
-  asm volatile
-      ("addu $sp, $sp, -64\n"
-       "sdc1 $f20, 0($sp)\n"
-       "sdc1 $f22, 8($sp)\n"
-       "sdc1 $f24, 16($sp)\n"
-       "sdc1 $f26, 24($sp)\n"
-       "sdc1 $f28, 32($sp)\n"
-       "sdc1 $f30, 40($sp)\n"
-       "sdc1 $f12, 48($sp)\n"
-       "sdc1 $f14, 56($sp)\n"
-       "beq %0, $0, 1f\n"
-       "ctc1 $0, $4\n"
-       "b 2f\n"
-       "1:\n"
-       "ctc1 $0, $1\n"
-       "2:\n"
-       "ldc1 $f20, 0($sp)\n"
-       "ldc1 $f22, 8($sp)\n"
-       "ldc1 $f24, 16($sp)\n"
-       "ldc1 $f26, 24($sp)\n"
-       "ldc1 $f28, 32($sp)\n"
-       "ldc1 $f30, 40($sp)\n"
-       "ldc1 $f12, 48($sp)\n"
-       "ldc1 $f14, 56($sp)\n"
-       "addu $sp, $sp, 64\n" :: "r"(newmode));
-}
-
-/* Modify the FR1/FR0 compatibility mode.  This feature enables/disables
-   exceptions being raised when odd-numbered registers are accessed as
-   32-bit values.  */
-
-static __attribute__ ((noinline)) __attribute__ ((nomips16)) void
-switch_frcmode_to (int newmode)
-{
-  asm volatile
-      ("beq %0, $0, 1f\n"
-       "ctc1 $0, $5\n"
-       "b 2f\n"
-       "1:\n"
-       "ctc1 $0, $2\n"
-       "2:\n" :: "r"(newmode));
-}
-#endif
-
 /* Return a description of the specified floating-point ABI.  */
 
 static const char *
@@ -200,6 +181,29 @@ mips_fp_abi_string (int fpabi)
     }
 }
 
+/* Return true if the requested mode was, or has been, set.
+   This function is required because we can not switch the fp
+   mode if there is an object containing FPXX code that uses the
+   single precision odd floating point registers.  */
+
+static inline bool
+maybe_mode_switch (bool cannot_mode_switch, unsigned int mode)
+{
+  unsigned int cur_mode;
+
+  if (cannot_mode_switch)
+    {
+      cur_mode = prctl (PR_GET_FP_MODE);
+      if (cur_mode == -1)
+        _dl_fatal_printf ("Failed to get FP mode\n");
+      return mode == cur_mode;
+    }
+
+  if (prctl (PR_SET_FP_MODE, mode) != 0)
+    _dl_fatal_printf ("Unable to set FP mode to %x\n", mode);
+  return true;
+}
+
 /* Return nonzero iff ELF program headers are compatible with the running
    host.  This verifies that floating-point ABIs are compatible and
    re-configures the hardware FR mode if necessary.  */
@@ -212,8 +216,11 @@ elf_machine_phdr_check (const ElfW(Phdr) *phdr, ElfW(Half) phnum,
   const ElfW(Phdr) *ph = find_mips_abiflags (phdr, phnum);
   struct link_map *l;
   Lmid_t nsid;
-  bool fr0_required = false;
+#if _MIPS_SIM == _ABIO32 && __mips_hard_float
+  bool alias_odd_singles = false;
   bool fr1_required = false;
+  bool cannot_mode_switch = false;
+#endif
   int req_abi = Val_GNU_MIPS_ABI_FP_DOUBLE;
   Elf_ABIFlags_v0 *mips_abiflags = NULL;
 
@@ -267,6 +274,7 @@ elf_machine_phdr_check (const ElfW(Phdr) *phdr, ElfW(Half) phnum,
 	if (l->l_mach.fpabi == 0)
 	  {
 	    l->l_mach.fpabi = Val_GNU_MIPS_ABI_FP_DOUBLE;
+	    l->l_mach.odd_spreg = true;
 	    ph = find_mips_abiflags (l->l_phdr, l->l_phnum);
 	    if (ph)
 	      {
@@ -280,6 +288,8 @@ elf_machine_phdr_check (const ElfW(Phdr) *phdr, ElfW(Half) phnum,
 
 		mips_abiflags = (Elf_ABIFlags_v0 *) (l->l_addr + ph->p_vaddr);
 		l->l_mach.fpabi = mips_abiflags->fp_abi;
+		l->l_mach.odd_spreg = (mips_abiflags->flags1
+				       & AFL_FLAGS1_ODDSPREG) != 0;
 	      }
 	  }
 
@@ -294,24 +304,28 @@ elf_machine_phdr_check (const ElfW(Phdr) *phdr, ElfW(Half) phnum,
 	switch (l->l_mach.fpabi)
 	  {
 #if _MIPS_SIM == _ABIO32 && __mips_hard_float
+	/* Compute the current fp mode requirements, and check the required
+	   abi is compatible with the currently loaded objects.  */
 	  case Val_GNU_MIPS_ABI_FP_DOUBLE:
 	    if (req_abi == Val_GNU_MIPS_ABI_FP_XX
-		|| (req_abi == Val_GNU_MIPS_ABI_FP_64A
-		    && (GLRO(dl_hwcap) & HWCAP_MIPS_UFRE)))
+		|| req_abi == Val_GNU_MIPS_ABI_FP_64A)
 	      success = true;
-	    fr0_required = true;
+	    alias_odd_singles = true;
 	    break;
 	  case Val_GNU_MIPS_ABI_FP_XX:
 	    if (req_abi == Val_GNU_MIPS_ABI_FP_DOUBLE
 		|| req_abi == Val_GNU_MIPS_ABI_FP_64
 		|| req_abi == Val_GNU_MIPS_ABI_FP_64A)
 	      success = true;
+	    cannot_mode_switch |= l->l_mach.odd_spreg;
 	    break;
 	  case Val_GNU_MIPS_ABI_FP_64A:
 	    if (req_abi == Val_GNU_MIPS_ABI_FP_DOUBLE
-		&& (GLRO(dl_hwcap) & HWCAP_MIPS_UFRE))
+		|| req_abi == Val_GNU_MIPS_ABI_FP_64
+		|| req_abi == Val_GNU_MIPS_ABI_FP_XX)
 	      success = true;
-	    /* fall-through.  */
+	    fr1_required = true;
+	    break;
 	  case Val_GNU_MIPS_ABI_FP_64:
 	    if (req_abi == Val_GNU_MIPS_ABI_FP_XX
 		|| req_abi == Val_GNU_MIPS_ABI_FP_64A)
@@ -338,55 +352,42 @@ elf_machine_phdr_check (const ElfW(Phdr) *phdr, ElfW(Half) phnum,
      existing objects but the hardware mode may not be correct.  */
 
 #if _MIPS_SIM == _ABIO32 && __mips_hard_float
-  if ((GLRO(dl_hwcap) & HWCAP_MIPS_FR1) == 0)
-    {
-      if (req_abi == Val_GNU_MIPS_ABI_FP_64A
-	  || req_abi == Val_GNU_MIPS_ABI_FP_64)
-	{
-	  if ((GLRO(dl_hwcap) & HWCAP_MIPS_UFR) == 0)
-	    {
-	      if (__glibc_unlikely (GLRO(dl_debug_mask) & DL_DEBUG_LIBS))
-		_dl_debug_printf (
-		  "   requires FR mode switch but UFR is not supported\n");
-	      return false;
-	    }
-	  if (!fr1_required)
-	    switch_frmode_to (1);
-	  fr1_required = true;
-	}
+  /* Compute the fp mode requirements based on the required abi.  */
+  if (req_abi == Val_GNU_MIPS_ABI_FP_64A
+      || req_abi == Val_GNU_MIPS_ABI_FP_64)
+    fr1_required = true;
 
-      if (req_abi == Val_GNU_MIPS_ABI_FP_DOUBLE)
-	fr0_required = true;
+  if (req_abi == Val_GNU_MIPS_ABI_FP_DOUBLE)
+    alias_odd_singles = true;
 
-      if ((GLRO(dl_hwcap) & HWCAP_MIPS_UFRE) && fr1_required)
-	{
-	  if (fr0_required)
-	    switch_frcmode_to (1);
-	  else
-	    switch_frcmode_to (0);
-	}
-      else if ((GLRO(dl_hwcap) & HWCAP_MIPS_UFR) && fr0_required)
-	switch_frmode_to (0);
-    }
-  else
+  /* Perform the required fp mode switch.  */
+
+  /* Do we require FR1 mode, or are we on a R6 core?  */
+  if (fr1_required || (GLRO(dl_hwcap) & HWCAP_MIPS_R6) != 0)
     {
-      if (req_abi == Val_GNU_MIPS_ABI_FP_DOUBLE)
+      /* Check the hardware will support FR1 mode.  */
+      if ((GLRO(dl_hwcap) & HWCAP_MIPS_FR1) == 0)
 	{
-	  if ((GLRO(dl_hwcap) & HWCAP_MIPS_UFRE) == 0)
-	    {
-	      if (__glibc_unlikely (GLRO(dl_debug_mask) & DL_DEBUG_LIBS))
-		_dl_debug_printf (
-		    "   requires FR0 compatibility mode but UFRE is not "
-		    "supported\n");
-	      return false;
-	    }
-	  switch_frcmode_to (1);
+	  if (__glibc_unlikely (GLRO(dl_debug_mask) & DL_DEBUG_LIBS))
+	    _dl_debug_printf ("   requires FR1 mode but it is not "
+			      "supported\n");
+	  return false;
 	}
-      
-      if (req_abi == Val_GNU_MIPS_ABI_FP_64
-	  && (GLRO(dl_hwcap) & HWCAP_MIPS_UFRE))
-	switch_frcmode_to (0);
+      /* Check the hardware will support FRE mode (if required).  */
+      if (alias_odd_singles && (GLRO(dl_hwcap) & HWCAP_MIPS_FRE) == 0)
+	{
+	  if (__glibc_unlikely (GLRO(dl_debug_mask) & DL_DEBUG_LIBS))
+	    _dl_debug_printf ("   requires FR0 compatibility mode but FRE"
+			      "is not supported\n");
+	  return false;
+	}
+      return maybe_mode_switch (cannot_mode_switch,
+				(alias_odd_singles ? PR_FP_MODE_FRE : 0)
+			        | PR_FP_MODE_FR);
     }
+  /* Assume FR0 mode.  Only worry about this if the core supports FR1 mode.  */
+  else if ((GLRO(dl_hwcap) & HWCAP_MIPS_FR1) != 0)
+    return maybe_mode_switch (cannot_mode_switch, 0);
 #endif
 
   return true;
