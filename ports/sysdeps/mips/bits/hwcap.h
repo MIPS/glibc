@@ -20,7 +20,7 @@
 # error "Never include <bits/hwcap.h> directly; use <sys/auxv.h> instead."
 #endif
 
-#define HWCAP_MIPS_UFR	0x00000001
+#define HWCAP_MIPS_FR1	0x00000001
 #define HWCAP_MIPS_MSA	0x00000002
-#define HWCAP_MIPS_UFRE	0x00000004
-#define HWCAP_MIPS_FR1	0x00000008
+#define HWCAP_MIPS_FRE	0x00000004
+#define HWCAP_MIPS_R6	0x00000008

@@ -52,7 +52,7 @@ _dl_string_platform (const char *str)
 
 #define _DL_HWCAP_COUNT	4
 
-#define HWCAP_IMPORTANT         (HWCAP_MIPS_UFR | HWCAP_MIPS_MSA)
+#define HWCAP_IMPORTANT         (HWCAP_MIPS_MSA)
 
 static inline int
 __attribute__ ((unused))
