@@ -336,6 +336,7 @@ elf_machine_phdr_check (const ElfW(Phdr) *phdr, ElfW(Half) phnum,
      existing objects but the hardware mode may not be correct.  */
 
 #if _MIPS_SIM == _ABIO32 && __mips_hard_float
+  return false; /* Temporarily disable all mode switching.  */
   /* Compute the fp mode requirements based on the required abi.  */
   if (req_abi == Val_GNU_MIPS_ABI_FP_64A
       || req_abi == Val_GNU_MIPS_ABI_FP_64)
