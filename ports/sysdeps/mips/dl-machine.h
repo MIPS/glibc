@@ -32,6 +32,24 @@
 #include <sgidefs.h>
 #include <sys/asm.h>
 #include <dl-tls.h>
+#include <unistd.h>
+
+
+#ifndef PR_SET_FP_MODE
+#define PR_SET_FP_MODE 43
+#endif
+
+#ifndef PR_GET_FP_MODE
+#define PR_GET_FP_MODE 44
+#endif
+
+#ifndef PR_FP_MODE_FR
+#define PR_FP_MODE_FR  (1 << 0)
+#endif
+
+#ifndef PR_FP_MODE_FRE
+#define PR_FP_MODE_FRE (1 << 1)
+#endif
 
 /* The offset of gp from GOT might be system-dependent.  It's set by
    ld.  The same value is also */
@@ -105,6 +123,259 @@ elf_machine_matches_host (const ElfW(Ehdr) *ehdr)
     default:
       return 0;
     }
+}
+
+/* Search the program headers for the ABI Flags.  */
+static inline const ElfW(Phdr) *
+find_mips_abiflags (const ElfW(Phdr) *phdr, ElfW(Half) phnum)
+{
+  const ElfW(Phdr) *ph;
+
+  for (ph = phdr; ph < &phdr[phnum]; ++ph)
+    if (ph->p_type == PT_MIPS_ABIFLAGS)
+      return ph;
+  return NULL;
+}
+
+/* Return a description of the specified floating-point ABI.  */
+
+static const char *
+mips_fp_abi_string (int fpabi)
+{
+  switch (fpabi)
+    {
+    case Val_GNU_MIPS_ABI_FP_ANY:
+      return "Hard or soft float";
+    case Val_GNU_MIPS_ABI_FP_DOUBLE:
+      return "Hard float (double precision)";
+    case Val_GNU_MIPS_ABI_FP_SINGLE:
+      return "Hard float (single precision)";
+    case Val_GNU_MIPS_ABI_FP_SOFT:
+      return "Soft float";
+    case Val_GNU_MIPS_ABI_FP_OLD_64:
+      return "Unsupported FP64";
+    case Val_GNU_MIPS_ABI_FP_XX:
+      return "Hard float (32-bit CPU, Any FPU)";
+    case Val_GNU_MIPS_ABI_FP_64:
+      return "Hard float (32-bit CPU, 64-bit FPU)";
+    case Val_GNU_MIPS_ABI_FP_64A:
+      return "Hard float compat (32-bit CPU, 64-bit FPU)";
+    default:
+      return "Unknown FP ABI";
+    }
+}
+
+/* Return true if the requested mode was, or has been, set.
+   This function is required because we can not switch the fp
+   mode if there is an object containing FPXX code that uses the
+   single precision odd floating point registers.  */
+
+static inline bool
+maybe_mode_switch (bool cannot_mode_switch, unsigned int mode)
+{
+  unsigned int cur_mode;
+
+  if (cannot_mode_switch)
+    {
+      cur_mode = prctl (PR_GET_FP_MODE);
+      if (cur_mode == -1)
+        _dl_fatal_printf ("Failed to get FP mode\n");
+      return mode == cur_mode;
+    }
+
+  if (prctl (PR_SET_FP_MODE, mode) != 0)
+    _dl_fatal_printf ("Unable to set FP mode to %x\n", mode);
+  return true;
+}
+
+/* Return nonzero iff ELF program headers are compatible with the running
+   host.  This verifies that floating-point ABIs are compatible and
+   re-configures the hardware FR mode if necessary.  */
+
+static bool __attribute_used__
+elf_machine_phdr_check (const ElfW(Phdr) *phdr, ElfW(Half) phnum,
+			const char *buf, ssize_t len, int fd,
+			struct link_map *map)
+{
+  const ElfW(Phdr) *ph = find_mips_abiflags (phdr, phnum);
+  struct link_map *l;
+  Lmid_t nsid;
+#if _MIPS_SIM == _ABIO32 && __mips_hard_float
+  bool alias_odd_singles = false;
+  bool fr1_required = false;
+  bool cannot_mode_switch = false;
+#endif
+  int req_abi = Val_GNU_MIPS_ABI_FP_DOUBLE;
+  Elf_ABIFlags_v0 *mips_abiflags = NULL;
+
+  /* Read the attributes section.  */
+  if (ph != NULL)
+    {
+      ElfW(Addr) size = ph->p_filesz;
+
+      if (ph->p_offset + size <= len)
+	mips_abiflags = (Elf_ABIFlags_v0 *) (buf + ph->p_offset);
+      else
+	{
+	  mips_abiflags = alloca (size);
+	  __lseek (fd, ph->p_offset, SEEK_SET);
+	  if (__libc_read (fd, (void *) mips_abiflags, size) != size)
+	    {
+	      if (__glibc_unlikely (GLRO(dl_debug_mask) & DL_DEBUG_LIBS))
+		_dl_debug_printf ("   unable to read PT_MIPS_ABIFLAGS\n");
+	      return false;
+	    }
+	}
+      if (size < sizeof (Elf_ABIFlags_v0))
+	{
+	  if (__glibc_unlikely (GLRO(dl_debug_mask) & DL_DEBUG_LIBS))
+	    _dl_debug_printf ("   contains malformed PT_MIPS_ABIFLAGS\n");
+	  return false;
+	}
+
+      /* Check for MSA support.  */
+      if ((mips_abiflags->ases & AFL_ASE_MSA) != 0
+	  && (GLRO(dl_hwcap) & HWCAP_MIPS_MSA) == 0)
+	{
+	  if (__glibc_unlikely (GLRO(dl_debug_mask) & DL_DEBUG_LIBS))
+	    _dl_debug_printf ("   requires MSA support\n");
+	  return false;
+	}
+
+      req_abi = mips_abiflags->fp_abi;
+    }
+
+  /* ANY is compatible with anything.  */
+  if (req_abi == Val_GNU_MIPS_ABI_FP_ANY)
+    return true;
+
+  /* Check that the new mode does not conflict with any currently
+     loaded object.  */
+  for (nsid = 0; nsid < DL_NNS; ++nsid)
+    for (l = GL(dl_ns)[nsid]._ns_loaded; l != NULL; l = l->l_next)
+      {
+	bool success = false;
+	if (l->l_mach.fpabi == 0)
+	  {
+	    l->l_mach.fpabi = Val_GNU_MIPS_ABI_FP_DOUBLE;
+	    l->l_mach.odd_spreg = true;
+	    ph = find_mips_abiflags (l->l_phdr, l->l_phnum);
+	    if (ph)
+	      {
+		if (ph->p_filesz < sizeof (Elf_ABIFlags_v0))
+		  {
+		    if (__glibc_unlikely (GLRO(dl_debug_mask) & DL_DEBUG_LIBS))
+		      _dl_debug_printf (
+			  "   malformed PT_MIPS_ABIFLAGS found\n");
+		    return false;
+		  }
+
+		mips_abiflags = (Elf_ABIFlags_v0 *) (l->l_addr + ph->p_vaddr);
+		l->l_mach.fpabi = mips_abiflags->fp_abi;
+		l->l_mach.odd_spreg = (mips_abiflags->flags1
+				       & AFL_FLAGS1_ODDSPREG) != 0;
+	      }
+	  }
+
+	/* Found a perfect match, success.  */
+	if (req_abi == l->l_mach.fpabi)
+	  return true;
+
+	/* Modules without an FP ABI are universally compatible.  */
+	if (l->l_mach.fpabi == Val_GNU_MIPS_ABI_FP_ANY)
+	  continue;
+
+	switch (l->l_mach.fpabi)
+	  {
+#if _MIPS_SIM == _ABIO32 && __mips_hard_float
+	/* Compute the current fp mode requirements, and check the required
+	   abi is compatible with the currently loaded objects.  */
+	  case Val_GNU_MIPS_ABI_FP_DOUBLE:
+	    if (req_abi == Val_GNU_MIPS_ABI_FP_XX
+		|| req_abi == Val_GNU_MIPS_ABI_FP_64A)
+	      success = true;
+	    alias_odd_singles = true;
+	    break;
+	  case Val_GNU_MIPS_ABI_FP_XX:
+	    if (req_abi == Val_GNU_MIPS_ABI_FP_DOUBLE
+		|| req_abi == Val_GNU_MIPS_ABI_FP_64
+		|| req_abi == Val_GNU_MIPS_ABI_FP_64A)
+	      success = true;
+	    cannot_mode_switch |= l->l_mach.odd_spreg;
+	    break;
+	  case Val_GNU_MIPS_ABI_FP_64A:
+	    if (req_abi == Val_GNU_MIPS_ABI_FP_DOUBLE
+		|| req_abi == Val_GNU_MIPS_ABI_FP_64
+		|| req_abi == Val_GNU_MIPS_ABI_FP_XX)
+	      success = true;
+	    fr1_required = true;
+	    break;
+	  case Val_GNU_MIPS_ABI_FP_64:
+	    if (req_abi == Val_GNU_MIPS_ABI_FP_XX
+		|| req_abi == Val_GNU_MIPS_ABI_FP_64A)
+	      success = true;
+	    fr1_required = true;
+	    break;
+#endif
+	  default:
+	    /* Simple 1:1 matches are handled earlier.  Everything else is
+	       a mis-match.  */
+	    success = false;
+	  }
+
+	if (!success)
+	  {
+	    if (__glibc_unlikely (GLRO(dl_debug_mask) & DL_DEBUG_LIBS))
+	      _dl_debug_printf ("   uses %s, already loaded %s\n",
+				mips_fp_abi_string (req_abi),
+				mips_fp_abi_string (l->l_mach.fpabi));
+	    return false;
+	  }
+      }
+  /* At this point we know that the newly loaded object is compatible with all
+     existing objects but the hardware mode may not be correct.  */
+
+#if _MIPS_SIM == _ABIO32 && __mips_hard_float
+  return false; /* Temporarily disable all mode switching.  */
+  /* Compute the fp mode requirements based on the required abi.  */
+  if (req_abi == Val_GNU_MIPS_ABI_FP_64A
+      || req_abi == Val_GNU_MIPS_ABI_FP_64)
+    fr1_required = true;
+
+  if (req_abi == Val_GNU_MIPS_ABI_FP_DOUBLE)
+    alias_odd_singles = true;
+
+  /* Perform the required fp mode switch.  */
+
+  /* Do we require FR1 mode, or are we on a R6 core?  */
+  if (fr1_required || (GLRO(dl_hwcap) & HWCAP_MIPS_R6) != 0)
+    {
+      /* Check the hardware will support FR1 mode.  */
+      if ((GLRO(dl_hwcap) & HWCAP_MIPS_FR1) == 0)
+	{
+	  if (__glibc_unlikely (GLRO(dl_debug_mask) & DL_DEBUG_LIBS))
+	    _dl_debug_printf ("   requires FR1 mode but it is not "
+			      "supported\n");
+	  return false;
+	}
+      /* Check the hardware will support FRE mode (if required).  */
+      if (alias_odd_singles && (GLRO(dl_hwcap) & HWCAP_MIPS_FRE) == 0)
+	{
+	  if (__glibc_unlikely (GLRO(dl_debug_mask) & DL_DEBUG_LIBS))
+	    _dl_debug_printf ("   requires FR0 compatibility mode but FRE"
+			      "is not supported\n");
+	  return false;
+	}
+      return maybe_mode_switch (cannot_mode_switch,
+				(alias_odd_singles ? PR_FP_MODE_FRE : 0)
+			        | PR_FP_MODE_FR);
+    }
+  /* Assume FR0 mode.  Only worry about this if the core supports FR1 mode.  */
+  else if ((GLRO(dl_hwcap) & HWCAP_MIPS_FR1) != 0)
+    return maybe_mode_switch (cannot_mode_switch, 0);
+#endif
+
+  return true;
 }
 
 static inline ElfW(Addr) *

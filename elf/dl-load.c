@@ -1866,6 +1866,11 @@ open_verify (const char *name, struct filebuf *fbp, struct link_map *loader,
 	    }
 	}
 
+      if (!__glibc_likely (
+	     elf_machine_phdr_check (phdr, ehdr->e_phnum, fbp->buf, fbp->len,
+				     fd, loader)))
+	goto close_and_out;
+
       /* Check .note.ABI-tag if present.  */
       for (ph = phdr; ph < &phdr[ehdr->e_phnum]; ++ph)
 	if (ph->p_type == PT_NOTE && ph->p_filesz >= 32 && ph->p_align >= 4)

@@ -50,18 +50,50 @@ _dl_string_platform (const char *str)
   return -1;
 };
 
-/* We cannot provide a general printing function.  */
-#define _dl_procinfo(type, word) -1
+#define _DL_HWCAP_COUNT	4
 
-/* There are no hardware capabilities defined.  */
-#define _dl_hwcap_string(idx) ""
+#define HWCAP_IMPORTANT         (HWCAP_MIPS_MSA)
 
-/* By default there is no important hardware capability.  */
-#define HWCAP_IMPORTANT (0)
+static inline int
+__attribute__ ((unused))
+_dl_procinfo (unsigned int type, unsigned long int word)
+{
+  int i;
 
-/* We don't have any hardware capabilities.  */
-#define _DL_HWCAP_COUNT	0
+  /* Fallback to unknown output mechanism.  */
+  if (type == AT_HWCAP2)
+    return -1;
 
-#define _dl_string_hwcap(str) (-1)
+  _dl_printf ("AT_HWCAP:   ");
+
+  for (i = 0; i < _DL_HWCAP_COUNT; ++i)
+    if (word & (1 << i))
+      _dl_printf (" %s", GLRO(dl_mips_cap_flags)[i]);
+
+  _dl_printf ("\n");
+
+  return 0;
+}
+
+static inline const char *
+__attribute__ ((unused))
+_dl_hwcap_string (int idx)
+{
+  return GLRO(dl_mips_cap_flags)[idx];
+};
+
+static inline int
+__attribute__ ((unused))
+_dl_string_hwcap (const char *str)
+{
+  int i;
+
+  for (i = 0; i < _DL_HWCAP_COUNT; i++)
+    {
+      if (strcmp (str, GLRO(dl_mips_cap_flags)[i]) == 0)
+	return i;
+    }
+  return -1;
+};
 
 #endif /* dl-procinfo.h */

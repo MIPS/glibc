@@ -34,6 +34,15 @@ elf_machine_matches_host (const ElfW(Ehdr) *ehdr)
   return ehdr->e_machine == EM_X86_64;
 }
 
+/* Return nonzero iff ELF program headers are compatible with the running
+   host.  */
+static inline bool
+elf_machine_phdr_check (const ElfW(Phdr) *phdr, ElfW(Half) phnum,
+			const char *buf, ssize_t len, int fd,
+			struct link_map *map)
+{
+  return true;
+}
 
 /* Return the link-time address of _DYNAMIC.  Conveniently, this is the
    first element of the GOT.  This must be inlined in a function which

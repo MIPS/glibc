@@ -35,6 +35,9 @@
 # Feature Name	Configuration
 # ------------	-------------
 #
+# MIPS PLTs.
+MIPS_PLT	mips*-*-linux*
+#
 # Unique symbol definitions for C++.
 # Architecture independent, all ELF targets (== all targets)
 UNIQUE
@@ -46,3 +49,6 @@ IFUNC		powerpc64-*-linux*
 IFUNC		powerpc-*-linux*
 IFUNC		sparc64-*-linux*
 IFUNC		sparc-*-linux*
+#
+# MIPS O32 FP64
+MIPS_O32_FP64	mips*-*-linux*
