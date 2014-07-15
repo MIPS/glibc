@@ -381,13 +381,11 @@ elf_machine_phdr_check (const ElfW(Phdr) *phdr, ElfW(Half) phnum,
 			      "is not supported\n");
 	  return false;
 	}
-      return maybe_mode_switch (cannot_mode_switch,
-				(alias_odd_singles ? PR_FP_MODE_FRE : 0)
-			        | PR_FP_MODE_FR);
+      return false;
     }
   /* Assume FR0 mode.  Only worry about this if the core supports FR1 mode.  */
   else if ((GLRO(dl_hwcap) & HWCAP_MIPS_FR1) != 0)
-    return maybe_mode_switch (cannot_mode_switch, 0);
+    return false;
 #endif
 
   return true;
