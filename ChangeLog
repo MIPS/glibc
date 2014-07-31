@@ -1,5 +1,10 @@
 2014-07-31  Roland McGrath  <roland@hack.frob.com>
 
+	* sysdeps/unix/sysv/linux/arm/sysdep.h (PTR_MANGLE_LOAD, PTR_MANGLE)
+	(PTR_MANGLE2, PTR_DEMANGLE, PTR_DEMANGLE2): Move these macros...
+	* sysdeps/arm/sysdep.h: ... here.
+	[!__ASSEMBLER__]: Include <stdint.h>.
+
 	* sysdeps/generic/safe-fatal.h: New file.
 	* sysdeps/unix/sysv/linux/safe-fatal.h: New file.
 	* nptl/forward.c: Include it.
