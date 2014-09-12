@@ -26,12 +26,7 @@
 #include <regdef.h>
 #include <sys/asm.h>
 #define PREFETCH_LOAD_HINT PREFETCH_HINT_LOAD_STREAMED
-#if __mips_isa_rev < 6
 #define PREFETCH_STORE_HINT PREFETCH_HINT_PREPAREFORSTORE
-#else
-#define PREFETCH_STORE_HINT PREFETCH_HINT_STORE_STREAMED
-#define DISABLE_DOUBLE
-#endif
 #elif _COMPILING_NEWLIB
 #include "machine/asm.h"
 #include "machine/regdef.h"
@@ -55,7 +50,12 @@
 #endif
 #endif
 
-
+#if __mips_isa_rev > 5
+# if (PREFETCH_STORE_HINT == PREFETCH_HINT_PREPAREFORSTORE)
+#  define PREFETCH_STORE_HINT PREFETCH_HINT_STORE_STREAMED
+# endif
+# define R6_CODE
+#endif
 
 /* Some asm.h files do not have the L macro definition.  */
 #ifndef L
@@ -291,7 +291,7 @@ L(memcpy):
 	move	v0,a0
 #endif
 
-#if __mips_isa_rev < 6
+#if !defined (R6_CODE)
 
 /*
  * If src and dst have different alignments, go to L(unaligned), if they
@@ -315,11 +315,14 @@ L(memcpy):
 
 L(aligned):
 
-#else /* __mips_isa_rev < 6 */
+#else /* R6_CODE */
 
-/* Align the destination and then check to see if the source is also aligned.
+/* Align the source and assume that destination can be written to even if
+   it is unaligned.  Technically, in MIPSr6, nothing has to be aligned but
+   we should get better performance if we try to align the data as much as
+   possible.
  */
-	andi	t8,a0,1
+	andi	t8,a1,1
 	beq	t8,zero,L(align2)
 	PTR_SUBU a2,a2,t8
 	lb	a3,0(a1)
@@ -327,7 +330,7 @@ L(aligned):
 	sb	a3,0(a0)
 	PTR_ADDU a0,a0,t8
 L(align2):
-	andi	t8,a0,2
+	andi	t8,a1,2
 	beq	t8,zero,L(align4)
 	PTR_SUBU a2,a2,t8
 	lh	a3,0(a1)
@@ -335,15 +338,16 @@ L(align2):
 	sh	a3,0(a0)
 	PTR_ADDU a0,a0,t8
 L(align4):
-	andi	t8,a1,3
-	beq	t8,zero,L(aligned)
-	nop
+	andi	t8,a1,4
+	beq	t8,zero,L(align8)
+	PTR_SUBU a2,a2,t8
+	lw	a3,0(a1)
+	PTR_ADDU a1,a1,t8
+	sw	a3,0(a0)
+	PTR_ADDU a0,a0,t8
+L(align8):
 
-	j	L(lastb)
-
-L(aligned):
-
-#endif /* __mips_isa_rev < 6 */
+#endif /* R6_CODE */
 
 /*
  * Now dst/src are both aligned to (word or double word) aligned addresses
@@ -402,8 +406,12 @@ L(loop16w):
 	bgtz	v1,L(skip_pref)
 #endif
 	C_LD	t1,UNIT(1)(a1)
+#if defined(R6_CODE)
+	PREFETCH_FOR_STORE (2, a0)
+#else
 	PREFETCH_FOR_STORE (4, a0)
 	PREFETCH_FOR_STORE (5, a0)
+#endif
 #if defined(RETURN_LAST_PREFETCH) && defined(USE_PREFETCH)
 	PTR_ADDIU v0,a0,(PREFETCH_CHUNK*5)
 #ifdef USE_DOUBLE
@@ -417,7 +425,11 @@ L(skip_pref):
 	C_LD	REG5,UNIT(5)(a1)
 	C_LD	REG6,UNIT(6)(a1)
 	C_LD	REG7,UNIT(7)(a1)
+#if defined(R6_CODE)
+        PREFETCH_FOR_LOAD (3, a1)
+#else
         PREFETCH_FOR_LOAD (4, a1)
+#endif
 
 	C_ST	t0,UNIT(0)(a0)
 	C_ST	t1,UNIT(1)(a0)
@@ -436,7 +448,9 @@ L(skip_pref):
 	C_LD	REG5,UNIT(13)(a1)
 	C_LD	REG6,UNIT(14)(a1)
 	C_LD	REG7,UNIT(15)(a1)
+#if !defined(R6_CODE)
         PREFETCH_FOR_LOAD (5, a1)
+#endif
 	C_ST	t0,UNIT(8)(a0)
 	C_ST	t1,UNIT(9)(a0)
 	C_ST	REG2,UNIT(10)(a0)
@@ -516,7 +530,7 @@ L(leave):
 	j	ra
 	nop
 
-#if __mips_isa_rev < 6
+#if !defined (R6_CODE)
 /*
  * UNALIGNED case, got here with a3 = "negu a0"
  * This code is nearly identical to the aligned code above
@@ -708,7 +722,7 @@ L(ua_smallCopy_loop):
 	j	ra
 	nop
 
-#endif /* __mips_isa_rev < 6 */
+#endif /* R6_CODE */
 
 	.set	at
 	.set	reorder
