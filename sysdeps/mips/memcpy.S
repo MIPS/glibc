@@ -318,12 +318,10 @@ L(aligned):
 
 #else /* R6_CODE */
 
-/* Align the source and assume that destination can be written to even if
-   it is unaligned.  Technically, in MIPSr6, nothing has to be aligned but
-   we should get better performance if we try to align the data as much as
-   possible.
+/* Align the destination and hope that the source gets aligned too.  If it
+   doesn't we jump to L(r6_unaligned) to do unaligned copies.
  */
-	andi	t8,a1,1
+	andi	t8,a0,1
 	beq	t8,zero,L(align2)
 	PTR_SUBU a2,a2,t8
 	lb	a3,0(a1)
@@ -331,7 +329,7 @@ L(aligned):
 	sb	a3,0(a0)
 	PTR_ADDU a0,a0,t8
 L(align2):
-	andi	t8,a1,2
+	andi	t8,a0,2
 	beq	t8,zero,L(align4)
 	PTR_SUBU a2,a2,t8
 	lh	a3,0(a1)
@@ -339,7 +337,7 @@ L(align2):
 	sh	a3,0(a0)
 	PTR_ADDU a0,a0,t8
 L(align4):
-	andi	t8,a1,4
+	andi	t8,a0,4
 	beq	t8,zero,L(align8)
 	PTR_SUBU a2,a2,t8
 	lw	a3,0(a1)
@@ -347,7 +345,7 @@ L(align4):
 	sw	a3,0(a0)
 	PTR_ADDU a0,a0,t8
 L(align8):
-	andi	t8,a0,3
+	andi	t8,a1,3
 	bne	t8, zero, L(r6_unaligned)
 	nop
 
