@@ -55,7 +55,6 @@
 #  define PREFETCH_STORE_HINT PREFETCH_HINT_STORE_STREAMED
 # endif
 # define R6_CODE
-# undef USE_DOUBLE
 #endif
 
 /* Some asm.h files do not have the L macro definition.  */
@@ -318,8 +317,10 @@ L(aligned):
 
 #else /* R6_CODE */
 
-/* Align the destination and hope that the source gets aligned too.  If it
-   doesn't we jump to L(r6_unaligned) to do unaligned copies.
+/* 
+ * Align the destination and hope that the source gets aligned too.  If it
+ * doesn't we jump to L(r6_unaligned) to do unaligned copies using the r6
+ * align instruction.
  */
 	andi	t8,a0,1
 	beq	t8,zero,L(align2)
@@ -345,7 +346,7 @@ L(align4):
 	sw	a3,0(a0)
 	PTR_ADDU a0,a0,t8
 L(align8):
-	andi	t8,a1,3
+	andi	t8,a1,(NSIZE-1)
 	bne	t8, zero, L(r6_unaligned)
 	nop
 
@@ -724,10 +725,21 @@ L(ua_smallCopy_loop):
 	j	ra
 	nop
 #else /* R6_CODE */
-
-#define R6_UNALIGNED_WORD_COPY(BYTENUMBER,FIRSTREG,SECONDREG,BYTEOFFSET) \
-	andi	REG7, a2, 3; 	/* REG7 is # of bytes to copy byte by byte */ \
-	beq	REG7, a2, L(r6_lastb); /* Check for bytes to copy by word  */ \
+# ifdef USE_DOUBLE
+#  define ALIGN dalign
+# else
+#  define ALIGN align
+# endif
+# if __MIPSEB
+#  define SWAP_REGS(X,Y) X, Y
+#  define ALIGN_OFFSET(N) (N)
+# else
+#  define SWAP_REGS(X,Y) Y, X
+#  define ALIGN_OFFSET(N) (NSIZE-N)
+# endif
+# define R6_UNALIGNED_WORD_COPY(BYTEOFFSET) \
+	andi	REG7, a2, (NSIZE-1);/* REG7 is # of bytes to by bytes.     */ \
+	beq	REG7, a2, L(lastb); /* Check for bytes to copy by word	   */ \
 	PTR_SUBU a3, a2, REG7;	/* a3 is number of bytes to be copied in   */ \
 				/* (d)word chunks.			   */ \
 	move	a2, REG7;	/* a2 is # of bytes to copy byte by byte   */ \
@@ -736,13 +748,13 @@ L(ua_smallCopy_loop):
 	PTR_SUBU REG2, a1, t8;	/* REG2 is the aligned src address.	   */ \
 	PTR_ADDU a1, a1, a3;	/* a1 is addr of source after word loop.   */ \
 	C_LD	t0, UNIT(0)(REG2);  /* Load first part of source.	   */ \
-L(r6_ua_wordcopy##BYTENUMBER):						      \
+L(r6_ua_wordcopy##BYTEOFFSET):						      \
 	C_LD	t1, UNIT(1)(REG2);  /* Load second part of source.	   */ \
-	align	REG3, FIRSTREG, SECONDREG, BYTEOFFSET; /* combine inputs   */ \
+	ALIGN	REG3, SWAP_REGS(t1,t0), ALIGN_OFFSET(BYTEOFFSET);	      \
 	PTR_ADDIU a0, a0, UNIT(1);  /* Increment destination pointer.	   */ \
 	PTR_ADDIU REG2, REG2, UNIT(1); /* Increment aligned source pointer.*/ \
 	move	t0, t1;		/* Move second part of source to first.	   */ \
-	bne	a0, REG6,L(r6_ua_wordcopy##BYTENUMBER);			      \
+	bne	a0, REG6,L(r6_ua_wordcopy##BYTEOFFSET);			      \
 	C_ST	REG3, UNIT(-1)(a0)
 
 	/* We are generating R6 code, the destination is 4 byte aligned and
@@ -750,57 +762,49 @@ L(r6_ua_wordcopy##BYTENUMBER):						      \
            alignment of the source.  */
 
 L(r6_unaligned):
-	li	t9,1
-	bne	t8,t9,L(r6_unaligned2)
 
-	/* Handle the case where t8 is 1.  */
-#if __MIPSEB
-	R6_UNALIGNED_WORD_COPY(1,t1,t0,1)
-#else
-	R6_UNALIGNED_WORD_COPY(1,t0,t1,3)
-#endif
-	j	L(r6_lastb)
+# ifdef USE_DOUBLE
+L(r6_unaligned7):
+	li	t9,7
+	bne	t8,t9,L(r6_unaligned6)
+	R6_UNALIGNED_WORD_COPY(7)
+	j	L(lastb)
 	nop
-
-L(r6_unaligned2):
-
-	li	t9,2
+L(r6_unaligned6):
+	li	t9,6
+	bne	t8,t9,L(r6_unaligned5)
+	R6_UNALIGNED_WORD_COPY(6)
+	j	L(lastb)
+	nop
+L(r6_unaligned5):
+	li	t9,5
+	bne	t8,t9,L(r6_unaligned4)
+	R6_UNALIGNED_WORD_COPY(5)
+	j	L(lastb)
+	nop
+L(r6_unaligned4):
+	li	t9,4
 	bne	t8,t9,L(r6_unaligned3)
-
-	/* Handle the case where t8 is 2.  */
-
-#if __MIPSEB
-        R6_UNALIGNED_WORD_COPY(2,t1,t0,2)
-#else
-        R6_UNALIGNED_WORD_COPY(2,t0,t1,2)
-#endif
-	j	L(r6_lastb)
+	R6_UNALIGNED_WORD_COPY(4)
+	j	L(lastb)
 	nop
+# endif
 
 L(r6_unaligned3):
-
-	/* Handle the case where t8 is 3.  */
-
-#if __MIPSEB
-	R6_UNALIGNED_WORD_COPY(3,t1,t0,3)
-#else
-	R6_UNALIGNED_WORD_COPY(3,t0,t1,1)
-#endif
-
-	/* Drop down into L(r6_lastb) */
-
-/* Copy the last 8 (or 16) bytes */
-L(r6_lastb):
-	beqz	a2,L(r6_leave)
-	PTR_ADDU REG6,a0,a2	/* REG6 is the last dst address */
-L(r6_lastb_loop):
-	lb	v1,0(a1)
-	PTR_ADDIU a0,a0,1
-	PTR_ADDIU a1,a1,1
-	bne	a0,REG6,L(r6_lastb_loop)
-	sb	v1,-1(a0)
-L(r6_leave):
-	j	ra
+	li	t9,3
+	bne	t8,t9,L(r6_unaligned2)
+	R6_UNALIGNED_WORD_COPY(3)
+	j	L(lastb)
+	nop
+L(r6_unaligned2):
+	li	t9,2
+	bne	t8,t9,L(r6_unaligned1)
+        R6_UNALIGNED_WORD_COPY(2)
+	j	L(lastb)
+	nop
+L(r6_unaligned1):
+	R6_UNALIGNED_WORD_COPY(1)
+	j	L(lastb)
 	nop
 #endif /* R6_CODE */
 
