@@ -1,5 +1,13 @@
 2014-10-22  Roland McGrath  <roland@hack.frob.com>
 
+	* iconv/iconv_charmap.c (add_bytes): Make IN argument pointer to const.
+	(convert_charseq): New function, broken out of ...
+	(use_from_charmap): ... here.  Call it.
+	(use_to_charmap): Use convert_charseq and free instead of duplicating
+	its code with a variable-length stack struct.
+
+2014-10-22  Roland McGrath  <roland@hack.frob.com>
+
 	* inet/netgroup.h (struct name_list): Use C99 [] syntax rather than
 	old GNU extension [0] syntax.
 	* nscd/nscd_helper.c (open_socket): Use a flexible array member and
