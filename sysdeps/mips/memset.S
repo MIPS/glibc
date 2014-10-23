@@ -23,11 +23,7 @@
 # include <sysdep.h>
 # include <regdef.h>
 # include <sys/asm.h>
-# if __mips_isa_rev < 6
-#  define PREFETCH_STORE_HINT PREFETCH_HINT_PREPAREFORSTORE
-# else
-#  define PREFETCH_STORE_HINT PREFETCH_HINT_STORE_STREAMED
-# endif
+# define PREFETCH_STORE_HINT PREFETCH_HINT_PREPAREFORSTORE
 #elif _COMPILING_NEWLIB
 # include "machine/asm.h"
 # include "machine/regdef.h"
@@ -35,6 +31,11 @@
 #else
 # include <regdef.h>
 # include <sys/asm.h>
+#endif
+
+#if (__mips_isa_rev > 5) && \
+    (PREFETCH_STORE_HINT == PREFETCH_HINT_PREPAREFORSTORE)
+# define PREFETCH_STORE_HINT PREFETCH_HINT_STORE_STREAMED
 #endif
 
 /* Check to see if the MIPS architecture we are compiling for supports
@@ -280,7 +281,6 @@ L(align4):
 L(align8):
 #endif
 #endif /* __mips_isa_rev < 6 */
-
 
 /* Now the destination is aligned to (word or double word) aligned address
    Set a2 to count how many bytes we have to copy after all the 64/128 byte
