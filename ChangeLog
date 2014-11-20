@@ -1,5 +1,13 @@
 2014-11-19  Roland McGrath  <roland@hack.frob.com>
 
+	* nptl/default-sched.h: New file.
+	* sysdeps/unix/sysv/linux/default-sched.h: New file.
+	* nptl/pthread_create.c: Include it.
+	(__pthread_create_2_1): Use collect_default_sched instead of making
+	Linux syscalls here directly.
+
+2014-11-19  Roland McGrath  <roland@hack.frob.com>
+
 	* nptl/pthread_create.c (__pthread_create_2_1): Don't try to validate
 	the sched_priority value here.  It was already checked when the user
 	called pthread_attr_setschedparam.
