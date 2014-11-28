@@ -94,6 +94,6 @@ if test -z "$arch_minimum_kernel"; then
     # FIXME: Adjust this setting to the actual first upstream kernel
     # version to support the 2008 NaN encoding and then remove this
     # comment.
-    arch_minimum_kernel=10.0.0
+    arch_minimum_kernel=2.6.16
   fi
 fi
