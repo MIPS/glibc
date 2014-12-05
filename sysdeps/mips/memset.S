@@ -23,11 +23,7 @@
 # include <sysdep.h>
 # include <regdef.h>
 # include <sys/asm.h>
-# if __mips_isa_rev < 6
-#  define PREFETCH_STORE_HINT PREFETCH_HINT_PREPAREFORSTORE
-# else
-#  define PREFETCH_STORE_HINT PREFETCH_HINT_STORE_STREAMED
-# endif
+# define PREFETCH_STORE_HINT PREFETCH_HINT_PREPAREFORSTORE
 #elif _COMPILING_NEWLIB
 # include "machine/asm.h"
 # include "machine/regdef.h"
@@ -58,6 +54,13 @@
 # endif
 #endif
 
+#if __mips_isa_rev > 5
+# if (PREFETCH_STORE_HINT == PREFETCH_HINT_PREPAREFORSTORE)
+#  define PREFETCH_STORE_HINT PREFETCH_HINT_STORE_STREAMED
+# endif
+# define R6_CODE
+#endif
+
 /* Some asm.h files do not have the L macro definition.  */
 #ifndef L
 # if _MIPS_SIM == _ABIO32
@@ -74,6 +77,15 @@
 # else
 #  define PTR_ADDIU	addiu
 # endif
+#endif
+
+/* New R6 instructions that may not be in asm.h.  */
+#ifndef PTR_LSA
+#if _MIPS_SIM == _ABI64
+# define PTR_LSA        dlsa
+#else
+# define PTR_LSA        lsa
+#endif
 #endif
 
 /* Using PREFETCH_HINT_PREPAREFORSTORE instead of PREFETCH_STORE
@@ -235,52 +247,58 @@ LEAF(MEMSET_NAME)
 /* If the destination address is not aligned do a partial store to get it
    aligned.  If it is already aligned just jump to L(aligned).  */
 L(set0):
-
-#if __mips_isa_rev < 6
+#if !defined (R6_CODE)
 	andi	t2,a3,(NSIZE-1)		/* word-unaligned address?          */
 	beq	t2,zero,L(aligned)	/* t2 is the unalignment count      */
 	PTR_SUBU a2,a2,t2
 	C_STHI	a1,0(a0)
 	PTR_ADDU a0,a0,t2
+#else /* R6_CODE */
+	andi	t2,a0,7
+	lapc	t9,L(atable)
+	PTR_LSA	t9,t2,t9,2
+	jrc	t9
+L(atable):
+	bc	L(aligned)
+	bc	L(lb1)
+	bc	L(lb2)
+	bc	L(lb3)
+	bc	L(lb4)
+	bc	L(lb5)
+	bc	L(lb6)
+	bc	L(lb7)
+L(lb7):
+	sb	a1,6(a0)
+L(lb6):
+	sb	a1,5(a0)
+L(lb5):
+	sb	a1,4(a0)
+L(lb4):
+	sb	a1,3(a0)
+L(lb3):
+	sb	a1,2(a0)
+L(lb2):
+	sb	a1,1(a0)
+L(lb1):
+	sb	a1,0(a0)
+	PTR_SUBU a2,a2,t2
+	PTR_ADDU a0,a0,t2
+#endif /* R6_CODE */
 
 L(aligned):
-
-# if defined (DOUBLE_ALIGN) && (NSIZE == 4)
-/* If USE_DOUBLE is not set we may still want to align the data on a 8
-   byte boundry instead of an 4 byte boundry to maximize the opportunity
+/* If USE_DOUBLE is not set we may still want to align the data on a 16
+   byte boundry instead of an 8 byte boundry to maximize the opportunity
    of proAptiv chips to do memory bonding (combining two sequential 4
    byte stores into one 8 byte store).  We know there are at least 4 bytes
    left to store or we would have jumped to L(lastb) earlier in the code.  */
+#ifdef DOUBLE_ALIGN
 	andi	t2,a3,4
 	beq	t2,zero,L(double_aligned)
 	PTR_SUBU a2,a2,t2
 	sw	a1,0(a0)
 	PTR_ADDU a0,a0,t2
 L(double_aligned):
-# endif
-#else /* __mips_isa_rev < 6 */
-	andi	t2,a0,1
-	beq	t2,zero,L(align2)
-	PTR_SUBU a2,a2,t2
-	sb	a1,0(a0)
-	PTR_ADDU a0,a0,t2
-L(align2):
-	andi	t2,a0,2
-	beq	t2,zero,L(align4)
-	PTR_SUBU a2,a2,t2
-	sh	a1,0(a0)
-	PTR_ADDU a0,a0,t2
-L(align4):
-#if defined (DOUBLE_ALIGN) || (NSIZE == 8)
-	andi	t2,a0,4
-	beq	t2,zero,L(align8)
-	PTR_SUBU a2,a2,t2
-	sw	a1,0(a0)
-	PTR_ADDU a0,a0,t2
-L(align8):
 #endif
-#endif /* __mips_isa_rev < 6 */
-
 
 /* Now the destination is aligned to (word or double word) aligned address
    Set a2 to count how many bytes we have to copy after all the 64/128 byte
@@ -316,14 +334,8 @@ L(loop16w):
 	bgtz	v1,L(skip_pref)
 	nop
 #endif
-#if !defined (USE_DOUBLE) || (__mips_isa_rev < 6)
 	PREFETCH_FOR_STORE (4, a0)
 	PREFETCH_FOR_STORE (5, a0)
-#else
-	/* FIXME - r6 prefetch has 9 bit offset, not 16 */
-	PREFETCH_FOR_STORE (2, a0)
-	PREFETCH_FOR_STORE (3, a0)
-#endif
 L(skip_pref):
 	C_ST	a1,UNIT(0)(a0)
 	C_ST	a1,UNIT(1)(a0)
