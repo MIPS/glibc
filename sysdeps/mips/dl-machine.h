@@ -143,7 +143,11 @@ elf_machine_load_address (void)
 #ifndef __mips16
   asm ("	.set noreorder\n"
        "	" STRINGXP (PTR_LA) " %0, 0f\n"
+#if __mips_isa_rev < 6
        "	bltzal $0, 0f\n"
+#else
+       "	bal 0f\n"
+#endif
        "	nop\n"
        "0:	" STRINGXP (PTR_SUBU) " %0, $31, %0\n"
        "	.set reorder\n"
@@ -246,6 +250,11 @@ do {									\
       and not just plain _start.  */
 
 #ifndef __mips16
+#if __mips_isa_rev < 6
+#define LOAD_31 STRINGXP(bltzal $8) "," STRINGXP(.Lcoff)
+#else
+#define LOAD_31 STRINGXP(bal .Lcoff)
+#endif
 # define RTLD_START asm (\
 	".text\n\
 	" _RTLD_PROLOGUE(ENTRY_POINT) "\
@@ -261,7 +270,7 @@ do {									\
 	" STRINGXP(PTR_SUBIU) " $29, 16\n\
 	\n\
 	" STRINGXP(PTR_LA) " $8, .Lcoff\n\
-	bltzal $8, .Lcoff\n\
+	" LOAD_31 "\n\
 .Lcoff:	" STRINGXP(PTR_SUBU) " $8, $31, $8\n\
 	\n\
 	" STRINGXP(PTR_LA) " $25, _dl_start\n\
