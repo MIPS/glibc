@@ -55,6 +55,7 @@
 
 #if __mips_isa_rev > 5
 # if (PREFETCH_STORE_HINT == PREFETCH_HINT_PREPAREFORSTORE)
+#  undef PREFETCH_STORE_HINT
 #  define PREFETCH_STORE_HINT PREFETCH_HINT_STORE_STREAMED
 # endif
 # define R6_CODE
@@ -340,13 +341,13 @@ L(memcpy):
 	jrc	t9
 L(atable):
 	bc	L(lb0)
-	bc	L(lb1)
-	bc	L(lb2)
-	bc	L(lb3)
-	bc	L(lb4)
-	bc	L(lb5)
-	bc	L(lb6)
 	bc	L(lb7)
+	bc	L(lb6)
+	bc	L(lb5)
+	bc	L(lb4)
+	bc	L(lb3)
+	bc	L(lb2)
+	bc	L(lb1)
 L(lb7):
 	lb	a3, 6(a1)
 	sb	a3, 6(a0)
@@ -369,6 +370,8 @@ L(lb1):
 	lb	a3, 0(a1)
 	sb	a3, 0(a0)
 
+	li	t9,8
+	subu	t8,t9,t8
 	PTR_SUBU a2,a2,t8
 	PTR_ADDU a0,a0,t8
 	PTR_ADDU a1,a1,t8

@@ -56,6 +56,7 @@
 
 #if __mips_isa_rev > 5
 # if (PREFETCH_STORE_HINT == PREFETCH_HINT_PREPAREFORSTORE)
+#  undef PREFETCH_STORE_HINT
 #  define PREFETCH_STORE_HINT PREFETCH_HINT_STORE_STREAMED
 # endif
 # define R6_CODE
@@ -204,9 +205,9 @@ LEAF(MEMSET_NAME)
 
 	.set	nomips16
 	.set	noreorder
-/* If the size is less than 2*NSIZE (8 or 16), go to L(lastb).  Regardless of
+/* If the size is less than 4*NSIZE (16 or 32), go to L(lastb).  Regardless of
    size, copy dst pointer to v0 for the return value.  */
-	slti	t2,a2,(2 * NSIZE)
+	slti	t2,a2,(4 * NSIZE)
 	bne	t2,zero,L(lastb)
 	move	v0,a0
 
@@ -260,13 +261,13 @@ L(set0):
 	jrc	t9
 L(atable):
 	bc	L(aligned)
-	bc	L(lb1)
-	bc	L(lb2)
-	bc	L(lb3)
-	bc	L(lb4)
-	bc	L(lb5)
-	bc	L(lb6)
 	bc	L(lb7)
+	bc	L(lb6)
+	bc	L(lb5)
+	bc	L(lb4)
+	bc	L(lb3)
+	bc	L(lb2)
+	bc	L(lb1)
 L(lb7):
 	sb	a1,6(a0)
 L(lb6):
@@ -281,6 +282,9 @@ L(lb2):
 	sb	a1,1(a0)
 L(lb1):
 	sb	a1,0(a0)
+
+	li	t9,8
+	subu	t2,t9,t2
 	PTR_SUBU a2,a2,t2
 	PTR_ADDU a0,a0,t2
 #endif /* R6_CODE */
@@ -334,8 +338,12 @@ L(loop16w):
 	bgtz	v1,L(skip_pref)
 	nop
 #endif
+#if defined(R6_CODE)
+	PREFETCH_FOR_STORE (2, a0)
+#else
 	PREFETCH_FOR_STORE (4, a0)
 	PREFETCH_FOR_STORE (5, a0)
+#endif
 L(skip_pref):
 	C_ST	a1,UNIT(0)(a0)
 	C_ST	a1,UNIT(1)(a0)
