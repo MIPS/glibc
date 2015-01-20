@@ -43,7 +43,6 @@ static void __attribute_used__ __mcount (u_long frompc, u_long selfpc)
 	".ent _mcount\n\t" \
         "_mcount:\n\t" \
         ".frame $sp,44,$31\n\t" \
-        ".set noreorder;\n\t" \
         ".set noat;\n\t" \
         CPLOAD \
 	"subu $29,$29,48;\n\t" \
@@ -58,19 +57,17 @@ static void __attribute_used__ __mcount (u_long frompc, u_long selfpc)
         "move $5,$31;\n\t" \
         "move $4,$1;\n\t" \
         "jal __mcount;\n\t" \
-        "nop;\n\t" \
         "lw $4,24($29);\n\t" \
         "lw $5,28($29);\n\t" \
         "lw $6,32($29);\n\t" \
         "lw $7,36($29);\n\t" \
         "lw $2,40($29);\n\t" \
-        "lw $31,20($29);\n\t" \
-        "lw $1,16($29);\n\t" \
+        "lw $1,20($29);\n\t" \
+        "lw $31,16($29);\n\t" \
         "addu $29,$29,56;\n\t" \
-        "j $31;\n\t" \
-        "move $31,$1;\n\t" \
+        "jr $1;\n\t" \
 	".end _mcount;\n\t" \
-	".set pop");
+	);
 
 #else
 
@@ -106,7 +103,6 @@ static void __attribute_used__ __mcount (u_long frompc, u_long selfpc)
 	".ent _mcount\n\t" \
         "_mcount:\n\t" \
         ".frame $sp,88,$31\n\t" \
-        ".set noreorder;\n\t" \
         ".set noat;\n\t" \
         PTR_SUBU_STRING " $29,$29,96;\n\t" \
         CPSETUP \
@@ -124,7 +120,6 @@ static void __attribute_used__ __mcount (u_long frompc, u_long selfpc)
         "move $5,$31;\n\t" \
         "move $4,$1;\n\t" \
         "jal __mcount;\n\t" \
-        "nop;\n\t" \
         "ld $4,24($29);\n\t" \
         "ld $5,32($29);\n\t" \
         "ld $6,40($29);\n\t" \
@@ -134,13 +129,12 @@ static void __attribute_used__ __mcount (u_long frompc, u_long selfpc)
         "ld $10,72($29);\n\t" \
         "ld $11,80($29);\n\t" \
         "ld $2,16($29);\n\t" \
-        "ld $31,8($29);\n\t" \
-        "ld $1,0($29);\n\t" \
+        "ld $1,8($29);\n\t" \
+        "ld $31,0($29);\n\t" \
         CPRETURN \
         PTR_ADDU_STRING " $29,$29,96;\n\t" \
-        "j $31;\n\t" \
-        "move $31,$1;\n\t" \
+        "jr $1;\n\t" \
 	".end _mcount;\n\t" \
-	".set pop");
+	);
 
 #endif

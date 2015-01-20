@@ -165,10 +165,9 @@ NESTED (__setcontext, FRAMESZ, ra)
 	PTR_ADDIU a0, SZREG
 	REG_S	t2, (t1)
 	PTR_ADDIU t1, SZREG
-	.set	noreorder
-	bgtz	t3, 0b
-	 addiu	t3, -1
-	.set	reorder
+	move	t2, t3
+	addiu	t3, -1
+	bgtz	t2, 0b
 
 /* rt_sigreturn () -- no arguments, sp points to struct rt_sigframe.  */
 	li	v0, SYS_ify (rt_sigreturn)

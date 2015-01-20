@@ -302,7 +302,6 @@ asm ("\n\
 	.ent	_dl_runtime_resolve\n\
 _dl_runtime_resolve:\n\
 	.frame	$29, " STRINGXP(ELF_DL_FRAME_SIZE) ", $31\n\
-	.set noreorder\n\
 	# Save GP.\n\
 1:	move	$3, $28\n\
 	# Save arguments and sp value in stack.\n\
@@ -312,7 +311,6 @@ _dl_runtime_resolve:\n\
 	# Compute GP.\n\
 2:	" STRINGXP(SETUP_GP) "\n\
 	" STRINGXV(SETUP_GP64 (0, _dl_runtime_resolve)) "\n\
-	.set reorder\n\
 	# Save slot call pc.\n\
 	move	$2, $31\n\
 	" IFABIO32(STRINGXP(CPRESTORE(32))) "\n\
@@ -328,7 +326,6 @@ _dl_runtime_resolve:\n\
 	move	$25, $2\n\
 	jr	$25\n\
 	.end	_dl_runtime_resolve\n\
-	.previous\n\
 ");
 
 /* Assembler veneer called from the PLT header code when using PLTs.
@@ -359,7 +356,6 @@ asm ("\n\
 	.ent	_dl_runtime_pltresolve\n\
 _dl_runtime_pltresolve:\n\
 	.frame	$29, " STRINGXP(ELF_DL_PLT_FRAME_SIZE) ", $31\n\
-	.set noreorder\n\
 	# Save arguments and sp value in stack.\n\
 1:	" STRINGXP(PTR_SUBIU) "	$29, " STRINGXP(ELF_DL_PLT_FRAME_SIZE) "\n\
 	" IFABIO32(STRINGXP(PTR_L) "	$13, " STRINGXP(PTRSIZE) "($28)") "\n\
@@ -369,7 +365,6 @@ _dl_runtime_pltresolve:\n\
 	# Compute GP.\n\
 2:	" STRINGXP(SETUP_GP) "\n\
 	" STRINGXV(SETUP_GP64 (0, _dl_runtime_pltresolve)) "\n\
-	.set reorder\n\
 	" IFABIO32(STRINGXP(CPRESTORE(32))) "\n\
 	" ELF_DL_PLT_SAVE_ARG_REGS "\
 	move	$4, $13\n\
@@ -381,7 +376,6 @@ _dl_runtime_pltresolve:\n\
 	" STRINGXP(PTR_ADDIU) "	$29, " STRINGXP(ELF_DL_PLT_FRAME_SIZE) "\n\
 	jr	$25\n\
 	.end	_dl_runtime_pltresolve\n\
-	.previous\n\
 ");
 
 #elif _MIPS_SIM == _ABIO32 /* __mips16 */

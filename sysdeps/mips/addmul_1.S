@@ -31,12 +31,9 @@ along with the GNU MP Library.  If not, see
 	.option pic2
 #endif
 ENTRY (__mpn_addmul_1)
-	.set    noreorder
 #ifdef __PIC__
 	.cpload t9
 #endif
-	.set    nomacro
-
 	/* warm up phase 0 */
 	lw	$8,0($5)
 
@@ -50,12 +47,12 @@ ENTRY (__mpn_addmul_1)
 #endif
 
 	addiu	$6,$6,-1
-	beq	$6,$0,L(LC0)
 	move	$2,$0		/* zero cy2 */
+	beq	$6,$0,L(LC0)
 
 	addiu	$6,$6,-1
-	beq	$6,$0,L(LC1)
 	lw	$8,0($5)	/* load new s1 limb as early as possible */
+	beq	$6,$0,L(LC1)
 
 L(Loop):	lw	$10,0($4)
 #if __mips_isa_rev < 6
@@ -81,8 +78,8 @@ L(Loop):	lw	$10,0($4)
 	addu	$2,$2,$10
 	sw	$3,0($4)
 	addiu	$4,$4,4
-	bne	$6,$0,L(Loop)	/* should be "bnel" */
 	addu	$2,$9,$2	/* add high product limb and carry from addition */
+	bne	$6,$0,L(Loop)	/* should be "bnel" */
 
 	/* cool down phase 1 */
 L(LC1):	lw	$10,0($4)
@@ -123,6 +120,6 @@ L(LC0):	lw	$10,0($4)
 	sltu	$10,$3,$10
 	addu	$2,$2,$10
 	sw	$3,0($4)
-	j	$31
 	addu	$2,$9,$2	/* add high product limb and carry from addition */
+	j	$31
 	END (__mpn_addmul_1)

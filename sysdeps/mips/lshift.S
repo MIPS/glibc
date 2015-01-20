@@ -30,12 +30,9 @@ along with the GNU MP Library.  If not, see
 	.option pic2
 #endif
 ENTRY (__mpn_lshift)
-	.set	noreorder
 #ifdef __PIC__
 	.cpload t9
 #endif
-	.set	nomacro
-
 	sll	$2,$6,2
 	addu	$5,$5,$2	/* make r5 point at end of src */
 	lw	$10,-4($5)	/* load first limb */
@@ -43,8 +40,8 @@ ENTRY (__mpn_lshift)
 	addu	$4,$4,$2	/* make r4 point at end of res */
 	addiu	$6,$6,-1
 	and	$9,$6,4-1	/* number of limbs in first loop */
-	beq	$9,$0,L(L0)	/* if multiple of 4 limbs, skip first loop */
 	srl	$2,$10,$13	/* compute function result */
+	beq	$9,$0,L(L0)	/* if multiple of 4 limbs, skip first loop */
 
 	subu	$6,$6,$9
 
@@ -56,11 +53,10 @@ L(Loop0):	lw	$3,-8($5)
 	srl	$12,$3,$13
 	move	$10,$3
 	or	$8,$11,$12
-	bne	$9,$0,L(Loop0)
 	sw	$8,0($4)
+	bne	$9,$0,L(Loop0)
 
 L(L0):	beq	$6,$0,L(Lend)
-	nop
 
 L(Loop):	lw	$3,-8($5)
 	addiu	$4,$4,-16
@@ -88,10 +84,10 @@ L(Loop):	lw	$3,-8($5)
 
 	addiu	$5,$5,-16
 	or	$8,$14,$9
-	bgtz	$6,L(Loop)
 	sw	$8,0($4)
+	bgtz	$6,L(Loop)
 
 L(Lend):	sll	$8,$10,$7
-	j	$31
 	sw	$8,-4($4)
+	j	$31
 	END (__mpn_lshift)

@@ -89,11 +89,9 @@
     lw v0, 36(sp);			/* restore syscall result */          \
     lw a3, 40(sp);			/* restore syscall error flag */      \
     lw ra, 28(sp);			/* restore return address */	      \
-    .set noreorder;							      \
-    bne a3, zero, 99b;							      \
      RESTORESTK;						              \
+    bne a3, zero, 99b;							      \
   L(pseudo_end):							      \
-    .set reorder;
 
 # undef PSEUDO_END
 # define PSEUDO_END(sym) cfi_endproc; .end sym; .size sym,.-sym

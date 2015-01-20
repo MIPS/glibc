@@ -41,19 +41,11 @@
 	.section .init,"ax",@progbits
 	ld $31,8($sp)
 	ld $28,0($sp)
-	.set noreorder
-	.set nomacro
-	j $31
 	addiu $sp,$sp,16
-	.set macro
-	.set reorder
+	j $31
 
 	.section .fini,"ax",@progbits
 	ld $31,8($sp)
 	ld $28,0($sp)
-	.set noreorder
-	.set nomacro
-	j $31
 	addiu $sp,$sp,16
-	.set macro
-	.set reorder
+	j $31

@@ -39,12 +39,10 @@
 L(syse1):
 #else
 #define PSEUDO(name, syscall_name, args) \
-  .set noreorder;							      \
   .set nomips16;							      \
   .align 2;								      \
   cfi_startproc;							      \
   99: j __syscall_error;						      \
-  nop;									      \
   cfi_endproc;								      \
   ENTRY(name)								      \
   .set noreorder;							      \

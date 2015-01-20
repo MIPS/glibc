@@ -31,19 +31,16 @@ along with the GNU MP Library.  If not, see
 	.option pic2
 #endif
 ENTRY (__mpn_sub_n)
-	.set	noreorder
 #ifdef __PIC__
 	.cpload t9
 #endif
-	.set	nomacro
-
 	lw	$10,0($5)
 	lw	$11,0($6)
 
 	addiu	$7,$7,-1
 	and	$9,$7,4-1	/* number of limbs in first loop */
-	beq	$9,$0,L(L0)	/* if multiple of 4 limbs, skip first loop */
 	move	$2,$0
+	beq	$9,$0,L(L0)	/* if multiple of 4 limbs, skip first loop */
 
 	subu	$7,$7,$9
 
@@ -61,11 +58,10 @@ L(Loop0):	addiu	$9,$9,-1
 	addiu	$6,$6,4
 	move	$10,$12
 	move	$11,$13
-	bne	$9,$0,L(Loop0)
 	addiu	$4,$4,4
+	bne	$9,$0,L(Loop0)
 
 L(L0):	beq	$7,$0,L(Lend)
-	nop
 
 L(Loop):	addiu	$7,$7,-4
 
@@ -108,14 +104,14 @@ L(Loop):	addiu	$7,$7,-4
 	addiu	$5,$5,16
 	addiu	$6,$6,16
 
-	bne	$7,$0,L(Loop)
 	addiu	$4,$4,16
+	bne	$7,$0,L(Loop)
 
 L(Lend):	addu	$11,$11,$2
 	sltu	$8,$11,$2
 	subu	$11,$10,$11
 	sltu	$2,$10,$11
 	sw	$11,0($4)
-	j	$31
 	or	$2,$2,$8
+	j	$31
 	END (__mpn_sub_n)

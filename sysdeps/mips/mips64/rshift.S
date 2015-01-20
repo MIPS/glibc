@@ -36,15 +36,12 @@ ENTRY (__mpn_rshift)
 #ifdef __PIC__
 	SETUP_GP /* ??? unused */
 #endif
-	.set	noreorder
-	.set	nomacro
-
 	ld	$10,0($5)	# load first limb
 	dsubu	$13,$0,$7
 	daddiu	$6,$6,-1
 	and	$9,$6,4-1	# number of limbs in first loop
-	beq	$9,$0,L(L0)	# if multiple of 4 limbs, skip first loop
 	dsll	$2,$10,$13	# compute function result
+	beq	$9,$0,L(L0)	# if multiple of 4 limbs, skip first loop
 
 	dsubu	$6,$6,$9
 
@@ -56,11 +53,10 @@ L(Loop0):	ld	$3,8($5)
 	dsll	$12,$3,$13
 	move	$10,$3
 	or	$8,$11,$12
-	bne	$9,$0,L(Loop0)
 	sd	$8,-8($4)
+	bne	$9,$0,L(Loop0)
 
 L(L0):	beq	$6,$0,L(Lend)
-	nop
 
 L(Loop):	ld	$3,8($5)
 	daddiu	$4,$4,32
@@ -88,10 +84,10 @@ L(Loop):	ld	$3,8($5)
 
 	daddiu	$5,$5,32
 	or	$8,$14,$9
-	bgtz	$6,L(Loop)
 	sd	$8,-8($4)
+	bgtz	$6,L(Loop)
 
 L(Lend):	dsrl	$8,$10,$7
-	j	$31
 	sd	$8,0($4)
+	j	$31
 END (__mpn_rshift)

@@ -36,9 +36,6 @@ ENTRY (__mpn_addmul_1)
 #ifdef PIC
 	SETUP_GP /* ??? unused */
 #endif
-	.set    noreorder
-	.set    nomacro
-
  # warm up phase 0
 	ld	$8,0($5)
 
@@ -52,12 +49,12 @@ ENTRY (__mpn_addmul_1)
 #endif
 
 	daddiu	$6,$6,-1
-	beq	$6,$0,L(LC0)
 	move	$2,$0		# zero cy2
+	beq	$6,$0,L(LC0)
 
 	daddiu	$6,$6,-1
-	beq	$6,$0,L(LC1)
 	ld	$8,0($5)	# load new s1 limb as early as possible
+	beq	$6,$0,L(LC1)
 
 L(Loop):	ld	$10,0($4)
 #if __mips_isa_rev < 6
@@ -83,8 +80,8 @@ L(Loop):	ld	$10,0($4)
 	daddu	$2,$2,$10
 	sd	$3,0($4)
 	daddiu	$4,$4,8
-	bne	$6,$0,L(Loop)
 	daddu	$2,$9,$2	# add high product limb and carry from addition
+	bne	$6,$0,L(Loop)
 
  # cool down phase 1
 L(LC1):	ld	$10,0($4)
@@ -125,7 +122,7 @@ L(LC0):	ld	$10,0($4)
 	sltu	$10,$3,$10
 	daddu	$2,$2,$10
 	sd	$3,0($4)
-	j	$31
 	daddu	$2,$9,$2	# add high product limb and carry from addition
+	j	$31
 
 END (__mpn_addmul_1)
