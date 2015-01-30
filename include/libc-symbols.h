@@ -20,16 +20,30 @@
 #ifndef _LIBC_SYMBOLS_H
 #define _LIBC_SYMBOLS_H	1
 
-#define IN_MODULE PASTE_NAME (MODULE_, MODULE_NAME)
-#define IS_IN(lib) (IN_MODULE == MODULE_##lib)
+#ifdef MODULE_NAME
+
+# define IN_MODULE		PASTE_NAME (MODULE_, MODULE_NAME)
+# define IS_IN(lib)		(IN_MODULE == MODULE_##lib)
 
 /* Returns true if the current module is a versioned library.  Versioned
    library names culled from shlib-versions files are assigned a MODULE_*
    value lower than MODULE_LIBS_BEGIN.  */
-#define IS_IN_LIB (IN_MODULE > MODULE_LIBS_BEGIN)
+# define IS_IN_LIB		(IN_MODULE > MODULE_LIBS_BEGIN)
 
-#define PASTE_NAME(a,b)      PASTE_NAME1 (a,b)
-#define PASTE_NAME1(a,b)     a##b
+# define PASTE_NAME(a,b)	PASTE_NAME1 (a,b)
+# define PASTE_NAME1(a,b)	a##b
+
+#else
+
+/* In actual compilation, MODULE_NAME is defined on the command line
+   (see Makeconfig).  The only time it should be undefined is for some
+   preprocessing-only runs used for files that are neither C nor
+   assembly.  In those cases, the IN_LIB result doesn't matter to
+   anything, but we must avoid -Wundef errors.  */
+
+# define IS_IN(lib)		0
+
+#endif
 
 /* This file's macros are included implicitly in the compilation of every
    file in the C library by -imacros.

@@ -1,3 +1,14 @@
+2015-01-30  Roland McGrath  <roland@hack.frob.com>
+
+	* Makeconfig (+gccwarn): Don't add -Wundef here.
+	(CPPFLAGS): Instead put it first thing here.
+	Also add -Werror if $(enable-werror) is yes.
+	* include/libc-symbols.h (IN_MODULE, IS_IN, IS_IN_LIB): Move these
+	macros under [MODULE_NAME].
+	[!MODULE_NAME] (IS_IN): New macro, always yields 0.
+	* sysdeps/unix/make-syscalls.sh: Always emit #define's for
+	SYSCALL_CANCELLABLE, SYSCALL_NOERRNO, SYSCALL_ERRVAL, to 1 or 0.
+
 2015-01-29  Andreas Schwab  <schwab@suse.de>
 
 	* sysdeps/nptl/allocrtsig.c: Include <signal.h>.

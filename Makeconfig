@@ -716,9 +716,10 @@ ifeq ($(all-warnings),yes)
 else
 +gccwarn := -Wall -Wwrite-strings -Winline
 endif
-+gccwarn += -Wundef
 ifeq ($(enable-werror),yes)
-+gccwarn += -Werror -Wno-error=undef
+# -Werror is in CPPFLAGS (below).  XXX Disable it for -Wundef in C/C++
+# code, for now, because some test sources still need to be fixed up.
++gccwarn += -Wno-error=undef
 endif
 +gccwarn-c = -Wstrict-prototypes
 
@@ -844,7 +845,8 @@ module-cppflags = $(if $(filter $(@F),$(skip-module-cppflags)), \
 # Note that we can't use -std=* in CPPFLAGS, because it overrides
 # the implicit -lang-asm and breaks cpp behavior for .S files--notably
 # it causes cpp to stop predefining __ASSEMBLER__.
-CPPFLAGS = $(config-extra-cppflags) $(CPPUNDEFS) $(CPPFLAGS-config) \
+CPPFLAGS = -Wundef $(if $(filter yes,$(enable-werror)),-Werror) \
+	   $(config-extra-cppflags) $(CPPUNDEFS) $(CPPFLAGS-config) \
 	   $($(subdir)-CPPFLAGS) \
 	   $(+includes) $(defines) $(module-cppflags) \
 	   -include $(..)include/libc-symbols.h $(sysdep-CPPFLAGS) \
