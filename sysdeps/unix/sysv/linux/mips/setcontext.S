@@ -159,15 +159,14 @@ NESTED (__setcontext, FRAMESZ, ra)
 	/* Only ucontext is referred to from rt_sigreturn,
 	   copy it.  */
 	PTR_ADDIU t1, sp, RT_SIGFRAME_UCONTEXT
-	li	t3, ((UCONTEXT_SIZE + SZREG - 1) / SZREG) - 1
+	li	t3, ((UCONTEXT_SIZE + SZREG - 1) / SZREG)
 0:
+	addiu	t3, -1
 	REG_L	t2, (a0)
 	PTR_ADDIU a0, SZREG
 	REG_S	t2, (t1)
 	PTR_ADDIU t1, SZREG
-	move	t2, t3
-	addiu	t3, -1
-	bgtz	t2, 0b
+	bgtz	t3, 0b
 
 /* rt_sigreturn () -- no arguments, sp points to struct rt_sigframe.  */
 	li	v0, SYS_ify (rt_sigreturn)

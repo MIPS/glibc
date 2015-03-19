@@ -89,12 +89,10 @@
 #endif
 #endif
 
-#ifndef PTR_BC
 #if __mips_isa_rev > 5 && defined (__mips_micromips)
 #define PTR_BC	      bc16
 #else
 #define PTR_BC	      bc
-#endif
 #endif
 
 /* Using PREFETCH_HINT_PREPAREFORSTORE instead of PREFETCH_STORE
@@ -420,7 +418,7 @@ L(lastbloop):
 	sb	a1,-1(a0)
 	bne	a0,a3,L(lastbloop)
 L(leave):
-	j	ra
+	jr	ra
 
 	.set	at
 END(MEMSET_NAME)

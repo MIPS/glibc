@@ -326,6 +326,7 @@ _dl_runtime_resolve:\n\
 	move	$25, $2\n\
 	jr	$25\n\
 	.end	_dl_runtime_resolve\n\
+	.previous\n\
 ");
 
 /* Assembler veneer called from the PLT header code when using PLTs.
@@ -376,6 +377,7 @@ _dl_runtime_pltresolve:\n\
 	" STRINGXP(PTR_ADDIU) "	$29, " STRINGXP(ELF_DL_PLT_FRAME_SIZE) "\n\
 	jr	$25\n\
 	.end	_dl_runtime_pltresolve\n\
+	.previous\n\
 ");
 
 #elif _MIPS_SIM == _ABIO32 /* __mips16 */
