@@ -121,5 +121,5 @@ L(LC0):	lw	$10,0($4)
 	addu	$2,$2,$10
 	sw	$3,0($4)
 	addu	$2,$9,$2	/* add high product limb and carry from addition */
-	j	$31
+	jr	$31
 	END (__mpn_addmul_1)

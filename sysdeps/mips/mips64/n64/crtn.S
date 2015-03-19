@@ -1,4 +1,4 @@
-/* Special .init and .fini section support for MIPS (n64).
+/r* Special .init and .fini section support for MIPS (n64).
    Copyright (C) 1995-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
@@ -42,10 +42,10 @@
 	ld $31,8($sp)
 	ld $28,0($sp)
 	daddiu $sp,$sp,16
-	j $31
+	jr $31
 
 	.section .fini,"ax",@progbits
 	ld $31,8($sp)
 	ld $28,0($sp)
 	daddiu $sp,$sp,16
-	j $31
+	jr $31

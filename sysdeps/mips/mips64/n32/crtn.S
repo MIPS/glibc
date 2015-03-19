@@ -42,10 +42,10 @@
 	ld $31,8($sp)
 	ld $28,0($sp)
 	addiu $sp,$sp,16
-	j $31
+	jr $31
 
 	.section .fini,"ax",@progbits
 	ld $31,8($sp)
 	ld $28,0($sp)
 	addiu $sp,$sp,16
-	j $31
+	jr $31

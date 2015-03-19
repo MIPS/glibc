@@ -89,5 +89,5 @@ L(Loop):	ld	$3,8($5)
 
 L(Lend):	dsrl	$8,$10,$7
 	sd	$8,0($4)
-	j	$31
+	jr	$31
 END (__mpn_rshift)

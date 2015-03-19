@@ -41,9 +41,9 @@
 	.section .init,"ax",@progbits
 	lw $31,28($sp)
 	addiu $sp,$sp,32
-	j $31
+	jr $31
 
 	.section .fini,"ax",@progbits
 	lw $31,28($sp)
 	addiu $sp,$sp,32
-	j $31
+	jr $31

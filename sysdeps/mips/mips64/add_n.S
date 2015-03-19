@@ -116,6 +116,6 @@ L(Lend):	daddu	$11,$11,$2
 	sltu	$2,$11,$10
 	sd	$11,0($4)
 	or	$2,$2,$8
-	j	$31
+	jr	$31
 
 END (__mpn_add_n)

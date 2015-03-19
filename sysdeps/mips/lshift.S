@@ -89,5 +89,5 @@ L(Loop):	lw	$3,-8($5)
 
 L(Lend):	sll	$8,$10,$7
 	sw	$8,-4($4)
-	j	$31
+	jr	$31
 	END (__mpn_lshift)

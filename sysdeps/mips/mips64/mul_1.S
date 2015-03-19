@@ -112,6 +112,6 @@ L(LC0):	move	$10,$11
 	sltu	$2,$10,$2
 	sd	$10,0($4)
 	daddu	$2,$9,$2	# add high product limb and carry from addition
-	j	$31
+	jr	$31
 
 END (__mpn_mul_1)

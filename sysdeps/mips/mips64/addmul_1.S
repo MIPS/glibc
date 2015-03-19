@@ -123,6 +123,6 @@ L(LC0):	ld	$10,0($4)
 	daddu	$2,$2,$10
 	sd	$3,0($4)
 	daddu	$2,$9,$2	# add high product limb and carry from addition
-	j	$31
+	jr	$31
 
 END (__mpn_addmul_1)
