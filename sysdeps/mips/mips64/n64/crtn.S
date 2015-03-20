@@ -1,4 +1,4 @@
-/r* Special .init and .fini section support for MIPS (n64).
+/* Special .init and .fini section support for MIPS (n64).
    Copyright (C) 1995-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
