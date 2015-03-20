@@ -193,6 +193,10 @@ __dl_runtime_resolve (ElfW(Word) sym_index,
       /* Currently value contains the base load address of the object
 	 that defines sym.  Now add in the symbol offset.  */
       value = (sym ? sym_map->l_addr + sym->st_value : 0);
+      if (sym != NULL
+          && __builtin_expect (ELFW(ST_TYPE) (sym->st_info)
+              == STT_GNU_IFUNC, 0))
+        value = elf_ifunc_invoke (DL_FIXUP_VALUE_ADDR (value));
     }
   else
     /* We already found the symbol.  The module (and therefore its load

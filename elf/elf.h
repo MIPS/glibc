@@ -1653,8 +1653,9 @@ typedef struct
 #define R_MIPS_GLOB_DAT		51
 #define R_MIPS_COPY		126
 #define R_MIPS_JUMP_SLOT        127
+#define R_MIPS_IRELATIVE        128
 /* Keep this the last entry.  */
-#define R_MIPS_NUM		128
+#define R_MIPS_NUM		129
 
 /* Legal values for p_type field of Elf32_Phdr.  */
 
@@ -1727,7 +1728,11 @@ typedef struct
    PLT is writable.  For a non-writable PLT, this is omitted or has a zero
    value.  */
 #define DT_MIPS_RWPLT        0x70000034
-#define DT_MIPS_NUM	     0x35
+/* Points to the first general GOT entry.  */
+#define DT_MIPS_GENERAL_GOTIDX	0x70000035
+/* Points to the first automatically relocated global GOT entry.  */
+#define DT_MIPS_GLOBAL_GOTIDX	0x70000037
+#define DT_MIPS_NUM	     0x38
 
 /* Legal values for DT_MIPS_FLAGS Elf32_Dyn entry.  */
 
