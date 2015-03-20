@@ -1656,8 +1656,9 @@ typedef struct
 #define R_MIPS_GLOB_DAT		51
 #define R_MIPS_COPY		126
 #define R_MIPS_JUMP_SLOT        127
+#define R_MIPS_IRELATIVE        128
 /* Keep this the last entry.  */
-#define R_MIPS_NUM		128
+#define R_MIPS_NUM		129
 
 /* Legal values for p_type field of Elf32_Phdr.  */
 

@@ -33,6 +33,7 @@
 #include <sysdep.h>
 #include <sys/asm.h>
 #include <dl-tls.h>
+#include <dl-irel.h>
 
 /* The offset of gp from GOT might be system-dependent.  It's set by
    ld.  The same value is also */
@@ -224,6 +225,8 @@ do {									\
       else if (ELFW(ST_TYPE) (sym->st_info) == STT_FUNC			\
 	       && *got != sym->st_value)				\
 	*got += map->l_addr;						\
+      else if (ELFW(ST_TYPE) (sym->st_info) == STT_GNU_IFUNC)		\
+	*got = elf_ifunc_invoke(sym->st_value);				\
       else if (ELFW(ST_TYPE) (sym->st_info) == STT_SECTION)		\
 	{								\
 	  if (sym->st_other == 0)					\
@@ -493,7 +496,8 @@ auto inline void
 __attribute__ ((always_inline))
 elf_machine_reloc (struct link_map *map, ElfW(Addr) r_info,
 		   const ElfW(Sym) *sym, const struct r_found_version *version,
-		   void *reloc_addr, ElfW(Addr) r_addend, int inplace_p)
+		   void *reloc_addr, ElfW(Addr) r_addend, int inplace_p,
+		   int skip_ifunc)
 {
   const unsigned long int r_type = ELFW(R_TYPE) (r_info);
   ElfW(Addr) *addr_field = (ElfW(Addr) *) reloc_addr;
@@ -663,6 +667,10 @@ elf_machine_reloc (struct link_map *map, ElfW(Addr) r_info,
 
 	sym_map = RESOLVE_MAP (&sym, version, r_type);
 	value = sym_map == NULL ? 0 : sym_map->l_addr + sym->st_value;
+
+	if (value && (ELFW(ST_TYPE) (sym->st_info) == STT_GNU_IFUNC))
+	  value = elf_ifunc_invoke (value);
+
 	*addr_field = value;
 
 	break;
@@ -698,6 +706,14 @@ elf_machine_reloc (struct link_map *map, ElfW(Addr) r_info,
 	break;
       }
 
+    case R_MIPS_IRELATIVE:
+      /* The resolver routine is the symbol referenced by this relocation.
+	 To get the address of the function to use at runtime, the resolver
+	 routine is called and its return value is the address of the target
+	 functon which is final relocation value. */
+      *addr_field = elf_ifunc_invoke (map->l_addr + *addr_field);
+      break;
+
 #if _MIPS_SIM == _ABI64
     case R_MIPS_64:
       /* For full compliance with the ELF64 ABI, one must precede the
@@ -727,7 +743,8 @@ elf_machine_rel (struct link_map *map, const ElfW(Rel) *reloc,
 		 const ElfW(Sym) *sym, const struct r_found_version *version,
 		 void *const reloc_addr, int skip_ifunc)
 {
-  elf_machine_reloc (map, reloc->r_info, sym, version, reloc_addr, 0, 1);
+  elf_machine_reloc (map, reloc->r_info, sym, version, reloc_addr, 0, 1, 
+		     skip_ifunc);
 }
 
 auto inline void
@@ -768,7 +785,7 @@ elf_machine_rela (struct link_map *map, const ElfW(Rela) *reloc,
 		  void *const reloc_addr, int skip_ifunc)
 {
   elf_machine_reloc (map, reloc->r_info, sym, version, reloc_addr,
-		     reloc->r_addend, 0);
+		     reloc->r_addend, 0, skip_ifunc);
 }
 
 auto inline void
@@ -795,8 +812,15 @@ elf_machine_got_rel (struct link_map *map, int lazy)
       const struct r_found_version *version __attribute__ ((unused))	  \
 	= vernum ? &map->l_versions[vernum[sym_index] & 0x7fff] : NULL;	  \
       struct link_map *sym_map;						  \
+      ElfW(Addr) value;							  \
       sym_map = RESOLVE_MAP (&ref, version, reloc);			  \
-      ref ? sym_map->l_addr + ref->st_value : 0;			  \
+      if (ref)								  \
+	{								  \
+	  value = sym_map->l_addr + ref->st_value;			  \
+	  if (ELFW(ST_TYPE) (ref->st_info) == STT_GNU_IFUNC)		  \
+	    value = elf_ifunc_invoke (value);				  \
+	}								  \
+      ref ? value : 0;							  \
     })
 
   if (map->l_info[VERSYMIDX (DT_VERSYM)] != NULL)
@@ -866,6 +890,8 @@ elf_machine_got_rel (struct link_map *map, int lazy)
 	  if (sym->st_other == 0)
 	    *got += map->l_addr;
 	}
+      else if (ELFW(ST_TYPE) (sym->st_info) == STT_GNU_IFUNC)
+	*got = elf_ifunc_invoke (map->l_addr + *got);
       else
 	*got = RESOLVE_GOTSYM (sym, vernum, symidx, R_MIPS_32);
 
