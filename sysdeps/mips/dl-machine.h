@@ -711,7 +711,10 @@ elf_machine_reloc (struct link_map *map, ElfW(Addr) r_info,
 	 To get the address of the function to use at runtime, the resolver
 	 routine is called and its return value is the address of the target
 	 functon which is final relocation value. */
-      *addr_field = elf_ifunc_invoke (map->l_addr + *addr_field);
+      if (map->l_addr > *addr_field)
+	*addr_field = elf_ifunc_invoke (map->l_addr + *addr_field);
+      else
+	*addr_field = elf_ifunc_invoke (*addr_field);
       break;
 
 #if _MIPS_SIM == _ABI64
@@ -818,7 +821,10 @@ elf_machine_got_rel (struct link_map *map, int lazy)
 	{								  \
 	  value = sym_map->l_addr + ref->st_value;			  \
 	  if (ELFW(ST_TYPE) (ref->st_info) == STT_GNU_IFUNC)		  \
-	    value = elf_ifunc_invoke (value);				  \
+	    if (sym_map->l_relocated)					  \
+	      value = elf_ifunc_invoke (value);				  \
+	    else							  \
+	      _dl_error_printf ("ifunc resolution failed due to link order\n"); \
 	}								  \
       ref ? value : 0;							  \
     })
