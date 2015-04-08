@@ -45,10 +45,8 @@ L(syse1):
   99: j __syscall_error;						      \
   cfi_endproc;								      \
   ENTRY(name)								      \
-  .set noreorder;							      \
   li v0, SYS_ify(syscall_name);						      \
   syscall;								      \
-  .set reorder;								      \
   bne a3, zero, 99b;							      \
 L(syse1):
 #endif

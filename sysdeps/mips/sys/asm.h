@@ -72,23 +72,21 @@
 		.set reorder
 /* Set gp when not at 1st instruction */
 # define SETUP_GPX(r)					\
-		.set noreorder;				\
 		move r, $31;	 /* Save old ra.  */	\
 		bal 10f; /* Find addr of cpload.  */	\
-		nop;					\
 10:							\
-		.cpload $31;				\
-		move $31, r;				\
-		.set reorder
-# define SETUP_GPX_L(r, l)				\
 		.set noreorder;				\
+		.cpload $31;				\
+		.set reorder;				\
+		move $31, r;				
+# define SETUP_GPX_L(r, l)				\
 		move r, $31;	 /* Save old ra.  */	\
 		bal l;   /* Find addr of cpload.  */	\
-		nop;					\
 l:							\
+		.set noreorder;				\
 		.cpload $31;				\
-		move $31, r;				\
-		.set reorder
+		.set reorder;				\
+		move $31, r;				
 # define SAVE_GP(x) \
 		.cprestore x /* Save gp trigger t9/jalr conversion.	 */
 # define SETUP_GP64(a, b)
@@ -109,20 +107,14 @@ l:							\
 		.cpsetup $25, gpoffset, proc
 # define SETUP_GPX64(cp_reg, ra_save)			\
 		move ra_save, $31; /* Save old ra.  */	\
-		.set noreorder;				\
 		bal 10f; /* Find addr of .cpsetup.  */	\
-		nop;					\
 10:							\
-		.set reorder;				\
 		.cpsetup $31, cp_reg, 10b;		\
 		move $31, ra_save
 # define SETUP_GPX64_L(cp_reg, ra_save, l)  \
 		move ra_save, $31; /* Save old ra.  */	\
-		.set noreorder;				\
 		bal l;   /* Find addr of .cpsetup.  */	\
-		nop;					\
 l:							\
-		.set reorder;				\
 		.cpsetup $31, cp_reg, l;		\
 		move $31, ra_save
 # define RESTORE_GP64 \
