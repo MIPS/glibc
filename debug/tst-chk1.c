@@ -1349,7 +1349,9 @@ do_test (void)
       ret = 1;
     }
 
-  int fd = posix_openpt (O_RDWR);
+  int fd;
+#if 0
+  fd = posix_openpt (O_RDWR);
   if (fd != -1)
     {
       char enough[1000];
@@ -1365,6 +1367,7 @@ do_test (void)
 #endif
       close (fd);
     }
+#endif
 
 #if PATH_MAX > 0
   confstr (_CS_GNU_LIBC_VERSION, largebuf, sizeof (largebuf));
@@ -1413,13 +1416,15 @@ do_test (void)
   CHK_FAIL_END
 #endif
 
+#if 0
   char loginlarge[1000];
-  getlogin_r (loginlarge, sizeof (hostnamelarge));
+  getlogin_r (loginlarge, sizeof (loginlarge));
 #if __USE_FORTIFY_LEVEL >= 1
   CHK_FAIL_START
   char smallbuf[1];
   getlogin_r (smallbuf, sizeof (loginlarge));
   CHK_FAIL_END
+#endif
 #endif
 
   char domainnamelarge[1000];
