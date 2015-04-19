@@ -65,10 +65,8 @@
     cfi_rel_offset (gp, STKOFF_GP);					      \
     SINGLE_THREAD_P(v1);						      \
     bne zero, v1, L(pseudo_cancel);					      \
-    .set noreorder;							      \
     li v0, SYS_ify(syscall_name);					      \
     syscall;								      \
-    .set reorder;							      \
     bne a3, zero, SYSCALL_ERROR_LABEL;			       		      \
     /* manual cpreturn */						      \
     REG_L gp, STKOFF_GP(sp);						      \
@@ -84,10 +82,8 @@
     CENABLE;								      \
     REG_S v0, STKOFF_SVMSK(sp);		/* save mask */			      \
     POPARGS_##args;			/* restore syscall args */	      \
-    .set noreorder;							      \
     li v0, SYS_ify (syscall_name);				      	      \
     syscall;								      \
-    .set reorder;							      \
     REG_S v0, STKOFF_SC_V0(sp);		/* save syscall result */             \
     REG_S a3, STKOFF_SC_ERR(sp);	/* save syscall error flag */	      \
     REG_L a0, STKOFF_SVMSK(sp);		/* pass mask as arg1 */		      \
@@ -125,10 +121,8 @@
     SAVESTK;								      \
     SINGLE_THREAD_P(v1);						      \
     bne zero, v1, L(pseudo_cancel);					      \
-    .set noreorder;							      \
     li v0, SYS_ify(syscall_name);					      \
     syscall;								      \
-    .set reorder;							      \
     bne a3, zero, SYSCALL_ERROR_LABEL;			       		      \
     RESTORESTK;								      \
     ret;								      \
@@ -140,10 +134,8 @@
     CENABLE;								      \
     REG_S v0, STKOFF_SVMSK(sp);		/* save mask */			      \
     POPARGS_##args;			/* restore syscall args */	      \
-    .set noreorder;							      \
     li v0, SYS_ify (syscall_name);				      	      \
     syscall;								      \
-    .set reorder;							      \
     REG_S v0, STKOFF_SC_V0(sp);		/* save syscall result */             \
     REG_S a3, STKOFF_SC_ERR(sp);	/* save syscall error flag */	      \
     REG_L a0, STKOFF_SVMSK(sp);		/* pass mask as arg1 */		      \
