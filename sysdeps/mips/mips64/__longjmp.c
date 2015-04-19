@@ -88,7 +88,7 @@ __longjmp (__jmp_buf env_arg, int val_arg)
   else
     asm volatile ("move $2, %0" : : "r" (val));
 
-  asm volatile ("j $31");
+  asm volatile ("jr $31");
 
   /* Avoid `volatile function does return' warnings.  */
   for (;;);

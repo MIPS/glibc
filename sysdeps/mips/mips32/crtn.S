@@ -40,18 +40,10 @@
 
 	.section .init,"ax",@progbits
 	lw $31,28($sp)
-	.set noreorder
-	.set nomacro
-	j $31
 	addiu $sp,$sp,32
-	.set macro
-	.set reorder
+	jr $31
 
 	.section .fini,"ax",@progbits
 	lw $31,28($sp)
-	.set noreorder
-	.set nomacro
-	j $31
 	addiu $sp,$sp,32
-	.set macro
-	.set reorder
+	jr $31

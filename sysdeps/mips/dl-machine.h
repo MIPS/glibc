@@ -149,16 +149,13 @@ elf_machine_load_address (void)
 {
   ElfW(Addr) addr;
 #ifndef __mips16
-  asm ("	.set noreorder\n"
-       "	" STRINGXP (PTR_LA) " %0, 0f\n"
+  asm ("	" STRINGXP (PTR_LA) " %0, 0f\n"
 # if !defined __mips_isa_rev || __mips_isa_rev < 6
        "	bltzal $0, 0f\n"
-       "	nop\n"
+#else
+       "	bal 0f\n"
+#endif
        "0:	" STRINGXP (PTR_SUBU) " %0, $31, %0\n"
-# else
-       "0:	addiupc $31, 0\n"
-       "	" STRINGXP (PTR_SUBU) " %0, $31, %0\n"
-# endif
        "	.set reorder\n"
        :	"=r" (addr)
        :	/* No inputs */
@@ -259,7 +256,9 @@ do {									\
       and not just plain _start.  */
 
 #ifndef __mips16
-# if !defined __mips_isa_rev || __mips_isa_rev < 6
+/* Although microMIPSr6 has an ADDIUPC instruction, it must be 4-byte aligned
+   for the address calculation to be valid.  */
+# if !defined __mips_isa_rev || __mips_isa_rev < 6 || defined __mips_micromips
 #  define LCOFF STRINGXP(.Lcof2)
 #  define LOAD_31 STRINGXP(bltzal $8) "," STRINGXP(.Lcof2)
 # else

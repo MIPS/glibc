@@ -37,16 +37,13 @@ ENTRY (__mpn_sub_n)
 #ifdef __PIC__
 	SETUP_GP /* ??? unused */
 #endif
-	.set	noreorder
-	.set	nomacro
-
 	ld	$10,0($5)
 	ld	$11,0($6)
 
 	daddiu	$7,$7,-1
 	and	$9,$7,4-1	# number of limbs in first loop
-	beq	$9,$0,L(L0)	# if multiple of 4 limbs, skip first loop
 	move	$2,$0
+	beq	$9,$0,L(L0)	# if multiple of 4 limbs, skip first loop
 
 	dsubu	$7,$7,$9
 
@@ -64,11 +61,10 @@ L(Loop0):	daddiu	$9,$9,-1
 	daddiu	$6,$6,8
 	move	$10,$12
 	move	$11,$13
-	bne	$9,$0,L(Loop0)
 	daddiu	$4,$4,8
+	bne	$9,$0,L(Loop0)
 
 L(L0):	beq	$7,$0,L(Lend)
-	nop
 
 L(Loop):	daddiu	$7,$7,-4
 
@@ -111,15 +107,15 @@ L(Loop):	daddiu	$7,$7,-4
 	daddiu	$5,$5,32
 	daddiu	$6,$6,32
 
-	bne	$7,$0,L(Loop)
 	daddiu	$4,$4,32
+	bne	$7,$0,L(Loop)
 
 L(Lend):	daddu	$11,$11,$2
 	sltu	$8,$11,$2
 	dsubu	$11,$10,$11
 	sltu	$2,$10,$11
 	sd	$11,0($4)
-	j	$31
 	or	$2,$2,$8
+	jr	$31
 
 END (__mpn_sub_n)
