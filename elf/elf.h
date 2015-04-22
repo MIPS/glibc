@@ -1728,11 +1728,12 @@ typedef struct
    PLT is writable.  For a non-writable PLT, this is omitted or has a zero
    value.  */
 #define DT_MIPS_RWPLT        0x70000034
-/* Points to the first general GOT entry.  */
-#define DT_MIPS_GENERAL_GOTIDX	0x70000035
-/* Points to the first automatically relocated global GOT entry.  */
-#define DT_MIPS_GLOBAL_GOTIDX	0x70000037
-#define DT_MIPS_NUM	     0x38
+/* Points to the first IPLT entry. */
+#define DT_MIPS_IPLT	0x70000035
+/* Index of first IFUNC in dynamic symbol table */
+#define DT_MIPS_IFUNC_DYNINDX	0x70000036
+
+#define DT_MIPS_NUM	     0x37
 
 /* Legal values for DT_MIPS_FLAGS Elf32_Dyn entry.  */
 
