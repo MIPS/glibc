@@ -801,7 +801,7 @@ elf_machine_rela_relative (ElfW(Addr) l_addr, const ElfW(Rela) *reloc,
 ElfW(Addr)
 elf_machine_ifunc_stub (struct link_map *map,  const ElfW(Sym) *sym)
 {
-  unsigned sym_index = (sym - (ElfW(Sym) *) D_PTR (map, l_info[DT_SYMTAB])) + 2;
+  unsigned sym_index = (sym - (ElfW(Sym) *) D_PTR (map, l_info[DT_SYMTAB]));
   ElfW(Addr) istub;
 
   istub = D_PTR(map, l_info[DT_MIPS (IPLT)]);
@@ -910,7 +910,11 @@ elf_machine_got_rel (struct link_map *map, int lazy)
 	  if (sym->st_other == 0)
 	    *got += map->l_addr;
 	}
-      else if (ELFW(ST_TYPE) (sym->st_info) != STT_GNU_IFUNC)
+      else if (ELFW(ST_TYPE) (sym->st_info) == STT_GNU_IFUNC)
+	/* Just bias the IFUNC entry for now, it will be correctly 
+	   fixed up later by IRELATIVE reloc */
+	*got += map->l_addr;
+      else
 	*got = RESOLVE_GOTSYM (sym, vernum, symidx, R_MIPS_32);
 
       ++got;
