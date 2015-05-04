@@ -798,14 +798,31 @@ elf_machine_rela_relative (ElfW(Addr) l_addr, const ElfW(Rela) *reloc,
 {
 }
 
+#define MIPS16_IPLT_STUB_SIZE    16
+#define MIPS32_IPLT_STUB_SIZE    20
+#define MIPS64_IPLT_STUB_SIZE    36
+
 ElfW(Addr)
 elf_machine_ifunc_stub (struct link_map *map,  const ElfW(Sym) *sym)
 {
   unsigned sym_index = (sym - (ElfW(Sym) *) D_PTR (map, l_info[DT_SYMTAB]));
   ElfW(Addr) istub;
+  unsigned stub_size;
 
   istub = D_PTR(map, l_info[DT_MIPS (IPLT)]);
-  istub += (sym_index - map->l_info[DT_MIPS(IFUNC_DYNINDX)]->d_un.d_val) * 32;
+#if _MIPS_SIM == _ABIN64
+  stub_size = MIPS64_IPLT_STUB_SIZE;
+#else /* if _MIPS_SIM != _ABIN64 */
+  if (istub & 0x1)
+    /* Odd IPLT indicates compressed stubs; these may be mips16 or
+       micromips, but we don't care because both have same size */
+    stub_size = MIPS16_IPLT_STUB_SIZE;
+  else
+    stub_size = MIPS32_IPLT_STUB_SIZE;
+#endif /* _MIPS_SIM == _ABIN64 */
+
+  istub += (sym_index - map->l_info[DT_MIPS(IFUNC_DYNINDX)]->d_un.d_val)
+    * stub_size;
 
   return istub;
 }
