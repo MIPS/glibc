@@ -9,7 +9,7 @@ $(objpfx)tst-bz21269: $(shared-thread-library)
 endif
 
 ifeq ($(subdir),elf)
-sysdep-dl-routines += libc-do-syscall
+sysdep-rtld_routines += libc-do-syscall
 sysdep-others += lddlibc4
 install-bin += lddlibc4
 endif

@@ -14,3 +14,6 @@ MUTEX_FUTEX		offsetof (pthread_mutex_t, __data.__lock)
 POINTER_GUARD		offsetof (tcbhead_t, pointer_guard)
 FEATURE_1_OFFSET	offsetof (tcbhead_t, feature_1)
 SSP_BASE_OFFSET		offsetof (tcbhead_t, ssp_base)
+
+-- Not strictly offsets, used on syscall_cancel.S
+TCB_CANCELED_BITMASK	CANCELED_BITMASK
