@@ -1,6 +1,6 @@
 /* Machine-dependent ELF indirect relocation inline functions.
    MIPS version.
-   Copyright (C) 2009-2013 Free Software Foundation, Inc.
+   Copyright (C) 2015 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -35,18 +35,18 @@ elf_ifunc_invoke (ElfW(Addr) addr)
 {
   /* Print some debugging info if wanted.  */
   if (__builtin_expect (GLRO(dl_debug_mask) & DL_DEBUG_SYMBOLS, 0))
-      {
-	ElfW(Addr) t_addr =
-	    ((ElfW(Addr) (*) (unsigned long int)) (addr)) (GLRO(dl_hwcap));
-	GLRO(dl_debug_printf) ("In elf_ifunc_invoke(0x%lx), return(0x%lx)\n",
-				(unsigned long int)addr,
-				(unsigned long int)t_addr);
-      }
+    {
+      ElfW(Addr) t_addr =
+	((ElfW(Addr) (*) (unsigned long int)) (addr)) (GLRO(dl_hwcap));
+      GLRO(dl_debug_printf) ("In elf_ifunc_invoke(0x%lx), return(0x%lx)\n",
+			     (unsigned long int)addr,
+			     (unsigned long int)t_addr);
+    }
 
   return ((ElfW(Addr) (*) (unsigned long int)) (addr)) (GLRO(dl_hwcap));
 }
 
-/* Allow either R_MIPS_RELATIVE or the nop R_MIPS_NONE */
+/* Allow either R_MIPS_RELATIVE or the nop R_MIPS_NONE.  */
 static inline void
 __attribute ((always_inline))
 elf_irel (const ElfW(Rel) *reloc)
@@ -57,7 +57,7 @@ elf_irel (const ElfW(Rel) *reloc)
   if (__builtin_expect (r_type == R_MIPS_IRELATIVE, 1))
     *reloc_addr = elf_ifunc_invoke (*reloc_addr);
   else if (r_type)
-     __libc_fatal ("unexpected reloc type in static binary\n");
+    __libc_fatal ("unexpected reloc type in static binary");
 }
 
 #endif /* dl-irel.h */

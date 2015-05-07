@@ -1728,9 +1728,9 @@ typedef struct
    PLT is writable.  For a non-writable PLT, this is omitted or has a zero
    value.  */
 #define DT_MIPS_RWPLT        0x70000034
-/* Points to the first IPLT entry. */
+/* Points to the first IPLT entry.  */
 #define DT_MIPS_IPLT	0x70000035
-/* Index of first IFUNC in dynamic symbol table */
+/* Index of first IFUNC in dynamic symbol table.  */
 #define DT_MIPS_IFUNC_DYNINDX	0x70000036
 
 #define DT_MIPS_NUM	     0x37
