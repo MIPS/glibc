@@ -54,21 +54,10 @@ def do_compare(func, var, tl1, tl2, par, threshold):
 def compare_runs(pts1, pts2, threshold):
     """Compare two benchmark runs
 
-    For now, assume that machine1 and machine2 are the same.  In future, we may
-    have to add an additional condition to ensure that we are comparing apples
-    to apples.
-
     Args:
-        machine1: Machine info from the first machine
-        machine2: machine info from the second machine
         pts1: Timing data from first machine
         pts2: Timing data from second machine
     """
-    # Just print the machines for now.  We would want to do something more
-    # interesting with this in future.
-    print 'Machine 1:', pts1['machine']
-    print 'Machine 2:', pts2['machine']
-    print
 
     # XXX We assume that the two benchmarks have identical functions and
     # variants.  We cannot compare two benchmarks that may have different
@@ -179,7 +168,7 @@ def main(args):
     else:
         threshold = 10.0
 
-    if (bench1['timing-type'] != bench2['timing-type']):
+    if (bench1['timing_type'] != bench2['timing_type']):
         print('Cannot compare benchmark outputs: timing types are different')
         return
 
