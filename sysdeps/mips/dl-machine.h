@@ -94,6 +94,10 @@ do { if ((l)->l_info[DT_MIPS (RLD_MAP_REL)]) \
 # define ELF_MACHINE_NAN2008 0
 #endif
 
+#define MIPS16_IPLT_STUB_SIZE    16
+#define MIPS32_IPLT_STUB_SIZE    20
+#define MIPS64_IPLT_STUB_SIZE    36
+
 /* Return nonzero iff ELF header is compatible with the running host.  */
 static inline int __attribute_used__
 elf_machine_matches_host (const ElfW(Ehdr) *ehdr)
@@ -710,7 +714,7 @@ elf_machine_reloc (struct link_map *map, ElfW(Addr) r_info,
       /* The resolver routine is the symbol referenced by this relocation.
 	 To get the address of the function to use at runtime, the resolver
 	 routine is called and its return value is the address of the target
-	 functon which is final relocation value. */
+	 functon which is final relocation value.  */
       if (map->l_addr > *addr_field)
 	*addr_field = elf_ifunc_invoke (map->l_addr + *addr_field);
       else
@@ -798,9 +802,10 @@ elf_machine_rela_relative (ElfW(Addr) l_addr, const ElfW(Rela) *reloc,
 {
 }
 
-#define MIPS16_IPLT_STUB_SIZE    16
-#define MIPS32_IPLT_STUB_SIZE    20
-#define MIPS64_IPLT_STUB_SIZE    36
+/* Calculate address of IFUNC stub by adding offset to MIPS_IPLT dynamic
+   tag. Offset is calculated by scaling the difference between dynamic index
+   of this symbol and index of the first IFUNC symbol marked by tag
+   MIPS_IFUNC_DYNINDX.  */
 
 ElfW(Addr)
 elf_machine_ifunc_stub (struct link_map *map,  const ElfW(Sym) *sym)
@@ -810,16 +815,16 @@ elf_machine_ifunc_stub (struct link_map *map,  const ElfW(Sym) *sym)
   unsigned stub_size;
 
   istub = D_PTR(map, l_info[DT_MIPS (IPLT)]);
-#if _MIPS_SIM == _ABIN64
+#if _MIPS_SIM == _ABI64
   stub_size = MIPS64_IPLT_STUB_SIZE;
-#else /* if _MIPS_SIM != _ABIN64 */
+#else /* _MIPS_SIM != _ABI64  */
   if (istub & 0x1)
     /* Odd IPLT indicates compressed stubs; these may be mips16 or
-       micromips, but we don't care because both have same size */
+       micromips, but we don't care because both have same size.  */
     stub_size = MIPS16_IPLT_STUB_SIZE;
   else
     stub_size = MIPS32_IPLT_STUB_SIZE;
-#endif /* _MIPS_SIM == _ABIN64 */
+#endif /* _MIPS_SIM != _ABI64  */
 
   istub += (sym_index - map->l_info[DT_MIPS(IFUNC_DYNINDX)]->d_un.d_val)
     * stub_size;
@@ -929,7 +934,7 @@ elf_machine_got_rel (struct link_map *map, int lazy)
 	}
       else if (ELFW(ST_TYPE) (sym->st_info) == STT_GNU_IFUNC)
 	/* Just bias the IFUNC entry for now, it will be correctly 
-	   fixed up later by IRELATIVE reloc */
+	   fixed up later by IRELATIVE reloc.  */
 	*got += map->l_addr;
       else
 	*got = RESOLVE_GOTSYM (sym, vernum, symidx, R_MIPS_32);
