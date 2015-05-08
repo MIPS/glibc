@@ -26,6 +26,7 @@ CPPFLAGS-crtn.S += $(pic-ccflag)
 endif
 
 ASFLAGS-.os += $(pic-ccflag)
+ASFLAGS += -O2
 
 ifeq ($(subdir),elf)
 ifneq ($(o32-fpabi),)
