@@ -18,6 +18,19 @@
 #ifndef _LINUX_X32_SYSDEP_H
 #define _LINUX_X32_SYSDEP_H 1
 
+#ifndef __ASSEMBLER__
+#include <libc-internal.h>
+#include <libc-diag.h>
+
+typedef long long int __syscall_arg_t;
+
+/* Syscall arguments for x32 follows x86_64 size, however pointers are 32
+   bits in size.  The idea is to zero extend pointer types while cast to
+   signed 64 bit default arguments.  */
+#define __SSC(__x) ((__syscall_arg_t) cast_to_uinteger (__x))
+
+#endif
+
 /* There is some commonality.  */
 #include <sysdeps/unix/sysv/linux/x86_64/sysdep.h>
 #include <sysdeps/x86_64/x32/sysdep.h>

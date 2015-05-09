@@ -25,17 +25,23 @@
 # define __pointer_type(type) (__builtin_classify_type ((type) 0) == 5)
 
 /* intptr_t if P is true, or T if P is false.  */
-# define __integer_if_pointer_type_sub(T, P) \
+# define __integer_if_pointer_type_sub(T, P, INTTYPE) \
   __typeof__ (*(0 ? (__typeof__ (0 ? (T *) 0 : (void *) (P))) 0 \
-		  : (__typeof__ (0 ? (intptr_t *) 0 : (void *) (!(P)))) 0))
+		  : (__typeof__ (0 ? (INTTYPE *) 0 : (void *) (!(P)))) 0))
 
 /* intptr_t if EXPR has a pointer type, or the type of EXPR otherwise.  */
-# define __integer_if_pointer_type(expr) \
+# define __integer_if_pointer_type(expr, inttype) \
   __integer_if_pointer_type_sub(__typeof__ ((__typeof__ (expr)) 0), \
-				__pointer_type (__typeof__ (expr)))
+				__pointer_type (__typeof__ (expr)), \
+				inttype)
 
 /* Cast an integer or a pointer VAL to integer with proper type.  */
-# define cast_to_integer(val) ((__integer_if_pointer_type (val)) (val))
+# define cast_to_integer(val) \
+  ((__integer_if_pointer_type (val, intptr_t)) (val))
+
+/* Cast an integer or a pointer VAL to unsigned integer with proper type.  */
+# define cast_to_uinteger(val) \
+  ((__integer_if_pointer_type (val, uintptr_t)) (val))
 
 /* Align a value by rounding down to closest size.
    e.g. Using size of 4096, we get this behavior:
