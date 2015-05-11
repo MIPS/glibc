@@ -40,5 +40,6 @@ ENTRY (__sigsetjmp)
 #if _MIPS_SIM != _ABIO32
 	move a4, gp
 #endif
+	nop
 	jr t9
 END (__sigsetjmp)

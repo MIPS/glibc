@@ -99,6 +99,7 @@ L(error):
 #ifdef __PIC__
 	PTR_LA		t9, __syscall_error
 	RESTORE_GP64_REG
+	nop
 	jr		t9
 #else
 	RESTORE_GP64_REG

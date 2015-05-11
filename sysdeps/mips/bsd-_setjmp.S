@@ -35,6 +35,7 @@ ENTRY (_setjmp)
 	la	t9, C_SYMBOL_NAME (__sigsetjmp)
 #endif
 	move	a1,zero		/* Pass a second argument of zero.  */
+	nop
 #ifdef __PIC__
 	jr	t9
 #else

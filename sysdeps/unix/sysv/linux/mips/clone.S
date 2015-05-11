@@ -54,6 +54,7 @@ NESTED(__clone,4*SZREG,sp)
 #ifdef PROF
 	.set		noat
 	move		$1,ra
+	nop
 	jal		_mcount
 	.set		at
 #endif
@@ -61,6 +62,7 @@ NESTED(__clone,4*SZREG,sp)
 
 	/* Sanity check arguments.  */
 	li		v0,EINVAL
+	nop
 	beqz		a0,L(error)	/* No NULL function pointers.  */
 	beqz		a1,L(error)	/* No NULL stack pointers.  */
 
@@ -110,11 +112,13 @@ L(error):
 	RESTORE_GP64_STACK
 	PTR_ADDU	sp, FRAMESZ
 	cfi_adjust_cfa_offset (-FRAMESZ)
+	nop
 	jr		t9
 #else
 	RESTORE_GP64_STACK
 	PTR_ADDU	sp, FRAMESZ
 	cfi_adjust_cfa_offset (-FRAMESZ)
+	nop
 	j		__syscall_error
 #endif
 	END(__clone)
@@ -133,15 +137,19 @@ L(thread_start):
 	/* Check and see if we need to reset the PID.  */
 	LONG_L		a0,(PTRSIZE*2)(sp)
 	and		a1,a0,CLONE_THREAD
+	nop
 	beqz		a1,L(restore_pid)
 L(donepid):
 
 	/* Restore the arg for user's function.  */
 	PTR_L		t9,0(sp)	/* Function pointer.  */
-	PTR_L		a0,PTRSIZE(sp)	/* Argument pointer.  */
 
 	/* Call the user's function.  */
-	jalr		t9
+	.set push
+	.set noreorder
+	PTR_L		a0,PTRSIZE(sp)	/* Argument pointer.  */
+	jal		t9
+	.set pop
 
 	/* Call _exit rather than doing it inline for breakpoint purposes.  */
 	move		a0,v0
@@ -149,12 +157,17 @@ L(donepid):
 	PTR_LA		t9,_exit
 	jalr		t9
 #else
+	.set push
+	.set noreorder
 	jal		_exit
+	nop
+	.set pop
 #endif
 
 L(restore_pid):
 	and		a1,a0,CLONE_VM
 	li		v0,-1
+	nop
 	bnez		a1,L(gotpid)
 	li		v0,__NR_getpid
 	syscall
@@ -162,6 +175,7 @@ L(gotpid):
 	READ_THREAD_POINTER(v1)
 	INT_S		v0,PID_OFFSET(v1)
 	INT_S		v0,TID_OFFSET(v1)
+	nop
 	b		L(donepid)
 
 	END(__thread_start)

@@ -41,6 +41,7 @@ ENTRY (__sigsetjmp)
 	la	t9, __sigsetjmp_aux
 	jr	t9
 #else
+	nop
 	j	__sigsetjmp_aux
 #endif
 END (__sigsetjmp)

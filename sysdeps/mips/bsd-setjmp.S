@@ -36,8 +36,10 @@ ENTRY (setjmp)
 #endif
 	li	a1, 1		/* Pass a second argument of one.  */
 #ifdef __PIC__
+	nop
 	jr	t9
 #else
+	nop
 	j	C_SYMBOL_NAME (__sigsetjmp)
 #endif
 END (setjmp)

@@ -145,7 +145,7 @@
    It also shuts up the assembler warning about not using .cprestore.  */
 #  define PSEUDO_JMP(sym) la t9, sym; jalr t9;
 # else
-#  define PSEUDO_JMP(sym) jal sym;
+#  define PSEUDO_JMP(sym) .set push; .set noreorder ; jal sym; nop; .set pop
 # endif
 
 # ifdef IS_IN_libpthread

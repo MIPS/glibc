@@ -74,6 +74,7 @@ NESTED (__makecontext, FRAMESZ, ra)
 #ifdef PROF
 	.set	noat
 	move	AT, ra
+	nop
 	jal	_mcount
 	.set	at
 #endif
@@ -97,6 +98,7 @@ NESTED (__makecontext, FRAMESZ, ra)
 	PTR_ADDIU t1, sp, A3OFF
 	PTR_ADDU t0, t2
 	and	t0, ALMASK
+	nop
 	blez	a2, 2f					/* no arguments */
 
 	/* Store register arguments.  */
@@ -151,6 +153,7 @@ NESTED (__makecontext, FRAMESZ, ra)
 	PTR_ADDIU sp, FRAMESZ
 	cfi_adjust_cfa_offset (-FRAMESZ)
 #endif
+	nop
 	jr	ra
 
 99:
@@ -158,6 +161,7 @@ NESTED (__makecontext, FRAMESZ, ra)
 	move	gp, s1
 #endif
 	move	a0, zero
+	nop
 	beqz	s0, 0f
 
 	/* setcontext (ucp) */
@@ -169,7 +173,11 @@ NESTED (__makecontext, FRAMESZ, ra)
 	move	gp, s1
 # endif
 #else
+	.set push
+	.set noreorder
 	jal	JUMPTARGET (__setcontext)
+	nop
+	.set pop
 #endif
 	move	a0, v0
 
@@ -179,12 +187,17 @@ NESTED (__makecontext, FRAMESZ, ra)
 	PTR_LA	t9, HIDDEN_JUMPTARGET (exit)
 	jalr	t9
 #else
+	.set push
+	.set noreorder
 	jal	HIDDEN_JUMPTARGET (exit)
+	nop
+	.set pop
 #endif
 
 	/* You don't exist, you won't feel anything.  */
 1:
 	lb	zero, (zero)
+	nop
 	b	1b
 PSEUDO_END (__makecontext)
 

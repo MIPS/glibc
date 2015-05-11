@@ -25,6 +25,7 @@ SYSCALL__ (pipe, 1)
 
 	/* Go out with a clean status.  */
 	move v0, zero
+	nop
 	j ra
 PSEUDO_END(__pipe)
 

@@ -42,6 +42,7 @@
       REG_L gp, STKOFF_GP(sp);						      \
       cfi_same_value (gp);						      \
       RESTORESTK;							      \
+      nop;\
       jr t9;								      \
   .type __##syscall_name##_nocancel, @function;				      \
   .globl __##syscall_name##_nocancel;					      \
@@ -64,6 +65,7 @@
     .cpsetup t9, STKOFF_GP, name;					      \
     cfi_rel_offset (gp, STKOFF_GP);					      \
     SINGLE_THREAD_P(v1);						      \
+    nop; \
     bne zero, v1, L(pseudo_cancel);					      \
     li v0, SYS_ify(syscall_name);					      \
     syscall;								      \
@@ -91,6 +93,7 @@
     REG_L a3, STKOFF_SC_ERR(sp);	/* restore syscall error flag */      \
     REG_L ra, STKOFF_RA(sp);		/* restore return address */	      \
     REG_L v0, STKOFF_SC_V0(sp);		/* restore syscall result */          \
+    nop; \
     bne a3, zero, SYSCALL_ERROR_LABEL;					      \
     /* manual cpreturn */						      \
     REG_L gp, STKOFF_GP(sp);						      \
@@ -105,6 +108,7 @@
       cfi_startproc;							      \
       cfi_adjust_cfa_offset (STKSPACE);					      \
   99: RESTORESTK;							      \
+      nop;\
       j __syscall_error;						      \
   .type __##syscall_name##_nocancel, @function;				      \
   .globl __##syscall_name##_nocancel;					      \
@@ -120,6 +124,7 @@
   ENTRY (name)								      \
     SAVESTK;								      \
     SINGLE_THREAD_P(v1);						      \
+    nop; \
     bne zero, v1, L(pseudo_cancel);					      \
     li v0, SYS_ify(syscall_name);					      \
     syscall;								      \
@@ -143,6 +148,7 @@
     REG_L a3, STKOFF_SC_ERR(sp);	/* restore syscall error flag */      \
     REG_L ra, STKOFF_RA(sp);		/* restore return address */	      \
     REG_L v0, STKOFF_SC_V0(sp);		/* restore syscall result */          \
+    nop; \
     bne a3, zero, SYSCALL_ERROR_LABEL;					      \
     RESTORESTK;								      \
   L(pseudo_end):
@@ -202,7 +208,7 @@
 # ifdef __PIC__
 #  define PSEUDO_JMP(sym) PTR_LA t9, sym; jalr t9
 # else
-#  define PSEUDO_JMP(sym) jal sym
+#  define PSEUDO_JMP(sym) nop; jal sym
 # endif
 
 # ifdef IS_IN_libpthread

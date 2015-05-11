@@ -124,7 +124,7 @@
 
 #else /* !__mips16 */
 # define INTERNAL_SYSCALL(name, err, nr, args...)			\
-	internal_syscall##nr ("li\t%0, %2\t\t\t# " #name "\n\t",	\
+	internal_syscall##nr ("\n\tli\t%0, %2\t\t\t# " #name "\n\t",	\
 			      "IK" (SYS_ify (name)),			\
 			      0, err, args)
 

@@ -67,6 +67,7 @@ NESTED (__setcontext, FRAMESZ, ra)
 #ifdef PROF
 	.set	noat
 	move	AT, ra
+	nop
 	jal	_mcount
 	.set	at
 #endif
@@ -74,6 +75,7 @@ NESTED (__setcontext, FRAMESZ, ra)
 	/* Check for the magic flag.  */
 	li	v0, 1
 	REG_L	v1, (0 * SZREG + MCONTEXT_GREGS)(a0)	/* zero */
+	nop
 	bne	v0, v1, 98f
 
 	REG_S	a0, A0OFF(sp)
@@ -145,6 +147,7 @@ NESTED (__setcontext, FRAMESZ, ra)
 	REG_L	t9, MCONTEXT_PC(v0)
 
 	move	v0, zero
+	nop
 	jr	t9
 
 98:
@@ -183,10 +186,12 @@ NESTED (__setcontext, FRAMESZ, ra)
 	RESTORE_GP64_STACK
 	PTR_ADDIU sp, FRAMESZ
 	cfi_adjust_cfa_offset (-FRAMESZ)
+	nop
 	jr	t9
 
 #else  /* ! __PIC__ */
 
+	nop
 	j	JUMPTARGET (__syscall_error)
 #endif /* ! __PIC__ */
 PSEUDO_END (__setcontext)

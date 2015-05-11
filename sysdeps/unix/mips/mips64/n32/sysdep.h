@@ -36,6 +36,7 @@
   la t9,__syscall_error;						      \
   .cpreturn;								      \
   cfi_restore (gp);							      \
+  nop; \
   jr t9;								      \
   cfi_endproc;								      \
   ENTRY(name)								      \

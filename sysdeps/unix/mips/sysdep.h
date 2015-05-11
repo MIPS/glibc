@@ -36,7 +36,7 @@
 		.end	function;		        \
 		.size	function,.-function
 
-#define ret	j ra ; nop
+#define ret	.set push; .set noreorder; j ra ; nop; nop;.set pop
 
 #undef PSEUDO_END
 #define PSEUDO_END(sym) cfi_endproc; .end sym; .size sym,.-sym

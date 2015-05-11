@@ -36,6 +36,7 @@
   dla t9,__syscall_error;						      \
   .cpreturn;								      \
   cfi_restore (gp);							      \
+  nop; \
   jr t9;								      \
   cfi_endproc;								      \
   ENTRY(name)								      \
@@ -48,6 +49,7 @@ L(syse1):
   .align 2;								      \
   .set nomips16;							      \
   cfi_startproc;							      \
+  nop;\
   99: j __syscall_error;						      \
   cfi_endproc;								      \
   ENTRY(name)								      \

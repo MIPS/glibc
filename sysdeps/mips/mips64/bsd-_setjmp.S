@@ -38,6 +38,7 @@ ENTRY (_setjmp)
 #endif
 	RESTORE_GP64_REG
 	move	a1, zero		/* Pass a second argument of zero.  */
+        nop
 #ifdef __PIC__
 	jr	t9
 #else

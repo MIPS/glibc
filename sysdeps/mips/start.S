@@ -106,7 +106,11 @@ ENTRY_POINT:
 	move $9, $2		/* rtld_fini */
 	move $10, $29		/* stack_end */
 # endif
+	.set push
+	.set noreorder
 	jal __libc_start_main
+	nop
+	.set pop
 hlt:	b hlt			/* Crash if somehow it does return.  */
 
 #elif _MIPS_SIM == _ABIO32 /* __mips16 */

@@ -134,6 +134,7 @@ NESTED (__getcontext, FRAMESZ, ra)
 	cfi_adjust_cfa_offset (-FRAMESZ)
 #endif
 	move	v0, zero
+	nop
 	jr	ra
 
 99:
@@ -143,6 +144,7 @@ NESTED (__getcontext, FRAMESZ, ra)
 	RESTORE_GP64_STACK
 	PTR_ADDIU sp, FRAMESZ
 	cfi_adjust_cfa_offset (-FRAMESZ)
+	nop
 	jr	t9
 
 #else  /* ! __PIC__ */

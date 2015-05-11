@@ -50,6 +50,7 @@ NESTED (syscall, SZREG, ra)
 	cfi_restore (s0)
 	PTR_ADDIU sp, SZREG
 	cfi_adjust_cfa_offset (-SZREG)
+	nop
 	bne a3, zero, L(error)
 
 	ret
@@ -58,6 +59,7 @@ L(error):
 	SETUP_GP64_REG (a0, syscall)
 	PTR_LA t9, __syscall_error
 	RESTORE_GP64_REG
+	nop
 	jr t9
 
 END (syscall)

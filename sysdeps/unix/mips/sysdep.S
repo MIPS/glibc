@@ -51,6 +51,7 @@ ENTRY(__syscall_error)
 	/* We translate the system's EWOULDBLOCK error into EAGAIN.
 	   The GNU C library always defines EWOULDBLOCK==EAGAIN.
 	   EWOULDBLOCK_sys is the original number.  */
+	nop
 	bne	v0, EWOULDBLOCK_sys, L(skip)
 	nop
 	li	v0, EAGAIN
@@ -68,6 +69,7 @@ L(skip):
 	RESTORE_GP64
 	PTR_ADDU sp, FRAMESZ
 	li	v0, -1
+	nop
 	j	ra
 	END(__syscall_error)
 
@@ -84,6 +86,7 @@ ENTRY(__syscall_error)
 	/* We translate the system's EWOULDBLOCK error into EAGAIN.
 	   The GNU C library always defines EWOULDBLOCK==EAGAIN.
 	   EWOULDBLOCK_sys is the original number.  */
+	nop
 	bne v0, EWOULDBLOCK_sys, L(skip)
 	li v0, EAGAIN
 L(skip):

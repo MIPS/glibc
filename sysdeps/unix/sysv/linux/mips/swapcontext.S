@@ -195,6 +195,7 @@ NESTED (__swapcontext, FRAMESZ, ra)
 	REG_L	t9, MCONTEXT_PC(v0)
 
 	move	v0, zero
+	nop
 	jr	t9
 
 99:
@@ -203,6 +204,7 @@ NESTED (__swapcontext, FRAMESZ, ra)
 	RESTORE_GP64_STACK
 	PTR_ADDIU sp, FRAMESZ
 	cfi_adjust_cfa_offset (-FRAMESZ)
+	nop
 	jr	t9
 
 #else  /* ! __PIC__ */
