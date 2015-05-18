@@ -29,10 +29,10 @@
 #endif
 
 /* Reject an object with a debug message.  */
-#define REJECT(str, args...)						      \
+# define REJECT(str, args...)						      \
   {									      \
     if (__glibc_unlikely (GLRO(dl_debug_mask) & DL_DEBUG_LIBS))		      \
-      _dl_debug_printf (str, ##args);					      \
+      GLRO(dl_debug_printf) (str, ##args);				      \
     return true;							      \
   }
 
@@ -49,6 +49,7 @@ find_mips_abiflags (const ElfW(Phdr) *phdr, ElfW(Half) phnum)
   return NULL;
 }
 
+#ifdef SHARED
 /* Cache the FP ABI value from the PT_MIPS_ABIFLAGS program header.  */
 
 static bool
@@ -82,6 +83,7 @@ cached_fpabi_reject_phdr_p (struct link_map *l)
     }
   return false;
 }
+#endif
 
 /* Return a description of the specified floating-point ABI.  */
 
@@ -145,23 +147,22 @@ static const struct abi_req reqs[Val_GNU_MIPS_ABI_FP_MAX + 1] =
 
 static const struct abi_req none_req = { true, true, true, false, true };
 
-/* Return true iff ELF program headers are incompatible with the running
-   host.  This verifies that floating-point ABIs are compatible and
-   re-configures the hardware mode if necessary.  This code handles both the
-   DT_NEEDED libraries and the dlopen'ed libraries.  It also accounts for the
-   impact of dlclose.  */
+/* FP ABI requirement for ifunc with callback.  The new mode switch can only
+   be requested once.  */
+
+static int ifunc_fpabi = -1;
+
+/* Return true iff that the new FP ABI requirement conflicts with any
+   currently loaded object.  */
 
 static bool __attribute_used__
-elf_machine_reject_phdr_p (const ElfW(Phdr) *phdr, uint_fast16_t phnum,
-			   const char *buf, size_t len, struct link_map *map,
-			   int fd)
+dl_reject_fpabi_req (int in_abi)
 {
-  const ElfW(Phdr) *ph = find_mips_abiflags (phdr, phnum);
+#ifdef SHARED
   struct link_map *l;
   Lmid_t nsid;
-  int in_abi = -1;
+#endif
   struct abi_req in_req;
-  Elf_MIPS_ABIFlags_v0 *mips_abiflags = NULL;
   bool perfect_match = false;
 #if _MIPS_SIM == _ABIO32
   unsigned int cur_mode = -1;
@@ -173,30 +174,6 @@ elf_machine_reject_phdr_p (const ElfW(Phdr) *phdr, uint_fast16_t phnum,
 # endif
 #endif
 
-  /* Read the attributes section.  */
-  if (ph != NULL)
-    {
-      ElfW(Addr) size = ph->p_filesz;
-
-      if (ph->p_offset + size <= len)
-	mips_abiflags = (Elf_MIPS_ABIFlags_v0 *) (buf + ph->p_offset);
-      else
-	{
-	  mips_abiflags = alloca (size);
-	  __lseek (fd, ph->p_offset, SEEK_SET);
-	  if (__libc_read (fd, (void *) mips_abiflags, size) != size)
-	    REJECT ("   unable to read PT_MIPS_ABIFLAGS\n");
-	}
-
-      if (size < sizeof (Elf_MIPS_ABIFlags_v0))
-	REJECT ("   contains malformed PT_MIPS_ABIFLAGS\n");
-
-      if (__glibc_unlikely (mips_abiflags->flags2 != 0))
-	REJECT ("   unknown MIPS.abiflags flags2: %u\n", mips_abiflags->flags2);
-
-      in_abi = mips_abiflags->fp_abi;
-    }
-
   /* ANY is compatible with anything.  */
   perfect_match |= (in_abi == Val_GNU_MIPS_ABI_FP_ANY);
 
@@ -207,6 +184,7 @@ elf_machine_reject_phdr_p (const ElfW(Phdr) *phdr, uint_fast16_t phnum,
   /* Obtain the initial requirements.  */
   in_req = (in_abi == -1) ? none_req : reqs[in_abi];
 
+#ifdef SHARED
   /* Check that the new requirement does not conflict with any currently
      loaded object.  */
   for (nsid = 0; nsid < DL_NNS; ++nsid)
@@ -266,6 +244,37 @@ elf_machine_reject_phdr_p (const ElfW(Phdr) *phdr, uint_fast16_t phnum,
 		  fpabi_string (in_abi),
 		  fpabi_string (l->l_mach.fpabi));
       }
+#endif
+
+  /* Check the compability of the FP ABI requested in ifunc callback with
+     the loaded objects.  */
+  if (ifunc_fpabi != -1)
+    {
+      struct abi_req existing_req;
+
+      /* Found a perfect match, success.  */
+      perfect_match |= (in_abi == ifunc_fpabi);
+
+      existing_req = reqs[ifunc_fpabi];
+
+      /* Merge requirements.  */
+      in_req.soft &= existing_req.soft;
+      in_req.single &= existing_req.single;
+      in_req.fr0 &= existing_req.fr0;
+      in_req.fr1 &= existing_req.fr1;
+      in_req.fre &= existing_req.fre;
+
+      /* If there is at least one mode which is still usable then the new
+	 object can be loaded.  */
+      if (in_req.single || in_req.soft || in_req.fr1 || in_req.fr0
+	  || in_req.fre)
+	{
+	}
+      else
+	REJECT ("   uses %s, ifunc already loaded %s\n",
+		fpabi_string (in_abi),
+		fpabi_string (ifunc_fpabi));
+    }
 
 #if _MIPS_SIM == _ABIO32
   /* At this point we know that the newly loaded object is compatible with all
@@ -274,8 +283,9 @@ elf_machine_reject_phdr_p (const ElfW(Phdr) *phdr, uint_fast16_t phnum,
       && !perfect_match)
     {
       if (__glibc_unlikely (GLRO(dl_debug_mask) & DL_DEBUG_LIBS))
-	_dl_debug_printf ("   needs %s%s mode\n", in_req.fr0 ? "FR0 or " : "",
-			  (in_req.fre && !in_req.fr1) ? "FRE" : "FR1");
+	GLRO (dl_debug_printf) ("   needs %s%s mode\n",
+				in_req.fr0 ? "FR0 or " : "",
+				(in_req.fre && !in_req.fr1) ? "FRE" : "FR1");
 
       /* If the PR_GET_FP_MODE is not supported then only FR0 is available.
 	 If the overall requirements cannot be met by FR0 then reject the
@@ -319,6 +329,51 @@ elf_machine_reject_phdr_p (const ElfW(Phdr) *phdr, uint_fast16_t phnum,
 # endif /* HAVE_PRCTL_FP_MODE */
     }
 #endif /* _MIPS_SIM == _ABIO32 */
+
+  return false;
+}
+
+/* Return true iff ELF program headers are incompatible with the running
+   host.  This verifies that floating-point ABIs are compatible and
+   re-configures the hardware mode if necessary.  This code handles both the
+   DT_NEEDED libraries and the dlopen'ed libraries.  It also accounts for the
+   impact of dlclose.  */
+
+static bool __attribute_used__
+elf_machine_reject_phdr_p (const ElfW(Phdr) *phdr, uint_fast16_t phnum,
+			   const char *buf, size_t len, struct link_map *map,
+			   int fd)
+{
+  const ElfW(Phdr) *ph = find_mips_abiflags (phdr, phnum);
+  int in_abi = -1;
+  Elf_MIPS_ABIFlags_v0 *mips_abiflags = NULL;
+
+  /* Read the attributes section.  */
+  if (ph != NULL)
+    {
+      ElfW(Addr) size = ph->p_filesz;
+
+      if (ph->p_offset + size <= len)
+	mips_abiflags = (Elf_MIPS_ABIFlags_v0 *) (buf + ph->p_offset);
+      else
+	{
+	  mips_abiflags = alloca (size);
+	  __lseek (fd, ph->p_offset, SEEK_SET);
+	  if (__libc_read (fd, (void *) mips_abiflags, size) != size)
+	    REJECT ("   unable to read PT_MIPS_ABIFLAGS\n");
+	}
+
+      if (size < sizeof (Elf_MIPS_ABIFlags_v0))
+	REJECT ("   contains malformed PT_MIPS_ABIFLAGS\n");
+
+      if (__glibc_unlikely (mips_abiflags->flags2 != 0))
+	REJECT ("   unknown MIPS.abiflags flags2: %u\n", mips_abiflags->flags2);
+
+      in_abi = mips_abiflags->fp_abi;
+    }
+
+  if (dl_reject_fpabi_req (in_abi))
+    return true;
 
   return false;
 }

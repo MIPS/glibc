@@ -26,6 +26,7 @@
 #include <link.h>
 #include <elf.h>
 #include <ldsodefs.h>
+#include <dl-ifunc-ctrl.h>
 
 #define ELF_MACHINE_IREL	1
 
@@ -33,19 +34,20 @@ static inline ElfW(Addr)
 __attribute ((always_inline))
 elf_ifunc_invoke (ElfW(Addr) addr)
 {
-#if 0
+#if 1
   /* Print some debugging info if wanted.  */
-  if (__builtin_expect (GLRO(dl_debug_mask) & DL_DEBUG_SYMBOLS, 0))
-      {
-	ElfW(Addr) t_addr =
-	    ((ElfW(Addr) (*) (unsigned long int)) (addr)) (GLRO(dl_hwcap));
-	GLRO(dl_debug_printf) ("In elf_ifunc_invoke(0x%lx), return(0x%lx)\n",
-				(unsigned long int)addr,
-				(unsigned long int)t_addr);
-      }
+  if (__glibc_unlikely (GLRO(dl_debug_mask) & DL_DEBUG_SYMBOLS))
+    {
+      ElfW(Addr) t_addr =
+	((ElfW(Addr) (*) (unsigned long int)) (addr)) (GLRO(dl_hwcap));
+      GLRO(dl_debug_printf) ("In elf_ifunc_invoke(0x%lx), return(0x%lx)\n",
+			      (unsigned long int)addr,
+			      (unsigned long int)t_addr);
+    }
 #endif
 
-  return ((ElfW(Addr) (*) (unsigned long int)) (addr)) (GLRO(dl_hwcap));
+  return ((ElfW(Addr) (*) (unsigned long int, int (int, int))) addr)
+	    (GLRO(dl_hwcap), dl_ifunc_control);
 }
 
 /* Allow either R_MIPS_RELATIVE or the nop R_MIPS_NONE */
