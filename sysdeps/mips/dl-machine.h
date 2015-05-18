@@ -32,6 +32,8 @@
 #include <sgidefs.h>
 #include <sys/asm.h>
 #include <dl-tls.h>
+
+#include <dl-ifunc-ctrl.h>
 #include <dl-irel.h>
 
 /* The offset of gp from GOT might be system-dependent.  It's set by
@@ -216,7 +218,7 @@ do {									\
       else if (ELFW(ST_TYPE) (sym->st_info) == STT_FUNC			\
 	       && *got != sym->st_value)				\
 	*got += map->l_addr;						\
-	else if (ELFW(ST_TYPE) (sym->st_info) == STT_GNU_IFUNC)		\
+      else if (ELFW(ST_TYPE) (sym->st_info) == STT_GNU_IFUNC)		\
 	*got = elf_ifunc_invoke(sym->st_value);				\
       else if (ELFW(ST_TYPE) (sym->st_info) == STT_SECTION)		\
 	{								\
@@ -695,13 +697,14 @@ elf_machine_reloc (struct link_map *map, ElfW(Addr) r_info,
       {
 	ElfW(Addr) value;
 
-	/* The address for the got entry storing the address for the */
-	/* ifunc routine is in this relocation. To get the address of */
-	/* the function to use on this machine the ifunc routine is run */
-	/* and its return value is the address which is then put back */
-	/* into the got entry. */
+	/* The address for the got entry storing the address for the
+	   ifunc routine is in this relocation. To get the address of
+	   the function to use on this machine the ifunc routine is run
+	   and its return value is the address which is then put back
+	   into the got entry.  */
 	value = map->l_addr + *addr_field;
-	value = ((ElfW(Addr) (*) (void)) value) ();
+	value = ((ElfW(Addr) (*) (unsigned long int, int (int, int))) value)
+		   (GLRO(dl_hwcap), dl_ifunc_control);
 	*addr_field = value;
 	break;
       }

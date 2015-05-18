@@ -1,6 +1,6 @@
 ifeq ($(subdir),misc)
 sysdep_headers += regdef.h fpregdef.h sys/regdef.h sys/fpregdef.h \
-		  sys/asm.h sgidefs.h
+		  sys/asm.h sys/dlifnctl.h sgidefs.h
 endif
 
 ifeq ($(subdir),setjmp)
