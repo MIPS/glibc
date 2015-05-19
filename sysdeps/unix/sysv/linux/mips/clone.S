@@ -141,7 +141,7 @@ L(donepid):
 	PTR_L		a0,PTRSIZE(sp)	/* Argument pointer.  */
 
 	/* Call the user's function.  */
-	jalr		t9
+	jal		t9
 
 	/* Call _exit rather than doing it inline for breakpoint purposes.  */
 	move		a0,v0
