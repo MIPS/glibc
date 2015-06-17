@@ -1730,10 +1730,14 @@ typedef struct
 #define DT_MIPS_RWPLT        0x70000034
 /* Points to the first IPLT entry.  */
 #define DT_MIPS_IPLT	0x70000035
-/* Index of first IFUNC in dynamic symbol table.  */
-#define DT_MIPS_IFUNC_DYNINDX	0x70000036
+/* Index of first GOT-referenced IFUNC in dynamic symbol table.  */
+#define DT_MIPS_IFUNC_INDX	0x70000036
+/*  Points to the first IPLT entry for reloc-only IFUNC.  */
+#define DT_MIPS_IPLTREL	0x70000037
+/* Index of first reloc-only IFUNC in dynamic symbol table.  */
+#define DT_MIPS_IFUNCREL_INDX	0x70000038
 
-#define DT_MIPS_NUM	     0x37
+#define DT_MIPS_NUM	     0x39
 
 /* Legal values for DT_MIPS_FLAGS Elf32_Dyn entry.  */
 
