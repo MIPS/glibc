@@ -811,10 +811,19 @@ ElfW(Addr)
 elf_machine_ifunc_stub (struct link_map *map,  const ElfW(Sym) *sym)
 {
   unsigned sym_index = (sym - (ElfW(Sym) *) D_PTR (map, l_info[DT_SYMTAB]));
+  unsigned ifunc_index = map->l_info[DT_MIPS(IFUNC_INDX)]->d_un.d_val;
+  unsigned ifuncrel_index = 0;
   ElfW(Addr) istub;
   unsigned stub_size;
 
-  istub = D_PTR(map, l_info[DT_MIPS (IPLT)]);
+  if (map->l_info[DT_MIPS(IFUNCREL_INDX)])
+    ifuncrel_index = map->l_info[DT_MIPS(IFUNCREL_INDX)]->d_un.d_val;
+
+  if (ifuncrel_index && sym_index >= ifuncrel_index)
+      istub = D_PTR(map, l_info[DT_MIPS (IPLTREL)]);
+  else
+      istub = D_PTR(map, l_info[DT_MIPS (IPLT)]);
+
 #if _MIPS_SIM == _ABI64
   stub_size = MIPS64_IPLT_STUB_SIZE;
 #else /* _MIPS_SIM != _ABI64  */
@@ -826,8 +835,10 @@ elf_machine_ifunc_stub (struct link_map *map,  const ElfW(Sym) *sym)
     stub_size = MIPS32_IPLT_STUB_SIZE;
 #endif /* _MIPS_SIM != _ABI64  */
 
-  istub += (sym_index - map->l_info[DT_MIPS(IFUNC_DYNINDX)]->d_un.d_val)
-    * stub_size;
+  if (ifuncrel_index && sym_index >= ifuncrel_index)
+    istub += (sym_index - ifuncrel_index) * stub_size;
+  else
+    istub += (sym_index - ifunc_index) * stub_size;
 
   return istub;
 }
