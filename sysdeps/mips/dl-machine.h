@@ -222,8 +222,6 @@ do {									\
       else if (ELFW(ST_TYPE) (sym->st_info) == STT_FUNC			\
 	       && *got != sym->st_value)				\
 	*got += map->l_addr;						\
-      else if (ELFW(ST_TYPE) (sym->st_info) == STT_GNU_IFUNC)		\
-	*got = elf_ifunc_invoke(sym->st_value);				\
       else if (ELFW(ST_TYPE) (sym->st_info) == STT_SECTION)		\
 	{								\
 	  if (sym->st_other == 0)					\
@@ -664,10 +662,6 @@ elf_machine_reloc (struct link_map *map, ElfW(Addr) r_info,
 
 	sym_map = RESOLVE_MAP (&sym, version, r_type);
 	value = sym_map == NULL ? 0 : sym_map->l_addr + sym->st_value;
-
-	if (value && (ELFW(ST_TYPE) (sym->st_info) == STT_GNU_IFUNC))
-	  value = elf_ifunc_invoke (value);
-
 	*addr_field = value;
 
 	break;
