@@ -1735,6 +1735,7 @@ typedef struct
    in a PIE as it stores a relative offset from the address of the tag
    rather than an absolute address.  */
 #define DT_MIPS_RLD_MAP_REL  0x70000035
+
 #define DT_MIPS_NUM	     0x36
 
 /* Legal values for DT_MIPS_FLAGS Elf32_Dyn entry.  */
