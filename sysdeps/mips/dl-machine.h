@@ -94,10 +94,6 @@ do { if ((l)->l_info[DT_MIPS (RLD_MAP_REL)]) \
 # define ELF_MACHINE_NAN2008 0
 #endif
 
-#define MIPS16_IPLT_STUB_SIZE    16
-#define MIPS32_IPLT_STUB_SIZE    20
-#define MIPS64_IPLT_STUB_SIZE    36
-
 /* Return nonzero iff ELF header is compatible with the running host.  */
 static inline int __attribute_used__
 elf_machine_matches_host (const ElfW(Ehdr) *ehdr)
@@ -709,10 +705,7 @@ elf_machine_reloc (struct link_map *map, ElfW(Addr) r_info,
 	 To get the address of the function to use at runtime, the resolver
 	 routine is called and its return value is the address of the target
 	 functon which is final relocation value.  */
-      if (map->l_addr > *addr_field)
-	*addr_field = elf_ifunc_invoke (map->l_addr + *addr_field);
-      else
-	*addr_field = elf_ifunc_invoke (*addr_field);
+      *addr_field = elf_ifunc_invoke (*addr_field);
       break;
 
 #if _MIPS_SIM == _ABI64
@@ -796,47 +789,6 @@ elf_machine_rela_relative (ElfW(Addr) l_addr, const ElfW(Rela) *reloc,
 {
 }
 
-/* Calculate address of IFUNC stub by adding offset to MIPS_IPLT dynamic
-   tag. Offset is calculated by scaling the difference between dynamic index
-   of this symbol and index of the first IFUNC symbol marked by tag
-   MIPS_IFUNC_DYNINDX.  */
-
-ElfW(Addr)
-elf_machine_ifunc_stub (struct link_map *map,  const ElfW(Sym) *sym)
-{
-  unsigned sym_index = (sym - (ElfW(Sym) *) D_PTR (map, l_info[DT_SYMTAB]));
-  unsigned ifunc_index = map->l_info[DT_MIPS(IFUNC_INDX)]->d_un.d_val;
-  unsigned ifuncrel_index = 0;
-  ElfW(Addr) istub;
-  unsigned stub_size;
-
-  if (map->l_info[DT_MIPS(IFUNCREL_INDX)])
-    ifuncrel_index = map->l_info[DT_MIPS(IFUNCREL_INDX)]->d_un.d_val;
-
-  if (ifuncrel_index && sym_index >= ifuncrel_index)
-      istub = D_PTR(map, l_info[DT_MIPS (IPLTREL)]);
-  else
-      istub = D_PTR(map, l_info[DT_MIPS (IPLT)]);
-
-#if _MIPS_SIM == _ABI64
-  stub_size = MIPS64_IPLT_STUB_SIZE;
-#else /* _MIPS_SIM != _ABI64  */
-  if (istub & 0x1)
-    /* Odd IPLT indicates compressed stubs; these may be mips16 or
-       micromips, but we don't care because both have same size.  */
-    stub_size = MIPS16_IPLT_STUB_SIZE;
-  else
-    stub_size = MIPS32_IPLT_STUB_SIZE;
-#endif /* _MIPS_SIM != _ABI64  */
-
-  if (ifuncrel_index && sym_index >= ifuncrel_index)
-    istub += (sym_index - ifuncrel_index) * stub_size;
-  else
-    istub += (sym_index - ifunc_index) * stub_size;
-
-  return istub;
-}
-
 #ifndef RTLD_BOOTSTRAP
 /* Relocate GOT. */
 auto inline void
@@ -859,13 +811,9 @@ elf_machine_got_rel (struct link_map *map, int lazy)
       if (ref)								  \
 	{								  \
 	  value = sym_map->l_addr + ref->st_value;			  \
-	  if (ELFW(ST_TYPE) (ref->st_info) == STT_GNU_IFUNC)		  \
-	    {								  \
-	      if (sym_map->l_relocated)					  \
+	  if (ELFW(ST_TYPE) (ref->st_info) == STT_GNU_IFUNC &&		  \
+	      sym_map != map && sym_map->l_relocated)			  \
 		value = elf_ifunc_invoke (value);			  \
-	      else							  \
-		value = elf_machine_ifunc_stub (sym_map, ref);		  \
-	    }								  \
 	}								  \
       ref ? value : 0;							  \
     })
@@ -937,10 +885,6 @@ elf_machine_got_rel (struct link_map *map, int lazy)
 	  if (sym->st_other == 0)
 	    *got += map->l_addr;
 	}
-      else if (ELFW(ST_TYPE) (sym->st_info) == STT_GNU_IFUNC)
-	/* Just bias the IFUNC entry for now, it will be correctly 
-	   fixed up later by IRELATIVE reloc.  */
-	*got += map->l_addr;
       else
 	*got = RESOLVE_GOTSYM (sym, vernum, symidx, R_MIPS_32);
 
