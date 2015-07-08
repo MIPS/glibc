@@ -604,6 +604,32 @@ elf_machine_reloc (struct link_map *map, ElfW(Addr) r_info,
 #endif
 		  reloc_value += sym->st_value + map->l_addr;
 	      }
+#ifndef RTLD_BOOTSTRAP
+	    /* Resolve IFUNC symbols with pre-emption.  */
+	    else if (sym
+		  && __glibc_unlikely (ELFW(ST_TYPE) (sym->st_info)
+				       == STT_GNU_IFUNC)
+		  && !skip_ifunc)
+	      {
+		struct link_map *rmap = RESOLVE_MAP (&sym, version, r_type);
+		if (__glibc_unlikely (rmap != map))
+		  {
+		    /* Symbol pre-empted, use value from GOT.  */
+		    const ElfW(Addr) *got
+		      = (const ElfW(Addr) *) D_PTR (rmap, l_info[DT_PLTGOT]);
+		    const ElfW(Word) local_gotno
+		      = (const ElfW(Word))
+		      rmap->l_info[DT_MIPS (LOCAL_GOTNO)]->d_un.d_val;
+		    reloc_value += got[symidx + local_gotno - gotsym];
+		  }
+		else if (__glibc_likely (ELFW(ST_TYPE) (sym->st_info)
+					 == STT_GNU_IFUNC
+					 && rmap->l_relocated))
+		  reloc_value = elf_ifunc_invoke (sym->st_value + map->l_addr);
+		else
+		  reloc_value = sym->st_value + map->l_addr;
+	      }
+#endif
 	    else
 	      {
 #ifndef RTLD_BOOTSTRAP
@@ -892,7 +918,7 @@ elf_machine_got_rel (struct link_map *map, int lazy)
 	  if (sym->st_other == 0)
 	    *got += map->l_addr;
 	}
-      else
+      else if (ELFW(ST_TYPE) (sym->st_info) != STT_GNU_IFUNC)
 	*got = RESOLVE_GOTSYM (sym, vernum, symidx, R_MIPS_32);
 
       ++got;
