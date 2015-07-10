@@ -201,7 +201,7 @@ do {									\
   if (__builtin_expect (map->l_addr == 0, 1))				\
     break;								\
 									\
-  if (__glibc_unlikely (map->l_info[DT_MIPS (GENERAL_GOTNO)]))		\
+  if (__glibc_unlikely (map->l_info[DT_MIPS (GENERAL_GOTNO)] != NULL))	\
     i = map->l_info[DT_MIPS (GENERAL_GOTNO)]->d_un.d_val;		\
   else									\
     /* got[0] is reserved. got[1] is also reserved for the dynamic	\
@@ -612,22 +612,31 @@ elf_machine_reloc (struct link_map *map, ElfW(Addr) r_info,
 		  && !skip_ifunc)
 	      {
 		struct link_map *rmap = RESOLVE_MAP (&sym, version, r_type);
-		if (__glibc_unlikely (rmap != map))
+
+		/* Symbol pre-empted, use value from GOT.
+		 2nd part of condition is redundant, explicit for clarity.  */
+		if (__glibc_unlikely (rmap->l_relocated)
+		    && __glibc_unlikely (rmap != map))
 		  {
-		    /* Symbol pre-empted, use value from GOT.  */
 		    const ElfW(Addr) *got
 		      = (const ElfW(Addr) *) D_PTR (rmap, l_info[DT_PLTGOT]);
 		    const ElfW(Word) local_gotno
 		      = (const ElfW(Word))
 		      rmap->l_info[DT_MIPS (LOCAL_GOTNO)]->d_un.d_val;
-		    reloc_value += got[symidx + local_gotno - gotsym];
+		    symidx = (sym
+			      - (ElfW(Sym) *) D_PTR(rmap, l_info[DT_SYMTAB]))
+		      / sizeof (sym);
+		    reloc_value = got[symidx + local_gotno - gotsym];
 		  }
+		/* Symbol pre-empted by not yet relocated, use best guess.  */
+		else if (__glibc_unlikely (rmap != map))
+		  reloc_value = sym->st_value + rmap->l_addr;
+		  /* Resolve IFUNC in this link unit.  */
 		else if (__glibc_likely (ELFW(ST_TYPE) (sym->st_info)
-					 == STT_GNU_IFUNC
-					 && rmap->l_relocated))
+					 == STT_GNU_IFUNC))
 		  reloc_value = elf_ifunc_invoke (sym->st_value + map->l_addr);
 		else
-		  reloc_value = sym->st_value + map->l_addr;
+		  reloc_value += sym->st_value + map->l_addr;
 	      }
 #endif
 	    else
@@ -837,13 +846,14 @@ elf_machine_got_rel (struct link_map *map, int lazy)
       struct link_map *sym_map;						  \
       ElfW(Addr) value = 0;						  \
       sym_map = RESOLVE_MAP (&ref, version, reloc);			  \
-      if (__glibc_likely(ref))						  \
+      if (__glibc_likely(ref != NULL))					  \
 	{								  \
 	  value = sym_map->l_addr + ref->st_value;			  \
 	  if (__glibc_unlikely (ELFW(ST_TYPE) (ref->st_info)		  \
 				== STT_GNU_IFUNC			  \
-				&& sym_map != map && sym_map->l_relocated)\
-		value = elf_ifunc_invoke (value);			  \
+				&& sym_map != map			  \
+				&& sym_map->l_relocated))		  \
+	      value = elf_ifunc_invoke (value);				  \
 	}								  \
       value;								  \
     })
@@ -859,7 +869,7 @@ elf_machine_got_rel (struct link_map *map, int lazy)
   /* The dynamic linker's local got entries have already been relocated.  */
   if (map != &GL(dl_rtld_map))
     {
-      if (__glibc_unlikely(map->l_info[DT_MIPS (GENERAL_GOTNO)]))
+      if (__glibc_unlikely(map->l_info[DT_MIPS (GENERAL_GOTNO)] != NULL))
 	i = map->l_info[DT_MIPS (GENERAL_GOTNO)]->d_un.d_val;
       else
 	/* got[0] is reserved. got[1] is also reserved for the dynamic object
