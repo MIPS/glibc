@@ -24,11 +24,7 @@
 int
 __setresgid (gid_t rgid, gid_t egid, gid_t sgid)
 {
-  int result;
-
-  result = INLINE_SETXID_SYSCALL (setresgid32, 3, rgid, egid, sgid);
-
-  return result;
+  return INLINE_SYSCALL_RETURN (setresgid32, 3, int, rgid, egid, sgid);
 }
 libc_hidden_def (__setresgid)
 #ifndef __setresgid

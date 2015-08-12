@@ -23,11 +23,7 @@
 int
 __setregid (gid_t rgid, gid_t egid)
 {
-  int result;
-
-  result = INLINE_SETXID_SYSCALL (setregid32, 2, rgid, egid);
-
-  return result;
+  return INLINE_SYSCALL_RETURN (setregid32, 2, int, rgid, egid);
 }
 #ifndef __setregid
 weak_alias (__setregid, setregid)

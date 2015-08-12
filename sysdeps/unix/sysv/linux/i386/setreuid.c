@@ -24,11 +24,7 @@
 int
 __setreuid (uid_t ruid, uid_t euid)
 {
-  int result;
-
-  result = INLINE_SETXID_SYSCALL (setreuid32, 2, ruid, euid);
-
-  return result;
+  return INLINE_SYSCALL_RETURN (setreuid32, 2, int, ruid, euid);
 }
 #ifndef __setreuid
 weak_alias (__setreuid, setreuid)

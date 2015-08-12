@@ -71,8 +71,8 @@ __old_semctl (int semid, int semnum, int cmd, ...)
 
   va_end (ap);
 
-  return INLINE_SYSCALL (ipc, 5, IPCOP_semctl, semid, semnum, cmd,
-			 &arg);
+  return INLINE_SYSCALL_RETURN (ipc, 5, int, IPCOP_semctl, semid,
+				semnum, cmd, &arg);
 }
 compat_symbol (libc, __old_semctl, semctl, GLIBC_2_0);
 #endif
@@ -90,8 +90,8 @@ __new_semctl (int semid, int semnum, int cmd, ...)
 
   va_end (ap);
 
-  return INLINE_SYSCALL (ipc, 5, IPCOP_semctl, semid, semnum, cmd | __IPC_64,
-			 &arg);
+  return INLINE_SYSCALL_RETURN (ipc, 5, int, IPCOP_semctl, semid,
+				semnum, cmd | __IPC_64, &arg);
 }
 
 versioned_symbol (libc, __new_semctl, semctl, GLIBC_2_2);

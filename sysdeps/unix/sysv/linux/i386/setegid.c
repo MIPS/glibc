@@ -17,23 +17,13 @@
 
 #include <errno.h>
 #include <unistd.h>
-#include <setxid.h>
 
 
 int
-setegid (gid)
-     gid_t gid;
+setegid (gid_t gid)
 {
-  int result;
-
   if (gid == (gid_t) ~0)
-    {
-      __set_errno (EINVAL);
-      return -1;
-    }
-
-  result = INLINE_SETXID_SYSCALL (setresgid32, 3, -1, gid, -1);
-
-  return result;
+    return INLINE_SYSCALL_ERROR_RETURN (-EINVAL, int, );
+  return INLINE_SYSCALL_RETURN (setresgid32, 3, int, -1, gid, -1);
 }
 libc_hidden_def (setegid)

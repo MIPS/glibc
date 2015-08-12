@@ -34,7 +34,7 @@ __fcntl_nocancel (int fd, int cmd, ...)
   arg = va_arg (ap, void *);
   va_end (ap);
 
-  return INLINE_SYSCALL (fcntl64, 3, fd, cmd, arg);
+  return INLINE_SYSCALL_RETURN (fcntl64, 3, int, fd, cmd, arg);
 }
 #endif /* NO_CANCELLATION */
 
@@ -50,7 +50,7 @@ __libc_fcntl (int fd, int cmd, ...)
   va_end (ap);
 
   if ((cmd != F_SETLKW) && (cmd != F_SETLKW64))
-    return INLINE_SYSCALL (fcntl64, 3, fd, cmd, arg);
+    return INLINE_SYSCALL_RETURN (fcntl64, 3, int, fd, cmd, arg);
 
   return SYSCALL_CANCEL (fcntl64, fd, cmd, arg);
 }

@@ -17,22 +17,13 @@
 
 #include <errno.h>
 #include <unistd.h>
-#include <setxid.h>
 
 
 int
 seteuid (uid_t uid)
 {
-  int result;
-
   if (uid == (uid_t) ~0)
-    {
-      __set_errno (EINVAL);
-      return -1;
-    }
-
-  result = INLINE_SETXID_SYSCALL (setresuid32, 3, -1, uid, -1);
-
-  return result;
+    return INLINE_SYSCALL_ERROR_RETURN (-EINVAL, int, );
+  return INLINE_SYSCALL_RETURN (setresuid32, 3, int, -1, uid, -1);
 }
 libc_hidden_def (seteuid)

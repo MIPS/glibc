@@ -30,7 +30,8 @@ putmsg (fildes, ctlptr, dataptr, flags)
      const struct strbuf *dataptr;
      int flags;
 {
-  return INLINE_SYSCALL (putpmsg, 5, fildes, ctlptr, dataptr, -1, flags);
+  return INLINE_SYSCALL_RETURN (putpmsg, 5, int, fildes, ctlptr,
+				dataptr, -1, flags);
 }
 #else
 # include <streams/putmsg.c>

@@ -62,7 +62,8 @@ int
 attribute_compat_text_section
 __old_shmctl (int shmid, int cmd, struct __old_shmid_ds *buf)
 {
-  return INLINE_SYSCALL (ipc, 5, IPCOP_shmctl, shmid, cmd, 0, buf);
+  return INLINE_SYSCALL_RETURN (ipc, 5, int,  IPCOP_shmctl, shmid,
+				cmd, 0, buf);
 }
 compat_symbol (libc, __old_shmctl, shmctl, GLIBC_2_0);
 #endif
@@ -70,8 +71,8 @@ compat_symbol (libc, __old_shmctl, shmctl, GLIBC_2_0);
 int
 __new_shmctl (int shmid, int cmd, struct shmid_ds *buf)
 {
-  return INLINE_SYSCALL (ipc, 5, IPCOP_shmctl,
-			 shmid, cmd | __IPC_64, 0, buf);
+  return INLINE_SYSCALL_RETURN (ipc, 5, int, IPCOP_shmctl, shmid,
+				cmd | __IPC_64, 0, buf);
 }
 
 versioned_symbol (libc, __new_shmctl, shmctl, GLIBC_2_2);

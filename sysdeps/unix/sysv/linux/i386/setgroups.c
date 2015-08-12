@@ -23,7 +23,6 @@
 #include <sysdep.h>
 #include <sys/syscall.h>
 
-#include <setxid.h>
 #include <linux/posix_types.h>
 
 /* Set the group set for the current user to GROUPS (N of them).  For
@@ -32,6 +31,6 @@
 int
 setgroups (size_t n, const gid_t *groups)
 {
-  return INLINE_SETXID_SYSCALL (setgroups32, 2, n, groups);
+  return INLINE_SYSCALL_RETURN (setgroups32, 2, int, n, groups);
 }
 libc_hidden_def (setgroups)

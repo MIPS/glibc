@@ -17,17 +17,12 @@
 
 #include <errno.h>
 #include <unistd.h>
-#include <setxid.h>
 #include <linux/posix_types.h>
 
 int
 __setgid (gid_t gid)
 {
-  int result;
-
-  result = INLINE_SETXID_SYSCALL (setgid32, 1, gid);
-
-  return result;
+  return INLINE_SYSCALL_RETURN (setgid32, 1, int, gid);
 }
 #ifndef __setgid
 weak_alias (__setgid, setgid)

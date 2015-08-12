@@ -30,7 +30,8 @@ getmsg (fildes, ctlptr, dataptr, flagsp)
      struct strbuf *dataptr;
      int *flagsp;
 {
-  return INLINE_SYSCALL (getpmsg, 5, fildes, ctlptr, dataptr, NULL, flagsp);
+  return INLINE_SYSCALL_RETURN (getpmsg, 5, int, fildes, ctlptr,
+				dataptr, NULL, flagsp);
 }
 #else
 # include <streams/getmsg.c>

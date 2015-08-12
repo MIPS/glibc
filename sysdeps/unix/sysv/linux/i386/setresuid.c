@@ -24,11 +24,7 @@
 int
 __setresuid (uid_t ruid, uid_t euid, uid_t suid)
 {
-  int result;
-
-  result = INLINE_SETXID_SYSCALL (setresuid32, 3, ruid, euid, suid);
-
-  return result;
+  return INLINE_SYSCALL_RETURN (setresuid32, 3, int, ruid, euid, suid);
 }
 libc_hidden_def (__setresuid)
 #ifndef __setresuid

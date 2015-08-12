@@ -38,15 +38,18 @@ __xstat (int vers, const char *name, struct stat *buf)
   int result;
 
   if (vers == _STAT_VER_KERNEL)
-    return INLINE_SYSCALL (stat, 2, name, (struct kernel_stat *) buf);
+    return INLINE_SYSCALL_RETURN (stat, 2, int, name,
+				  (struct kernel_stat *) buf);
 
   {
     struct stat64 buf64;
 
-    result = INLINE_SYSCALL (stat64, 2, name, &buf64);
-    if (result == 0)
-      result = __xstat32_conv (vers, &buf64, buf);
-    return result;
+    INTERNAL_SYSCALL_DECL (err);
+    result = INTERNAL_SYSCALL (stat64, err, 2, name, &buf64);
+    if (__glibc_unlikely (INTERNAL_SYSCALL_ERROR_P (result, )))
+      return INLINE_SYSCALL_ERROR_RETURN (result, int, );
+    else
+      return __xstat32_conv (vers, &buf64, buf);
   }
 }
 hidden_def (__xstat)
