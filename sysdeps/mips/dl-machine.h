@@ -584,61 +584,42 @@ elf_machine_reloc (struct link_map *map, ElfW(Addr) r_info,
 
 	    if ((ElfW(Word))symidx < gotsym)
 	      {
-		/* This wouldn't work for a symbol imported from other
-		   libraries for which there's no GOT entry, but MIPS
-		   requires every symbol referenced in a dynamic
-		   relocation to have a GOT entry in the primary GOT,
-		   so we only get here for locally-defined symbols.
-		   For section symbols, we should *NOT* be adding
-		   sym->st_value (per the definition of the meaning of
-		   S in reloc expressions in the ELF64 MIPS ABI),
-		   since it should have already been added to
-		   reloc_value by the linker, but older versions of
-		   GNU ld didn't add it, and newer versions don't emit
-		   useless relocations to section symbols any more, so
-		   it is safe to keep on adding sym->st_value, even
-		   though it's not ABI compliant.  Some day we should
-		   bite the bullet and stop doing this.  */
+#ifndef RTLD_BOOTSTRAP
+		/* Resolve IFUNC symbols with pre-emption.  */
+		if (sym && __glibc_unlikely (ELFW(ST_TYPE) (sym->st_info)
+					     == STT_GNU_IFUNC) && !skip_ifunc)
+		  {
+		    struct link_map *rmap = RESOLVE_MAP (&sym, version, r_type);
+
+		    if (__glibc_likely (ELFW(ST_TYPE) (sym->st_info)
+					== STT_GNU_IFUNC))
+		      reloc_value = elf_ifunc_invoke (sym->st_value
+						      + rmap->l_addr);
+		    else
+		      reloc_value = sym->st_value + rmap->l_addr;
+		  }
+		else
+#endif
+	      /* This wouldn't work for a symbol imported from other
+		 libraries for which there's no GOT entry, but MIPS
+		 requires every symbol referenced in a dynamic
+		 relocation to have a GOT entry in the primary GOT,
+		 so we only get here for locally-defined symbols.
+		 For section symbols, we should *NOT* be adding
+		 sym->st_value (per the definition of the meaning of
+		 S in reloc expressions in the ELF64 MIPS ABI),
+		 since it should have already been added to
+		 reloc_value by the linker, but older versions of
+		 GNU ld didn't add it, and newer versions don't emit
+		 useless relocations to section symbols any more, so
+		 it is safe to keep on adding sym->st_value, even
+		 though it's not ABI compliant.  Some day we should
+		 bite the bullet and stop doing this.  */
 #ifndef RTLD_BOOTSTRAP
 		if (map != &GL(dl_rtld_map))
 #endif
 		  reloc_value += sym->st_value + map->l_addr;
 	      }
-#ifndef RTLD_BOOTSTRAP
-	    /* Resolve IFUNC symbols with pre-emption.  */
-	    else if (sym
-		  && __glibc_unlikely (ELFW(ST_TYPE) (sym->st_info)
-				       == STT_GNU_IFUNC)
-		  && !skip_ifunc)
-	      {
-		struct link_map *rmap = RESOLVE_MAP (&sym, version, r_type);
-
-		/* Symbol pre-empted, use value from GOT.
-		 2nd part of condition is redundant, explicit for clarity.  */
-		if (__glibc_unlikely (rmap->l_relocated)
-		    && __glibc_unlikely (rmap != map))
-		  {
-		    const ElfW(Addr) *got
-		      = (const ElfW(Addr) *) D_PTR (rmap, l_info[DT_PLTGOT]);
-		    const ElfW(Word) local_gotno
-		      = (const ElfW(Word))
-		      rmap->l_info[DT_MIPS (LOCAL_GOTNO)]->d_un.d_val;
-		    symidx = (sym
-			      - (ElfW(Sym) *) D_PTR(rmap, l_info[DT_SYMTAB]))
-		      / sizeof (sym);
-		    reloc_value = got[symidx + local_gotno - gotsym];
-		  }
-		/* Symbol pre-empted by not yet relocated, use best guess.  */
-		else if (__glibc_unlikely (rmap != map))
-		  reloc_value = sym->st_value + rmap->l_addr;
-		  /* Resolve IFUNC in this link unit.  */
-		else if (__glibc_likely (ELFW(ST_TYPE) (sym->st_info)
-					 == STT_GNU_IFUNC))
-		  reloc_value = elf_ifunc_invoke (sym->st_value + map->l_addr);
-		else
-		  reloc_value += sym->st_value + map->l_addr;
-	      }
-#endif
 	    else
 	      {
 #ifndef RTLD_BOOTSTRAP
