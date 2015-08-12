@@ -201,7 +201,7 @@ do {									\
   if (__builtin_expect (map->l_addr == 0, 1))				\
     break;								\
 									\
-  if (__glibc_unlikely (map->l_info[DT_MIPS (GENERAL_GOTNO)] != NULL))	\
+  if (__glibc_likely (map->l_info[DT_MIPS (GENERAL_GOTNO)] != NULL))	\
     i = map->l_info[DT_MIPS (GENERAL_GOTNO)]->d_un.d_val;		\
   else									\
     /* got[0] is reserved. got[1] is also reserved for the dynamic	\
@@ -869,7 +869,7 @@ elf_machine_got_rel (struct link_map *map, int lazy)
   /* The dynamic linker's local got entries have already been relocated.  */
   if (map != &GL(dl_rtld_map))
     {
-      if (__glibc_unlikely(map->l_info[DT_MIPS (GENERAL_GOTNO)] != NULL))
+      if (__glibc_likely(map->l_info[DT_MIPS (GENERAL_GOTNO)] != NULL))
 	i = map->l_info[DT_MIPS (GENERAL_GOTNO)]->d_un.d_val;
       else
 	/* got[0] is reserved. got[1] is also reserved for the dynamic object
