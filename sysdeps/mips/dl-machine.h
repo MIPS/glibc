@@ -850,9 +850,7 @@ elf_machine_got_rel (struct link_map *map, int lazy)
 	{								  \
 	  value = sym_map->l_addr + ref->st_value;			  \
 	  if (__glibc_unlikely (ELFW(ST_TYPE) (ref->st_info)		  \
-				== STT_GNU_IFUNC			  \
-				&& sym_map != map			  \
-				&& sym_map->l_relocated))		  \
+				== STT_GNU_IFUNC))			  \
 	      value = elf_ifunc_invoke (value);				  \
 	}								  \
       value;								  \
@@ -928,7 +926,7 @@ elf_machine_got_rel (struct link_map *map, int lazy)
 	  if (sym->st_other == 0)
 	    *got += map->l_addr;
 	}
-      else if (ELFW(ST_TYPE) (sym->st_info) != STT_GNU_IFUNC)
+      else
 	*got = RESOLVE_GOTSYM (sym, vernum, symidx, R_MIPS_32);
 
       ++got;
