@@ -201,7 +201,7 @@ do {									\
   if (__builtin_expect (map->l_addr == 0, 1))				\
     break;								\
 									\
-  if (__glibc_likely (map->l_info[DT_MIPS (GENERAL_GOTNO)] != NULL))	\
+  if (map->l_info[DT_MIPS (GENERAL_GOTNO)] != NULL)			\
     i = map->l_info[DT_MIPS (GENERAL_GOTNO)]->d_un.d_val;		\
   else									\
     /* got[0] is reserved. got[1] is also reserved for the dynamic	\
@@ -584,41 +584,31 @@ elf_machine_reloc (struct link_map *map, ElfW(Addr) r_info,
 
 	    if ((ElfW(Word))symidx < gotsym)
 	      {
+		/* Linker will not normally emit symbolic relocations for
+		   locally-defined global symbols.  If we reach here, we must
+		   be dealing with relocation to a global symbols which is
+		   explicitly relocated via the general GOT region and
+		   pre-emptible.  */
 #ifndef RTLD_BOOTSTRAP
-		/* Resolve IFUNC symbols with pre-emption.  */
-		if (sym && __glibc_unlikely (ELFW(ST_TYPE) (sym->st_info)
-					     == STT_GNU_IFUNC) && !skip_ifunc)
+		if (map->l_info[DT_MIPS (GENERAL_GOTNO)] == NULL)
+		  {
+		    const char *strtab;
+		    strtab = (const void *) D_PTR (map, l_info[DT_STRTAB]);
+
+		    _dl_error_printf ("\
+%s: Explicitly relocated symbol `%s' requires dynamic tag MIPS_GENERAL_GOTNO\n",
+				      RTLD_PROGNAME, strtab + sym->st_name);
+		  }
+		else
 		  {
 		    struct link_map *rmap = RESOLVE_MAP (&sym, version, r_type);
-
-		    if (__glibc_likely (ELFW(ST_TYPE) (sym->st_info)
-					== STT_GNU_IFUNC))
+		    if ((ELFW(ST_TYPE) (sym->st_info) == STT_GNU_IFUNC))
 		      reloc_value = elf_ifunc_invoke (sym->st_value
 						      + rmap->l_addr);
 		    else
 		      reloc_value = sym->st_value + rmap->l_addr;
 		  }
-		else
 #endif
-	      /* This wouldn't work for a symbol imported from other
-		 libraries for which there's no GOT entry, but MIPS
-		 requires every symbol referenced in a dynamic
-		 relocation to have a GOT entry in the primary GOT,
-		 so we only get here for locally-defined symbols.
-		 For section symbols, we should *NOT* be adding
-		 sym->st_value (per the definition of the meaning of
-		 S in reloc expressions in the ELF64 MIPS ABI),
-		 since it should have already been added to
-		 reloc_value by the linker, but older versions of
-		 GNU ld didn't add it, and newer versions don't emit
-		 useless relocations to section symbols any more, so
-		 it is safe to keep on adding sym->st_value, even
-		 though it's not ABI compliant.  Some day we should
-		 bite the bullet and stop doing this.  */
-#ifndef RTLD_BOOTSTRAP
-		if (map != &GL(dl_rtld_map))
-#endif
-		  reloc_value += sym->st_value + map->l_addr;
 	      }
 	    else
 	      {
@@ -827,7 +817,7 @@ elf_machine_got_rel (struct link_map *map, int lazy)
       struct link_map *sym_map;						  \
       ElfW(Addr) value = 0;						  \
       sym_map = RESOLVE_MAP (&ref, version, reloc);			  \
-      if (__glibc_likely(ref != NULL))					  \
+      if (__glibc_likely (ref != NULL))					  \
 	{								  \
 	  value = sym_map->l_addr + ref->st_value;			  \
 	  if (__glibc_unlikely (ELFW(ST_TYPE) (ref->st_info)		  \
@@ -848,7 +838,7 @@ elf_machine_got_rel (struct link_map *map, int lazy)
   /* The dynamic linker's local got entries have already been relocated.  */
   if (map != &GL(dl_rtld_map))
     {
-      if (__glibc_likely(map->l_info[DT_MIPS (GENERAL_GOTNO)] != NULL))
+      if (map->l_info[DT_MIPS (GENERAL_GOTNO)] != NULL)
 	i = map->l_info[DT_MIPS (GENERAL_GOTNO)]->d_un.d_val;
       else
 	/* got[0] is reserved. got[1] is also reserved for the dynamic object

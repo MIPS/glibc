@@ -34,7 +34,7 @@ __attribute ((always_inline))
 elf_ifunc_invoke (ElfW(Addr) addr)
 {
   /* Print some debugging info if wanted.  */
-  if (__builtin_expect (GLRO(dl_debug_mask) & DL_DEBUG_SYMBOLS, 0))
+  if (__glibc_unlikely (GLRO(dl_debug_mask) & DL_DEBUG_SYMBOLS))
     {
       ElfW(Addr) t_addr =
 	((ElfW(Addr) (*) (unsigned long int)) (addr)) (GLRO(dl_hwcap));
@@ -54,7 +54,7 @@ elf_irel (const ElfW(Rel) *reloc)
   ElfW(Addr) *const reloc_addr = (void *) reloc->r_offset;
   const unsigned long int r_type = ELFW(R_TYPE) (reloc->r_info);
 
-  if (__builtin_expect (r_type == R_MIPS_IRELATIVE, 1))
+  if (__glibc_likely (r_type == R_MIPS_IRELATIVE))
     *reloc_addr = elf_ifunc_invoke (*reloc_addr);
   else if (r_type)
     __libc_fatal ("unexpected reloc type in static binary");
