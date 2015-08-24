@@ -58,6 +58,7 @@
 	  ADDU " %0,%0,$3"				\
 	  : "+r" (__result) : : "$3");			\
      __result; })
+#if __mips_isa_rev < 2
 # define TLS_IE(x)					\
   ({ void *__result, *__tmp;				\
      asm (".set push\n\t.set mips32r2\n\t"		\
@@ -79,6 +80,27 @@
 	  ADDU " %0,%0,$3"				\
 	  : "+r" (__result) : : "$3");			\
      __result; })
+#else
+# define TLS_IE(x)					\
+  ({ void *__result, *__tmp;				\
+     asm ("rdhwr\t%0,$29"				\
+	  : "=v" (__result));				\
+     asm (LOAD_GP LW " $3,%%gottprel(" #x ")($28)\n\t"	\
+	  ADDU " %0,%0,$3"				\
+	  UNLOAD_GP					\
+	  : "+r" (__result), [tmp] "=&r" (__tmp)	\
+	  : : "$3");					\
+     __result; })
+# define TLS_LE(x)					\
+  ({ void *__result;					\
+     asm ("rdhwr\t%0,$29"				\
+	  : "=v" (__result));				\
+     asm ("lui $3,%%tprel_hi(" #x ")\n\t"		\
+	  "addiu $3,$3,%%tprel_lo(" #x ")\n\t"		\
+	  ADDU " %0,%0,$3"				\
+	  : "+r" (__result) : : "$3");			\
+     __result; })
+#endif
 
 #else /* __mips16 */
 /* MIPS16 version.  */
