@@ -42,21 +42,32 @@ typedef union dtv
 # define READ_THREAD_POINTER() (__builtin_thread_pointer ())
 #else
 /* Note: rd must be $v1 to be ABI-conformant.  */
+#if __mips_isa_rev < 2
 # define READ_THREAD_POINTER() \
     ({ void *__result;							      \
        asm volatile (".set\tpush\n\t.set\tmips32r2\n\t"			      \
 		     "rdhwr\t%0, $29\n\t.set\tpop" : "=v" (__result));	      \
        __result; })
+#else
+# define READ_THREAD_POINTER() \
+    ({ void *__result;							      \
+       asm volatile ("rdhwr\t%0, $29" : "=v" (__result));	      	      \
+       __result; })
+#endif
 #endif
 
 #else /* __ASSEMBLER__ */
 # include <tcb-offsets.h>
 
+#if __mips_isa_rev < 2
 # define READ_THREAD_POINTER(rd) \
 	.set	push;							      \
 	.set	mips32r2;						      \
 	rdhwr	rd, $29;						      \
 	.set	pop
+#else
+# define READ_THREAD_POINTER(rd) rdhwr	rd, $29
+#endif
 #endif /* __ASSEMBLER__ */
 
 
