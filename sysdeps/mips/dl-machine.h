@@ -584,13 +584,37 @@ elf_machine_reloc (struct link_map *map, ElfW(Addr) r_info,
 
 	    if ((ElfW(Word))symidx < gotsym)
 	      {
-		/* Linker will not normally emit symbolic relocations for
-		   locally-defined global symbols.  If we reach here, we must
-		   be dealing with relocation to a global symbols which is
-		   explicitly relocated via the general GOT region and
-		   pre-emptible.  */
+		if (ELFW(ST_BIND) (sym->st_info) == STB_LOCAL)
+		  {
+		    /* For section symbols, we should *NOT* be adding
+		       sym->st_value (per the definition of the meaning of S
+		       in reloc expressions in the ELF64 MIPS ABI), since it
+		       should have already been added to reloc_value by the
+		       linker, but older versions of GNU ld didn't add it, and
+		       newer versions don't emit useless relocations to
+		       section symbols any more, so it is safe to keep on
+		       adding sym->st_value, even though it's not ABI
+		       compliant.  */
 #ifndef RTLD_BOOTSTRAP
-		if (map->l_info[DT_MIPS (GENERAL_GOTNO)] == NULL)
+		    if (map != &GL(dl_rtld_map))
+#endif
+			reloc_value += sym->st_value + map->l_addr;
+		  }
+#ifndef RTLD_BOOTSTRAP
+		/* The original MIPS ABI required every global symbol used in
+		   a relocation to be in the global GOT.  We would then only
+		   expect to get here for local symbols.  This restriction is
+		   removed for objects that use DT_MIPS_GENERAL_GOTNO, since
+		   newer relocations and symbol types do not fit easily in the
+		   original ABI scheme.  Relocations against symbols below
+		   DT_MIPS_GOTSYM bind in just the same way as relocations
+		   against symbols in the global GOT; the only difference is
+		   that we are not able to use the global GOT as a
+		   directly-indexed lookup cache.  Symbols below
+		   DT_MIPS_GOTSYM might be in the general GOT region or might
+		   not have a GOT entry at all.  */
+		else if (__glibc_unlikely (map->l_info[DT_MIPS (GENERAL_GOTNO)]
+					   == NULL))
 		  {
 		    const char *strtab;
 		    strtab = (const void *) D_PTR (map, l_info[DT_STRTAB]);
@@ -606,6 +630,11 @@ elf_machine_reloc (struct link_map *map, ElfW(Addr) r_info,
 		      reloc_value = elf_ifunc_invoke (sym->st_value
 						      + rmap->l_addr);
 		    else
+		      /* The behavior for section symbols described above
+			 is now so firmly established that it is explicitly
+			 adopted by objects with DT_MIPS_GLOBAL_GOTNO.
+			 We therefore don't have a special case for
+			 section symbols.  */
 		      reloc_value = sym->st_value + rmap->l_addr;
 		  }
 #endif
@@ -674,6 +703,9 @@ elf_machine_reloc (struct link_map *map, ElfW(Addr) r_info,
 
 	sym_map = RESOLVE_MAP (&sym, version, r_type);
 	value = sym_map == NULL ? 0 : sym_map->l_addr + sym->st_value;
+	if ((ELFW(ST_TYPE) (sym->st_info) == STT_GNU_IFUNC) && !skip_ifunc)
+	  value = elf_ifunc_invoke (value);
+
 	*addr_field = value;
 
 	break;
@@ -710,11 +742,14 @@ elf_machine_reloc (struct link_map *map, ElfW(Addr) r_info,
       }
 
     case R_MIPS_IRELATIVE:
+#ifndef RTLD_BOOTSTRAP
       /* The resolver routine is the symbol referenced by this relocation.
 	 To get the address of the function to use at runtime, the resolver
 	 routine is called and its return value is the address of the target
 	 functon which is final relocation value.  */
-      *addr_field = elf_ifunc_invoke (map->l_addr + *addr_field);
+      if (!skip_ifunc)
+	*addr_field = elf_ifunc_invoke (map->l_addr + *addr_field);
+#endif
       break;
 
 #if _MIPS_SIM == _ABI64
@@ -817,7 +852,7 @@ elf_machine_got_rel (struct link_map *map, int lazy)
       struct link_map *sym_map;						  \
       ElfW(Addr) value = 0;						  \
       sym_map = RESOLVE_MAP (&ref, version, reloc);			  \
-      if (__glibc_likely (ref != NULL))					  \
+      if (__glibc_likely (ref != NULL))                                   \
 	{								  \
 	  value = sym_map->l_addr + ref->st_value;			  \
 	  if (__glibc_unlikely (ELFW(ST_TYPE) (ref->st_info)		  \
