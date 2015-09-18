@@ -1,6 +1,6 @@
-/* Copyright (C) 2002-2019 Free Software Foundation, Inc.
+/* Architecture specific code for pthread cancellation handling.
+   Copyright (C) 2019 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
-   Contributed by Ulrich Drepper <drepper@redhat.com>, 2002.
 
    The GNU C Library is free software; you can redistribute it and/or
    modify it under the terms of the GNU Lesser General Public
@@ -14,11 +14,17 @@
 
    You should have received a copy of the GNU Lesser General Public
    License along with the GNU C Library; if not, see
-   <https://www.gnu.org/licenses/>.  */
+   <http://www.gnu.org/licenses/>.  */
 
-#include <nptl/pthreadP.h>
+#ifndef _NPTL_CANCELLATION_SIGMASK_H
+#define _NPTL_CANCELLATION_SIGMASK_H
 
+/* Add the SIGCANCEL signal on sigmask set at the ucontext_t CTX obtained from
+   the sigaction handler.  */
+static void
+ucontext_block_sigcancel (void *ctx)
+{
+  __sigaddset (&((ucontext_t*) ctx)->uc_sigmask, SIGCANCEL);
+}
 
-#define __pthread_enable_asynccancel __librt_enable_asynccancel
-#define __pthread_disable_asynccancel __librt_disable_asynccancel
-#include <nptl/cancellation.c>
+#endif

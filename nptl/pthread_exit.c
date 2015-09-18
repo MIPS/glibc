@@ -16,16 +16,13 @@
    License along with the GNU C Library; if not, see
    <https://www.gnu.org/licenses/>.  */
 
-#include <stdlib.h>
 #include "pthreadP.h"
 
 
 void
 __pthread_exit (void *value)
 {
-  THREAD_SETMEM (THREAD_SELF, result, value);
-
-  __do_cancel ();
+  __do_cancel_with_result (value);
 }
 weak_alias (__pthread_exit, pthread_exit)
 

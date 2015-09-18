@@ -36,11 +36,9 @@ __clock_nanosleep (clockid_t clock_id, int flags, const struct timespec *req,
 
   /* If the call is interrupted by a signal handler or encounters an error,
      it returns a positive value similar to errno.  */
-  INTERNAL_SYSCALL_DECL (err);
-  int r = INTERNAL_SYSCALL_CANCEL (clock_nanosleep, err, clock_id, flags,
-				   req, rem);
-  return (INTERNAL_SYSCALL_ERROR_P (r, err)
-	  ? INTERNAL_SYSCALL_ERRNO (r, err) : 0);
+  long int r = INTERNAL_SYSCALL_CANCEL (clock_nanosleep, clock_id, flags,
+					req, rem);
+  return SYSCALL_CANCEL_ERROR (r) ? -r : 0;
 }
 
 versioned_symbol (libc, __clock_nanosleep, clock_nanosleep, GLIBC_2_17);

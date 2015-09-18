@@ -16,23 +16,14 @@
    License along with the GNU C Library; if not, see
    <https://www.gnu.org/licenses/>.  */
 
-#include <errno.h>
-#include <signal.h>
-#include <pthreadP.h>
-#include <tls.h>
-#include <sysdep.h>
 #include <unistd.h>
+#include <pthreadP.h>
 
-
+/* Used internally by pthread_cancel, so we can't filter SIGCANCEL.  */
 int
-__pthread_kill (pthread_t threadid, int signo)
+__pthread_kill_internal (pthread_t threadid, int signo)
 {
   struct pthread *pd = (struct pthread *) threadid;
-
-  /* Make sure the descriptor is valid.  */
-  if (DEBUGGING_P && INVALID_TD_P (pd))
-    /* Not a valid thread handle.  */
-    return ESRCH;
 
   /* Force load of pd->tid into local variable or register.  Otherwise
      if a thread exits between ESRCH test and tgkill, we might return
@@ -41,11 +32,6 @@ __pthread_kill (pthread_t threadid, int signo)
   if (__glibc_unlikely (tid <= 0))
     /* Not a valid thread handle.  */
     return ESRCH;
-
-  /* Disallow sending the signal we use for cancellation, timers,
-     for the setxid implementation.  */
-  if (signo == SIGCANCEL || signo == SIGTIMER || signo == SIGSETXID)
-    return EINVAL;
 
   /* We have a special syscall to do the work.  */
   INTERNAL_SYSCALL_DECL (err);
@@ -56,4 +42,3 @@ __pthread_kill (pthread_t threadid, int signo)
   return (INTERNAL_SYSCALL_ERROR_P (val, err)
 	  ? INTERNAL_SYSCALL_ERRNO (val, err) : 0);
 }
-strong_alias (__pthread_kill, pthread_kill)

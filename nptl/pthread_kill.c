@@ -31,8 +31,9 @@ __pthread_kill (pthread_t threadid, int signo)
     /* Not a valid thread handle.  */
     return ESRCH;
 
-  return ENOSYS;
+  if (__is_internal_signal (signo))
+    return EINVAL;
+
+  return __pthread_kill_internal (threadid, signo);
 }
 strong_alias (__pthread_kill, pthread_kill)
-
-stub_warning (pthread_kill)

@@ -17,6 +17,9 @@
 
 #include <bits/wordsize.h>
 #include <kernel-features.h>
+#ifndef __ASSEMBLER__
+#include <errno.h>
+#endif
 
 /* Set error number and return -1.  A target may choose to return the
    internal function, __syscall_error, which sets errno and returns -1.
@@ -26,6 +29,26 @@
     __set_errno (err);				\
     -1l;					\
   })
+
+/* Check error from cancellable syscall and set errno accordingly.
+   Linux uses a negative return value to indicate syscall errors
+   and since version 2.1 the return value of a system call might be
+   negative even if the call succeeded (e.g., the `lseek' system call
+   might return a large offset).
+   Current contract is kernel make sure the no syscall returns a value
+   in -1 .. -4095 as a valid result so we can savely test with -4095.  */
+#define SYSCALL_CANCEL_ERROR(__ret)		\
+  ((__ret) > -4096UL)
+
+#define SYSCALL_CANCEL_RET(__ret)		\
+  ({						\
+    if (SYSCALL_CANCEL_ERROR ((__ret)))		\
+      {						\
+	__set_errno (-(__ret));			\
+	__ret = -1;				\
+      }						\
+    __ret;					\
+   })
 
 /* Provide a dummy argument that can be used to force register
    alignment for register pairs if required by the syscall ABI.  */

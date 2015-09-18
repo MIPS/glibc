@@ -34,7 +34,8 @@ routines = alloca_cutoff forward libc-lowlevellock libc-cancellation \
 	   pthread_attr_destroy pthread_attr_init pthread_attr_getdetachstate \
 	   pthread_attr_setdetachstate pthread_attr_getinheritsched \
 	   pthread_attr_setinheritsched pthread_attr_getschedparam \
-	   pthread_attr_setschedparam
+	   pthread_attr_setschedparam \
+	   syscall_cancel
 shared-only-routines = forward
 static-only-routines = pthread_atfork
 
@@ -103,7 +104,8 @@ libpthread-routines = nptl-init nptlfreeres vars events version pt-interp \
 		      pthread_barrierattr_setpshared \
 		      pthread_key_create pthread_key_delete \
 		      pthread_getspecific pthread_setspecific \
-		      pthread_sigmask pthread_kill pthread_sigqueue \
+		      pthread_sigmask pthread_kill pthread_kill_internal \
+		      pthread_sigqueue \
 		      pthread_cancel pthread_testcancel \
 		      pthread_setcancelstate pthread_setcanceltype \
 		      pthread_once \
@@ -117,7 +119,6 @@ libpthread-routines = nptl-init nptlfreeres vars events version pt-interp \
 		      cleanup cleanup_defer cleanup_compat \
 		      cleanup_defer_compat unwind \
 		      pt-longjmp pt-cleanup\
-		      cancellation \
 		      lowlevellock \
 		      lll_timedlock_wait \
 		      pt-fork pt-fcntl \
@@ -171,8 +172,7 @@ CFLAGS-pthread_setcanceltype.c += -fexceptions -fasynchronous-unwind-tables
 
 # These are internal functions which similar functionality as setcancelstate
 # and setcanceltype.
-CFLAGS-cancellation.c += -fasynchronous-unwind-tables
-CFLAGS-libc-cancellation.c += -fasynchronous-unwind-tables
+CFLAGS-libc-cancellation.c += -fexceptions -fasynchronous-unwind-tables
 
 # Calling pthread_exit() must cause the registered cancel handlers to
 # be executed.  Therefore exceptions have to be thrown through this
@@ -286,7 +286,7 @@ tests = tst-attr1 tst-attr2 tst-attr3 tst-default-attr \
 	tst-cancel11 tst-cancel12 tst-cancel13 tst-cancel14 tst-cancel15 \
 	tst-cancel16 tst-cancel17 tst-cancel18 tst-cancel19 tst-cancel20 \
 	tst-cancel21 tst-cancel22 tst-cancel23 tst-cancel24 tst-cancel25 \
-	tst-cancel26 tst-cancel27 \
+	tst-cancel26 tst-cancel27 tst-cancel28 \
 	tst-cancel-self tst-cancel-self-cancelstate \
 	tst-cancel-self-canceltype tst-cancel-self-testcancel \
 	tst-cleanup0 tst-cleanup1 tst-cleanup2 tst-cleanup3 tst-cleanup4 \

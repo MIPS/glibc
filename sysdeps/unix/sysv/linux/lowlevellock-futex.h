@@ -22,6 +22,8 @@
 #ifndef __ASSEMBLER__
 #include <sysdep.h>
 #include <sysdep-cancel.h>
+#include <time.h>
+#include <sysdeps/unix/sysdep.h>
 #include <kernel-features.h>
 #endif
 
@@ -72,6 +74,12 @@
 				       __VA_ARGS__);                    \
     (__glibc_unlikely (INTERNAL_SYSCALL_ERROR_P (__ret, __err))         \
      ? -INTERNAL_SYSCALL_ERRNO (__ret, __err) : 0);                     \
+  })
+
+#define lll_futex_syscall_cp(...)					\
+  ({                                                                    \
+    long int __ret = INTERNAL_SYSCALL_CANCEL (futex, __VA_ARGS__);	\
+    __ret;								\
   })
 
 #define lll_futex_wait(futexp, val, private) \
@@ -147,21 +155,34 @@
 
 
 /* Cancellable futex macros.  */
-#define lll_futex_wait_cancel(futexp, val, private) \
-  ({                                                                   \
-    int __oldtype = CANCEL_ASYNC ();				       \
-    long int __err = lll_futex_wait (futexp, val, LLL_SHARED);	       \
-    CANCEL_RESET (__oldtype);					       \
-    __err;							       \
-  })
+static __always_inline int
+lll_futex_timed_wait_cancel (unsigned int *futexp, int val,
+			     const struct timespec *timeout, int priv)
+{
+  int op = __lll_private_flag (FUTEX_WAIT, priv);
+  return INTERNAL_SYSCALL_CANCEL (futex, futexp, op, val, timeout);
+}
 
-#define lll_futex_timed_wait_cancel(futexp, val, timeout, private)	   \
-  ({									   \
-    int __oldtype = CANCEL_ASYNC ();				       	   \
-    long int __err = lll_futex_timed_wait (futexp, val, timeout, private); \
-    CANCEL_RESET (__oldtype);						   \
-    __err;								   \
-  })
+static __always_inline int
+lll_futex_wait_cancel (unsigned int *futexp, int val, int priv)
+{
+  return lll_futex_timed_wait_cancel (futexp, val, NULL, priv);
+}
+
+static __always_inline int
+lll_futex_clock_wait_bitset_cancel (unsigned int *futexp, int val,
+				    clockid_t clockid,
+				    const struct timespec *timeout, int priv)
+{
+  if (!lll_futex_supported_clockid (clockid))
+    return -EINVAL;
+
+  const unsigned int clockbit = clockid == CLOCK_REALTIME
+				? FUTEX_CLOCK_REALTIME : 0;
+  const int op = __lll_private_flag (FUTEX_WAIT_BITSET | clockbit, priv);
+  return INTERNAL_SYSCALL_CANCEL (futex, futexp, op, val, timeout, NULL,
+				  FUTEX_BITSET_MATCH_ANY);
+}
 
 #endif  /* !__ASSEMBLER__  */
 

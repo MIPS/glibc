@@ -296,20 +296,46 @@ extern void __nptl_unwind_freeres (void) attribute_hidden;
 #endif
 
 
-/* Called when a thread reacts on a cancellation request.  */
 static inline void
 __attribute ((noreturn, always_inline))
-__do_cancel (void)
+__do_cancel_with_result (void *result)
 {
   struct pthread *self = THREAD_SELF;
 
-  /* Make sure we get no more cancellations.  */
-  THREAD_ATOMIC_BIT_SET (self, cancelhandling, EXITING_BIT);
+  /* Make sure we get no more cancellations by clearing the cancel
+     state.  */
+  int oldval = THREAD_GETMEM (self, cancelhandling);
+  while (1)
+    {
+      int newval = oldval | CANCELSTATE_BITMASK | EXITING_BITMASK;
+      if (oldval == newval)
+	break;
+
+      oldval = THREAD_ATOMIC_CMPXCHG_VAL (self, cancelhandling, newval,
+					  oldval);
+    }
+
+  THREAD_SETMEM (self, result, result);
 
   __pthread_unwind ((__pthread_unwind_buf_t *)
 		    THREAD_GETMEM (self, cleanup_jmp_buf));
 }
 
+/* Called when a thread reacts on a cancellation request.  */
+static inline void
+__attribute ((noreturn, always_inline))
+__do_cancel (void)
+{
+  __do_cancel_with_result (PTHREAD_CANCELED);
+}
+
+extern long int __syscall_cancel_arch (volatile int *, __syscall_arg_t nr,
+     __syscall_arg_t arg1, __syscall_arg_t arg2, __syscall_arg_t arg3,
+     __syscall_arg_t arg4, __syscall_arg_t arg5, __syscall_arg_t arg6);
+libc_hidden_proto (__syscall_cancel_arch);
+
+extern _Noreturn void __syscall_do_cancel (void)
+     attribute_hidden;
 
 /* Internal prototypes.  */
 
@@ -469,11 +495,11 @@ extern int __pthread_equal (pthread_t thread1, pthread_t thread2);
 extern int __pthread_detach (pthread_t th);
 extern int __pthread_cancel (pthread_t th);
 extern int __pthread_kill (pthread_t threadid, int signo);
+extern int __pthread_kill_internal (pthread_t threadid, int signo)
+  attribute_hidden;
 extern void __pthread_exit (void *value) __attribute__ ((__noreturn__));
 extern int __pthread_join (pthread_t threadid, void **thread_return);
 extern int __pthread_setcanceltype (int type, int *oldtype);
-extern int __pthread_enable_asynccancel (void) attribute_hidden;
-extern void __pthread_disable_asynccancel (int oldtype) attribute_hidden;
 extern void __pthread_testcancel (void);
 extern int __pthread_timedjoin_ex (pthread_t, void **, const struct timespec *,
 				   bool);

@@ -58,7 +58,7 @@ __old_sem_wait (sem_t *sem)
 	return 0;
 
       /* Always assume the semaphore is shared.  */
-      err = lll_futex_wait_cancel (futex, 0, LLL_SHARED);
+      err = lll_futex_wait_cancel ((unsigned int *) futex, 0, LLL_SHARED);
     }
   while (err == 0 || err == -EWOULDBLOCK);
 
