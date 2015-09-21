@@ -584,22 +584,6 @@ elf_machine_reloc (struct link_map *map, ElfW(Addr) r_info,
 
 	    if ((ElfW(Word))symidx < gotsym)
 	      {
-		if (ELFW(ST_BIND) (sym->st_info) == STB_LOCAL)
-		  {
-		    /* For section symbols, we should *NOT* be adding
-		       sym->st_value (per the definition of the meaning of S
-		       in reloc expressions in the ELF64 MIPS ABI), since it
-		       should have already been added to reloc_value by the
-		       linker, but older versions of GNU ld didn't add it, and
-		       newer versions don't emit useless relocations to
-		       section symbols any more, so it is safe to keep on
-		       adding sym->st_value, even though it's not ABI
-		       compliant.  */
-#ifndef RTLD_BOOTSTRAP
-		    if (map != &GL(dl_rtld_map))
-#endif
-			reloc_value += sym->st_value + map->l_addr;
-		  }
 #ifndef RTLD_BOOTSTRAP
 		/* The original MIPS ABI required every global symbol used in
 		   a relocation to be in the global GOT.  We would then only
@@ -613,19 +597,40 @@ elf_machine_reloc (struct link_map *map, ElfW(Addr) r_info,
 		   directly-indexed lookup cache.  Symbols below
 		   DT_MIPS_GOTSYM might be in the general GOT region or might
 		   not have a GOT entry at all.  */
-		else if (__glibc_unlikely (map->l_info[DT_MIPS (GENERAL_GOTNO)]
-					   == NULL))
+		if (__glibc_unlikely (map->l_info[DT_MIPS (GENERAL_GOTNO)]
+				      == NULL))
 		  {
-		    const char *strtab;
-		    strtab = (const void *) D_PTR (map, l_info[DT_STRTAB]);
+		    if (ELFW(ST_BIND) (sym->st_info) == STB_LOCAL)
+		      {
+			/* For section symbols, we should *NOT* be adding
+			   sym->st_value (per the definition of the meaning of
+			   S in reloc expressions in the ELF64 MIPS ABI),
+			   since it should have already been added to
+			   reloc_value by the linker, but older versions of
+			   GNU ld didn't add it, and newer versions don't emit
+			   useless relocations to section symbols any more, so
+			   it is safe to keep on adding sym->st_value, even
+			   though it's not ABI compliant.  */
+#ifndef RTLD_BOOTSTRAP
+			if (map != &GL(dl_rtld_map))
+#endif
+			  reloc_value += sym->st_value + map->l_addr;
+		      }
+		    else
+		      {
+			const char *strtab;
+			strtab = (const void *) D_PTR (map, l_info[DT_STRTAB]);
 
-		    _dl_error_printf ("\
+			_dl_error_printf ("\
 %s: Explicitly relocated symbol `%s' requires dynamic tag MIPS_GENERAL_GOTNO\n",
-				      RTLD_PROGNAME, strtab + sym->st_name);
+					  RTLD_PROGNAME,
+					  strtab + sym->st_name);
+		      }
 		  }
 		else
 		  {
-		    struct link_map *rmap = RESOLVE_MAP (&sym, version, r_type);
+		    struct link_map *rmap = RESOLVE_MAP (&sym, version,
+							 r_type);
 		    if ((ELFW(ST_TYPE) (sym->st_info) == STT_GNU_IFUNC))
 		      reloc_value = elf_ifunc_invoke (sym->st_value
 						      + rmap->l_addr);
