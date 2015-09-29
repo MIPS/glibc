@@ -14,3 +14,9 @@ UNIQUE
 #
 # MIPS O32 FP64
 MIPS_O32_FP64   mips*-*-linux*
+#
+# MIPS IFUNC
+IFUNC		mips*-*-linux*
+#
+# Non-executable stack support
+MIPS_GNU_STACK mips*-*-linux*

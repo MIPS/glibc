@@ -182,6 +182,10 @@ ElfW(Word) _dl_stack_flags = DEFAULT_STACK_PERMS;
 int (*_dl_make_stack_executable_hook) (void **) internal_function
   = _dl_make_stack_executable;
 
+/* Check if architecture allows non-executable stack.  */
+bool (*_dl_allow_noexec_stack_p_hook) (void) internal_function
+  = _dl_allow_noexec_stack_p;
+
 
 /* Function in libpthread to wait for termination of lookups.  */
 void (*_dl_wait_lookup_done) (void);
