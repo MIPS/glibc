@@ -114,10 +114,8 @@
 	register long __v0 asm ("$2");					\
 	register long __a3 asm ("$7");					\
 	__asm__ volatile (						\
-	".set\tnoreorder\n\t"						\
 	v0_init								\
 	"syscall\n\t"							\
-	".set reorder"							\
 	: "=r" (__v0), "=r" (__a3)					\
 	: input								\
 	: __SYSCALL_CLOBBERS);						\
@@ -138,10 +136,8 @@
 	register long __a0 asm ("$4") = (long) (arg1);			\
 	register long __a3 asm ("$7");					\
 	__asm__ volatile (						\
-	".set\tnoreorder\n\t"						\
 	v0_init								\
 	"syscall\n\t"							\
-	".set reorder"							\
 	: "=r" (__v0), "=r" (__a3)					\
 	: input, "r" (__a0)						\
 	: __SYSCALL_CLOBBERS);						\
@@ -163,10 +159,8 @@
 	register long __a1 asm ("$5") = (long) (arg2);			\
 	register long __a3 asm ("$7");					\
 	__asm__ volatile (						\
-	".set\tnoreorder\n\t"						\
 	v0_init								\
 	"syscall\n\t"							\
-	".set\treorder"							\
 	: "=r" (__v0), "=r" (__a3)					\
 	: input, "r" (__a0), "r" (__a1)					\
 	: __SYSCALL_CLOBBERS);						\
@@ -190,10 +184,8 @@
 	register long __a2 asm ("$6") = (long) (arg3);			\
 	register long __a3 asm ("$7");					\
 	__asm__ volatile (						\
-	".set\tnoreorder\n\t"						\
 	v0_init								\
 	"syscall\n\t"							\
-	".set\treorder"							\
 	: "=r" (__v0), "=r" (__a3)					\
 	: input, "r" (__a0), "r" (__a1), "r" (__a2)			\
 	: __SYSCALL_CLOBBERS);						\
@@ -217,10 +209,8 @@
 	register long __a2 asm ("$6") = (long) (arg3);			\
 	register long __a3 asm ("$7") = (long) (arg4);			\
 	__asm__ volatile (						\
-	".set\tnoreorder\n\t"						\
 	v0_init								\
 	"syscall\n\t"							\
-	".set\treorder"							\
 	: "=r" (__v0), "+r" (__a3)					\
 	: input, "r" (__a0), "r" (__a1), "r" (__a2)			\
 	: __SYSCALL_CLOBBERS);						\
@@ -245,10 +235,8 @@
 	register long __a3 asm ("$7") = (long) (arg4);			\
 	register long __a4 asm ("$8") = (long) (arg5);			\
 	__asm__ volatile (						\
-	".set\tnoreorder\n\t"						\
 	v0_init								\
 	"syscall\n\t"							\
-	".set\treorder"							\
 	: "=r" (__v0), "+r" (__a3)					\
 	: input, "r" (__a0), "r" (__a1), "r" (__a2), "r" (__a4)		\
 	: __SYSCALL_CLOBBERS);						\
@@ -274,10 +262,8 @@
 	register long __a4 asm ("$8") = (long) (arg5);			\
 	register long __a5 asm ("$9") = (long) (arg6);			\
 	__asm__ volatile (						\
-	".set\tnoreorder\n\t"						\
 	v0_init								\
 	"syscall\n\t"							\
-	".set\treorder"							\
 	: "=r" (__v0), "+r" (__a3)					\
 	: input, "r" (__a0), "r" (__a1), "r" (__a2), "r" (__a4),	\
 	  "r" (__a5)							\

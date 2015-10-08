@@ -61,10 +61,8 @@
     .set reorder;							      \
     SINGLE_THREAD_P(v1);						      \
     bne zero, v1, L(pseudo_cancel);					      \
-    .set noreorder;							      \
     li v0, SYS_ify(syscall_name);					      \
     syscall;								      \
-    .set reorder;							      \
     bne a3, zero, 99b;					       		      \
     ret;								      \
   L(pseudo_cancel):							      \
@@ -77,10 +75,8 @@
     PSEUDO_LOADGP							      \
     sw v0, 44(sp);			/* save mask */			      \
     POPARGS_##args;			/* restore syscall args */	      \
-    .set noreorder;							      \
     li v0, SYS_ify (syscall_name);				      	      \
     syscall;								      \
-    .set reorder;							      \
     sw v0, 36(sp);			/* save syscall result */             \
     sw a3, 40(sp);			/* save syscall error flag */	      \
     lw a0, 44(sp);			/* pass mask as arg1 */		      \
@@ -89,11 +85,9 @@
     lw v0, 36(sp);			/* restore syscall result */          \
     lw a3, 40(sp);			/* restore syscall error flag */      \
     lw ra, 28(sp);			/* restore return address */	      \
-    .set noreorder;							      \
-    bne a3, zero, 99b;							      \
      RESTORESTK;						              \
+    bne a3, zero, 99b;							      \
   L(pseudo_end):							      \
-    .set reorder;
 
 # undef PSEUDO_END
 # define PSEUDO_END(sym) cfi_endproc; .end sym; .size sym,.-sym

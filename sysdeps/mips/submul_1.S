@@ -31,33 +31,46 @@ along with the GNU MP Library.  If not, see
 	.option pic2
 #endif
 ENTRY (__mpn_submul_1)
-	.set    noreorder
 #ifdef __PIC__
 	.cpload t9
 #endif
-	.set    nomacro
-
 	/* warm up phase 0 */
 	lw	$8,0($5)
 
 	/* warm up phase 1 */
 	addiu	$5,$5,4
+#if __mips_isa_rev < 6
 	multu	$8,$7
+#else
+	mulu	$11,$8,$7
+	muhu	$12,$8,$7
+#endif
+	
 
 	addiu	$6,$6,-1
-	beq	$6,$0,L(LC0)
 	move	$2,$0		/* zero cy2 */
+	beq	$6,$0,L(LC0)
 
 	addiu	$6,$6,-1
-	beq	$6,$0,L(LC1)
 	lw	$8,0($5)	/* load new s1 limb as early as possible */
+	beq	$6,$0,L(LC1)
 
 L(Loop):	lw	$10,0($4)
+#if __mips_isa_rev < 6
 	mflo	$3
 	mfhi	$9
+#else
+	move	$3,$11
+	move	$9,$12
+#endif
 	addiu	$5,$5,4
 	addu	$3,$3,$2	/* add old carry limb to low product limb */
+#if __mips_isa_rev < 6
 	multu	$8,$7
+#else
+	mulu	$11,$8,$7
+	muhu	$12,$8,$7
+#endif
 	lw	$8,0($5)	/* load new s1 limb as early as possible */
 	addiu	$6,$6,-1	/* decrement loop counter */
 	sltu	$2,$3,$2	/* carry from previous addition -> $2 */
@@ -66,16 +79,26 @@ L(Loop):	lw	$10,0($4)
 	addu	$2,$2,$10
 	sw	$3,0($4)
 	addiu	$4,$4,4
-	bne	$6,$0,L(Loop)	/* should be "bnel" */
 	addu	$2,$9,$2	/* add high product limb and carry from addition */
+	bne	$6,$0,L(Loop)	/* should be "bnel" */
 
 	/* cool down phase 1 */
 L(LC1):	lw	$10,0($4)
+#if __mips_isa_rev < 6
 	mflo	$3
 	mfhi	$9
+#else
+	move	$3,$11
+	move	$9,$12
+#endif
 	addu	$3,$3,$2
 	sltu	$2,$3,$2
+#if __mips_isa_rev < 6
 	multu	$8,$7
+#else
+	mulu	$11,$8,$7
+	muhu	$12,$8,$7
+#endif
 	subu	$3,$10,$3
 	sgtu	$10,$3,$10
 	addu	$2,$2,$10
@@ -85,14 +108,19 @@ L(LC1):	lw	$10,0($4)
 
 	/* cool down phase 0 */
 L(LC0):	lw	$10,0($4)
+#if __mips_isa_rev < 6
 	mflo	$3
 	mfhi	$9
+#else
+	move	$3,$11
+	move	$9,$12
+#endif
 	addu	$3,$3,$2
 	sltu	$2,$3,$2
 	subu	$3,$10,$3
 	sgtu	$10,$3,$10
 	addu	$2,$2,$10
 	sw	$3,0($4)
-	j	$31
 	addu	$2,$9,$2	/* add high product limb and carry from addition */
+	jr	$31
 	END (__mpn_submul_1)

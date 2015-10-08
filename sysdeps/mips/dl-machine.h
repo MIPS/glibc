@@ -67,10 +67,17 @@
    in l_info array.  */
 #define DT_MIPS(x) (DT_MIPS_##x - DT_LOPROC + DT_NUM)
 
-/* If there is a DT_MIPS_RLD_MAP entry in the dynamic section, fill it in
-   with the run-time address of the r_debug structure  */
+/* If there is a DT_MIPS_RLD_MAP_REL or DT_MIPS_RLD_MAP entry in the dynamic
+   section, fill in the debug map pointer with the run-time address of the
+   r_debug structure.  */
 #define ELF_MACHINE_DEBUG_SETUP(l,r) \
-do { if ((l)->l_info[DT_MIPS (RLD_MAP)]) \
+do { if ((l)->l_info[DT_MIPS (RLD_MAP_REL)]) \
+       { \
+	 char *ptr = (char *)(l)->l_info[DT_MIPS (RLD_MAP_REL)]; \
+	 ptr += (l)->l_info[DT_MIPS (RLD_MAP_REL)]->d_un.d_val; \
+	 *(ElfW(Addr) *)ptr = (ElfW(Addr)) (r); \
+       } \
+     else if ((l)->l_info[DT_MIPS (RLD_MAP)]) \
        *(ElfW(Addr) *)((l)->l_info[DT_MIPS (RLD_MAP)]->d_un.d_ptr) = \
        (ElfW(Addr)) (r); \
    } while (0)
@@ -97,6 +104,11 @@ elf_machine_matches_host (const ElfW(Ehdr) *ehdr)
 
   /* Don't link 2008-NaN and legacy-NaN objects together.  */
   if ((ehdr->e_flags & EF_MIPS_NAN2008) != ELF_MACHINE_NAN2008)
+    return 0;
+
+  /* Ensure that the old O32 FP64 ABI is never loaded, it is not supported
+     on linux.  */
+  if (ehdr->e_flags & EF_MIPS_FP64)
     return 0;
 
   switch (ehdr->e_machine)
@@ -136,10 +148,12 @@ elf_machine_load_address (void)
 {
   ElfW(Addr) addr;
 #ifndef __mips16
-  asm ("	.set noreorder\n"
-       "	" STRINGXP (PTR_LA) " %0, 0f\n"
+  asm ("	" STRINGXP (PTR_LA) " %0, 0f\n"
+#if __mips_isa_rev < 6
        "	bltzal $0, 0f\n"
-       "	nop\n"
+#else
+       "	bal 0f\n"
+#endif
        "0:	" STRINGXP (PTR_SUBU) " %0, $31, %0\n"
        "	.set reorder\n"
        :	"=r" (addr)
@@ -241,6 +255,11 @@ do {									\
       and not just plain _start.  */
 
 #ifndef __mips16
+#if __mips_isa_rev < 6
+#define LOAD_31 STRINGXP(bltzal $8) "," STRINGXP(.Lcoff)
+#else
+#define LOAD_31 STRINGXP(bal .Lcoff)
+#endif
 # define RTLD_START asm (\
 	".text\n\
 	" _RTLD_PROLOGUE(ENTRY_POINT) "\
@@ -256,7 +275,7 @@ do {									\
 	" STRINGXP(PTR_SUBIU) " $29, 16\n\
 	\n\
 	" STRINGXP(PTR_LA) " $8, .Lcoff\n\
-	bltzal $8, .Lcoff\n\
+	" LOAD_31 "\n\
 .Lcoff:	" STRINGXP(PTR_SUBU) " $8, $31, $8\n\
 	\n\
 	" STRINGXP(PTR_LA) " $25, _dl_start\n\

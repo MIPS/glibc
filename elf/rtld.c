@@ -358,7 +358,7 @@ _dl_start (void *arg)
     HP_TIMING_NOW (info.start_time);
 #endif
 
-  /* Partly clean the `bootstrap_map' structure up.  Don't use
+  /* Zero-initialize the `bootstrap_map' structure.  Don't use
      `memset' since it might not be built in or inlined and we cannot
      make function calls at this point.  Use '__builtin_memset' if we
      know it is available.  We do not have to clear the memory if we
@@ -366,12 +366,14 @@ _dl_start (void *arg)
      are initialized to zero by default.  */
 #ifndef DONT_USE_BOOTSTRAP_MAP
 # ifdef HAVE_BUILTIN_MEMSET
-  __builtin_memset (bootstrap_map.l_info, '\0', sizeof (bootstrap_map.l_info));
+  __builtin_memset (&bootstrap_map, '\0', sizeof (struct link_map));
 # else
-  for (size_t cnt = 0;
-       cnt < sizeof (bootstrap_map.l_info) / sizeof (bootstrap_map.l_info[0]);
-       ++cnt)
-    bootstrap_map.l_info[cnt] = 0;
+  {
+    char *p = (char *) &bootstrap_map;
+    char *pend = p + sizeof (struct link_map);
+    while (p < pend)
+      *(p++) = '\0';
+  }
 # endif
 #endif
 
