@@ -77,6 +77,10 @@ _init (int argc, char **argv, char **envp)
   /* First the initialization which normally would be done by the
      dynamic linker.  */
   _dl_non_dynamic_init ();
+
+#ifdef STACK_EXEC_OVERRIDE
+  STACK_EXEC_OVERRIDE ();
+#endif
 #endif
 
 #ifdef VDSO_SETUP
