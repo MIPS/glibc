@@ -1277,12 +1277,10 @@ cannot allocate TLS data structures for initial thread");
   else
     /* Adjust the PT_PHDR value by the runtime load address.  */
     l->l_phdr = (ElfW(Phdr) *) ((ElfW(Addr)) l->l_phdr + l->l_addr);
-  
+
   /* Program requests a non-executable stack, but architecture does
      not support it.  */
-  if ((stack_flags & PF_X) == 0
-      && ! (*GL(dl_allow_noexec_stack_p_hook)) ())
-    stack_flags |= PF_X;
+  (*GL(dl_stack_exec_override_hook)) (&stack_flags);
 
   if (__glibc_unlikely ((stack_flags &~ GL(dl_stack_flags)) & PF_X))
     {

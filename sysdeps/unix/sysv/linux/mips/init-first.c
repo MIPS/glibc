@@ -20,23 +20,7 @@
 #ifndef SHARED
 #include <ldsodefs.h>
 
-static inline void
-_mips_stack_exec_override (void)
-{
-  /* Program requests a non-executable stack, but architecture does
-     not support it.  */
-  if ((_dl_stack_flags & PF_X) == 0 &&
-      ! (getauxval (AT_FLAGS) & AT_FLAG_NOEXEC_BIT))
-    {
-      uintptr_t page = ((uintptr_t) __libc_stack_end
-		    & -(intptr_t) GLRO(dl_pagesize));
-      __mprotect ((void *) page, GLRO(dl_pagesize),
-		  PROT_READ | PROT_WRITE | PROT_EXEC);
-    }
-}
-
-# define STACK_EXEC_OVERRIDE _mips_stack_exec_override
-
-#endif
+#  define STACK_EXEC_OVERRIDE GL(dl_stack_exec_override)
+#endif /* !SHARED */
 
 #include <csu/init-first.c>

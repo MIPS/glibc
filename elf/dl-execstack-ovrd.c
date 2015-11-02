@@ -1,5 +1,4 @@
-/* Non-executable stack check for GNU dynamic linker.  MIPS specific
-   version.
+/* Non-executable stack check for GNU dynamic linker.  Stub version.
    Copyright (C) 2003-2015 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
@@ -17,21 +16,13 @@
    License along with the GNU C Library; if not, see
    <http://www.gnu.org/licenses/>.  */
 
-#include <elf.h>
 #include <ldsodefs.h>
 #include <errno.h>
-#include <misc/sys/auxv.h>
 
-/* FIXME: Temporary pattern for testing */
-#define AT_FLAG_NOEXEC_BIT 0x1
-
-bool
+void
 internal_function
-_dl_allow_noexec_stack_p (void)
+_dl_stack_exec_override (void* flags)
 {
-  if ((getauxval (AT_FLAGS) & AT_FLAG_NOEXEC_BIT) == 0)
-    return false;
-  else
-    return true;
+  return;
 }
-rtld_hidden_def (_dl_allow_noexec_stack_p)
+rtld_hidden_def (_dl_stack_exec_override)

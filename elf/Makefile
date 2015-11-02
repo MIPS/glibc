@@ -32,7 +32,7 @@ dl-routines	= $(addprefix dl-,load lookup object reloc deps hwcaps \
 				  runtime error init fini debug misc \
 				  version profile conflict tls origin scope \
 				  execstack caller open close trampoline \
-				  noexecstack)
+				  execstack-ovrd)
 ifeq (yes,$(use-ldconfig))
 dl-routines += dl-cache
 endif
@@ -123,7 +123,8 @@ tests = tst-tls1 tst-tls2 tst-tls9 tst-leaks1 \
 tests-static = tst-tls1-static tst-tls2-static tst-stackguard1-static \
 	       tst-leaks1-static tst-array1-static tst-array5-static \
 	       tst-ptrguard1-static tst-dl-iter-static \
-	       tst-tlsalign-static tst-tlsalign-extern-static
+	       tst-tlsalign-static tst-tlsalign-extern-static \
+	       tst-execstack-ovrd-static
 ifeq (yes,$(build-shared))
 tests-static += tst-tls9-static
 tst-tls9-static-ENV = \
@@ -159,7 +160,7 @@ endif
 test-srcs = tst-pathopt
 selinux-enabled := $(shell cat /selinux/enforce 2> /dev/null)
 ifneq ($(selinux-enabled),1)
-tests-execstack-yes = tst-execstack tst-execstack-needed tst-execstack-prog
+tests-execstack-yes = tst-execstack tst-execstack-needed tst-execstack-prog tst-execstack-ovrd
 endif
 endif
 ifeq ($(run-built-tests),yes)
@@ -902,6 +903,8 @@ LDFLAGS-tst-execstack-needed = -Wl,-z,noexecstack
 LDFLAGS-tst-execstack-prog = -Wl,-z,execstack
 CFLAGS-tst-execstack-prog.c += -Wno-trampolines
 CFLAGS-tst-execstack-mod.c += -Wno-trampolines
+LDFLAGS-tst-execstack-ovrd = -Wl,-z,execstack
+CFLAGS-tst-execstack-ovrd.c += -Wno-trampolines
 endif
 
 LDFLAGS-tst-array2 = $(no-as-needed)

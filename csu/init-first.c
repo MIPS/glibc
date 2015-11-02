@@ -79,7 +79,7 @@ _init (int argc, char **argv, char **envp)
   _dl_non_dynamic_init ();
 
 #ifdef STACK_EXEC_OVERRIDE
-  STACK_EXEC_OVERRIDE ();
+  STACK_EXEC_OVERRIDE (&GL(dl_stack_flags));
 #endif
 #endif
 

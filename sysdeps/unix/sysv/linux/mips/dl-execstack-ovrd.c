@@ -1,4 +1,5 @@
-/* Non-executable stack check for GNU dynamic linker.  Stub version.
+/* Non-executable stack check for GNU dynamic linker.  MIPS specific
+   version.
    Copyright (C) 2003-2015 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
@@ -16,13 +17,30 @@
    License along with the GNU C Library; if not, see
    <http://www.gnu.org/licenses/>.  */
 
+#include <elf.h>
 #include <ldsodefs.h>
 #include <errno.h>
+#include <misc/sys/auxv.h>
 
-bool
+#define AV_FLAGS_MIPS_GNU_STACK	(1 << 24) /* Non-executable stack supported. */
+
+void
 internal_function
-_dl_allow_noexec_stack_p (void)
+_dl_stack_exec_override (void* flags)
 {
-  return true;
+  if ((*(ElfW(Word) *)flags & PF_X) == 0
+      && (getauxval (AT_FLAGS) & AV_FLAGS_MIPS_GNU_STACK) == 0)
+    {
+#ifndef SHARED
+      /* For static executable, we need to set stack permission here. */
+      uintptr_t page = ((uintptr_t) __libc_stack_end
+		    & -(intptr_t) GLRO(dl_pagesize));
+      __mprotect ((void *) page, GLRO(dl_pagesize),
+		  PROT_READ | PROT_WRITE | PROT_EXEC);
+#endif /* !SHARED */
+      *(ElfW(Word) *)flags |= PF_X;
+    }
+
+  return;
 }
-rtld_hidden_def (_dl_allow_noexec_stack_p)
+rtld_hidden_def (_dl_stack_exec_override)
