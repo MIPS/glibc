@@ -1,4 +1,4 @@
-/* Non-executable stack check for GNU dynamic linker.  Stub version.
+/* Non-executable stack override for GNU dynamic linker.  Stub version.
    Copyright (C) 2003-2015 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
@@ -21,8 +21,8 @@
 
 void
 internal_function
-_dl_stack_exec_override (void* flags)
+_dl_exec_stack_override (void* flags)
 {
   return;
 }
-rtld_hidden_def (_dl_stack_exec_override)
+rtld_hidden_def (_dl_exec_stack_override)

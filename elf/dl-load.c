@@ -1280,7 +1280,7 @@ cannot allocate TLS data structures for initial thread");
 
   /* Program requests a non-executable stack, but architecture does
      not support it.  */
-  (*GL(dl_stack_exec_override_hook)) (&stack_flags);
+  (*GL(dl_exec_stack_override_hook)) (&stack_flags);
 
   if (__glibc_unlikely ((stack_flags &~ GL(dl_stack_flags)) & PF_X))
     {
