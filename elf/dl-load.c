@@ -1280,7 +1280,11 @@ cannot allocate TLS data structures for initial thread");
 
   /* Program requests a non-executable stack, but architecture does
      not support it.  */
-  (*GL(dl_exec_stack_override_hook)) (&stack_flags);
+  if (__glibc_unlikely ((*GL(dl_exec_stack_override_hook)) (&stack_flags) != 0))
+    {
+      errstring = N_("cannot override stack memory protections");
+      goto call_lose_errno;
+    }
 
   if (__glibc_unlikely ((stack_flags &~ GL(dl_stack_flags)) & PF_X))
     {

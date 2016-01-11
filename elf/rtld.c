@@ -768,7 +768,7 @@ dl_main (const ElfW(Phdr) *phdr,
   /* The explicit initialization here is cheaper than processing the reloc
      in the _rtld_local definition's initializer.  */
   GL(dl_make_stack_executable_hook) = &_dl_make_stack_executable;
-  GL(dl_stack_exec_override_hook) = &_dl_stack_exec_override;
+  GL(dl_exec_stack_override_hook) = &_dl_exec_stack_override;
 
   /* Process the environment variable which control the behaviour.  */
   process_envvars (&mode);

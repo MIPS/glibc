@@ -25,7 +25,7 @@
     Ref: arch/mips/include/asm/elf.h in kernel sources. */
 #define AV_FLAGS_MIPS_GNU_STACK	(1 << 24)
 
-void
+int
 internal_function
 _dl_exec_stack_override (void* flags)
 {
@@ -38,12 +38,11 @@ _dl_exec_stack_override (void* flags)
 		    & -(intptr_t) GLRO(dl_pagesize));
       if (__mprotect ((void *) page, GLRO(dl_pagesize),
 		      PROT_READ | PROT_WRITE | PROT_EXEC) < 0)
-	{
-	}
+	return errno;
 #endif /* !SHARED */
       *(ElfW(Word) *)flags |= PF_X;
     }
 
-  return;
+  return 0;
 }
 rtld_hidden_def (_dl_exec_stack_override)

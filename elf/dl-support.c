@@ -183,7 +183,7 @@ int (*_dl_make_stack_executable_hook) (void **) internal_function
   = _dl_make_stack_executable;
 
 /* Check if architecture allows non-executable stack.  */
-void (*_dl_exec_stack_override_hook) (void *) internal_function
+int (*_dl_exec_stack_override_hook) (void *) internal_function
   = _dl_exec_stack_override;
 
 

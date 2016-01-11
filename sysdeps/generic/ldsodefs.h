@@ -367,7 +367,7 @@ struct rtld_global
   EXTERN int (*_dl_make_stack_executable_hook) (void **) internal_function;
 
   /* Check if this architecture support non-executable stack segments.  */
-  EXTERN void (*_dl_exec_stack_override_hook) (void *) internal_function;
+  EXTERN int (*_dl_exec_stack_override_hook) (void *) internal_function;
 
   /* Prevailing state of the stack, PF_X indicating it's executable.  */
   EXTERN ElfW(Word) _dl_stack_flags;
@@ -634,7 +634,7 @@ rtld_hidden_proto (_dl_make_stack_executable)
 
 /* This is the initial value of GL(dl_exec_stack_override_hook).
    A threads library can change it.  */
-extern void _dl_exec_stack_override (void *) internal_function;
+extern int _dl_exec_stack_override (void *) internal_function;
 rtld_hidden_proto (_dl_exec_stack_override)
 
 /* Variable pointing to the end of the stack (or close to it).  This value

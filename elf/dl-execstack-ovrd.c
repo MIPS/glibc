@@ -19,10 +19,10 @@
 #include <ldsodefs.h>
 #include <errno.h>
 
-void
+int
 internal_function
 _dl_exec_stack_override (void* flags)
 {
-  return;
+  return 0;
 }
 rtld_hidden_def (_dl_exec_stack_override)
