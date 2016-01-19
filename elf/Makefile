@@ -903,8 +903,8 @@ LDFLAGS-tst-execstack-needed = -Wl,-z,noexecstack
 LDFLAGS-tst-execstack-prog = -Wl,-z,execstack
 CFLAGS-tst-execstack-prog.c += -Wno-trampolines
 CFLAGS-tst-execstack-mod.c += -Wno-trampolines
-LDFLAGS-tst-execstack-ovrd = -Wl,-z,execstack
-CFLAGS-tst-execstack-ovrd.c += -Wno-trampolines
+LDFLAGS-tst-execstack-ovrd = -Wl,-z,noexecstack
+LDFLAGS-tst-execstack-ovrd-static = -Wl,-z,noexecstack
 endif
 
 LDFLAGS-tst-array2 = $(no-as-needed)
