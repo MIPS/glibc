@@ -37,6 +37,7 @@ generate_locale ()
     # The makefile checks the timestamp of the LC_CTYPE file,
     # but localedef won't have touched it if it was able to
     # hard-link it to an existing file.
+    while [ ! -d ${common_objpfx}localedata/$out ]; do sleep 1; done;
     touch ${common_objpfx}localedata/$out/LC_CTYPE
   else
     echo "Charmap: \"${charmap}\" Inputfile: \"${input}\"" \
