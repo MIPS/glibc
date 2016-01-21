@@ -16,9 +16,6 @@
    License along with the GNU C Library; if not, see
    <http://www.gnu.org/licenses/>.  */
 
-#include <ldsodefs.h>
-#include <errno.h>
-
 int
 internal_function
 _dl_exec_stack_override (void* flags)

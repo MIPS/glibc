@@ -20,7 +20,7 @@
 #ifndef SHARED
 #include <ldsodefs.h>
 
-#  define EXEC_STACK_OVERRIDE GL(dl_exec_stack_override)
+# define EXEC_STACK_OVERRIDE GL(dl_exec_stack_override)
 #endif /* !SHARED */
 
 #include <csu/init-first.c>

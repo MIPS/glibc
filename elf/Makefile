@@ -160,7 +160,8 @@ endif
 test-srcs = tst-pathopt
 selinux-enabled := $(shell cat /selinux/enforce 2> /dev/null)
 ifneq ($(selinux-enabled),1)
-tests-execstack-yes = tst-execstack tst-execstack-needed tst-execstack-prog tst-execstack-ovrd
+tests-execstack-yes = tst-execstack tst-execstack-needed tst-execstack-prog \
+	tst-execstack-ovrd
 endif
 endif
 ifeq ($(run-built-tests),yes)
