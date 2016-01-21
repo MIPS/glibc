@@ -618,6 +618,9 @@ extern const struct rtld_global_ro _rtld_global_ro
 /* dl-support.c defines these and initializes them early on.  */
 extern const ElfW(Phdr) *_dl_phdr;
 extern size_t _dl_phnum;
+
+/* Empty definition to be overridden by arch-specific header.  */
+#define EXEC_STACK_OVERRIDE
 #endif
 
 #if IS_IN (rtld)
