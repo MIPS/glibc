@@ -1,3 +1,38 @@
+2016-01-25  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* sysdeps/unix/sysv/linux/mips/configure.ac: Set
+	`arch_minimum_kernel' to 4.5.0 if 2008 NaN encoding is used.
+	* sysdeps/unix/sysv/linux/mips/configure: Regenerate.
+
+2016-01-22  Paul E. Murphy  <murphyp@linux.vnet.ibm.com>
+
+	* nptl/tst-setuid3.c (is_invalid_barrier_ret): New function.
+	(thread_func): Use new function to simplify barrier check.
+	(do_test): Use new function to simplify checking barrier exit
+	code, and actually join the child thread.
+
+2016-01-22  Paul E. Murphy  <murphyp@linux.vnet.ibm.com>
+
+	* sysdeps/unix/sysv/linux/powerpc/htm.h	(__libc_tbegin): Remove
+	semicolon.
+	(__libc_tend): Likewise.
+	(__libc_tabort): Likewise.
+
+2016-01-22  Chung-Lin Tang  <cltang@codesourcery.com>
+
+	* sysdeps/nios2/libm-test-ulps: Update.
+	* sysdeps/unix/sysv/linux/nios2/localplt.data (__gtdf2): Add.
+	(__gtsf2): Likewise.
+	(__unorddf2): Likewise.
+	(__unordsf2): Likewise.
+	(__ledf2): Likewise.
+
+2016-01-20  Chris Metcalf  <cmetcalf@ezchip.com>
+
+	* nis/nis_table.c (__follow_path): Disable diagnostic for
+	uninitialized variable that is a false positive for gcc 4.7.
+	* stdio-common/vfscanf.c (_IO_vfwscanf): Likewise.
+
 2016-01-20  Roland McGrath  <roland@hack.frob.com>
 
 	* sysdeps/nacl/lowlevellock-futex.h
