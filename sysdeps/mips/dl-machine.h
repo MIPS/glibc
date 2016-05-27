@@ -746,7 +746,11 @@ elf_machine_reloc (struct link_map *map, ElfW(Addr) r_info,
 	break;
       }
 
+#if _MIPS_SIM == _ABI64
+    case (R_MIPS_64 << 8) | R_MIPS_IRELATIVE:
+#else
     case R_MIPS_IRELATIVE:
+#endif
 #ifndef RTLD_BOOTSTRAP
       /* The resolver routine is the symbol referenced by this relocation.
 	 To get the address of the function to use at runtime, the resolver

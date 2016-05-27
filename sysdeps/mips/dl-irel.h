@@ -53,8 +53,13 @@ elf_irel (const ElfW(Rel) *reloc)
 {
   ElfW(Addr) *const reloc_addr = (void *) reloc->r_offset;
   const unsigned long int r_type = ELFW(R_TYPE) (reloc->r_info);
+#if _MIPS_SIM == _ABI64
+  const unsigned long int irel_type = ((R_MIPS_64 << 8) | R_MIPS_IRELATIVE);
+#else
+  const unsigned long int irel_type = R_MIPS_IRELATIVE;
+#endif
 
-  if (__glibc_likely (r_type == R_MIPS_IRELATIVE))
+  if (__glibc_likely (r_type == irel_type))
     *reloc_addr = elf_ifunc_invoke (*reloc_addr);
   else if (r_type)
     __libc_fatal ("unexpected reloc type in static binary");
