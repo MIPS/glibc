@@ -8,3 +8,6 @@
 
 MULTIPLE_THREADS_OFFSET		thread_offsetof (header.multiple_threads)
 TID_OFFSET			thread_offsetof (tid)
+
+-- Not strictly offsets, used on syscall_cancel.S
+TCB_CANCELED_BITMASK		CANCELED_BITMASK
