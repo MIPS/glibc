@@ -74,7 +74,7 @@ __syscall_cancel_arch_end:
 1:
 	cfi_restore_state
 	ldq 	t12, __do_cancel(gp)	!literal!2
-	jsr 	ra, (t12), __cancel	!lituse_jsr!2
+	jsr 	ra, (t12), __do_cancel	!lituse_jsr!2
 	cfi_endproc
 END (__syscall_cancel_arch)
 libc_hidden_def (__syscall_cancel_arch)
