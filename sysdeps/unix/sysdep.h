@@ -120,30 +120,51 @@
 /* Cancellation macros.  */
 #include <syscall_types.h>
 
+/* Adjust both the __syscall_cancel and the SYSCALL_CANCEL macro to support
+   7 arguments instead of default 6 (curently only mip32).  It avoid add
+   the requirement to each architecture to support 7 argument macros
+   {INTERNAL,INLINE}_SYSCALL.  */
+#ifdef HAVE_CANCELABLE_SYSCALL_WITH_7_ARGS
+# define __SYSCALL_CANCEL7_ARG_DEF 	, __syscall_arg_t arg7
+# define __SYSCALL_CANCEL7_ARG		, 0
+# define __SYSCALL_CANCEL7_ARG7		, arg7
+#else
+# define __SYSCALL_CANCEL7_ARG_DEF
+# define __SYSCALL_CANCEL7_ARG
+# define __SYSCALL_CANCEL7_ARG7
+#endif
+
 long int __syscall_cancel (__syscall_arg_t nr, __syscall_arg_t arg1,
 			   __syscall_arg_t arg2, __syscall_arg_t arg3,
 			   __syscall_arg_t arg4, __syscall_arg_t arg5,
-			   __syscall_arg_t arg6);
+			   __syscall_arg_t arg6 __SYSCALL_CANCEL7_ARG_DEF);
 libc_hidden_proto (__syscall_cancel);
 
 #define __SYSCALL_CANCEL0(name) \
-  __syscall_cancel (__NR_##name, 0, 0, 0, 0, 0, 0)
+  __syscall_cancel (__NR_##name, 0, 0, 0, 0, 0, 0 \
+		    __SYSCALL_CANCEL7_ARG)
 #define __SYSCALL_CANCEL1(name, a1) \
-  __syscall_cancel (__NR_##name, __SSC (a1), 0, 0, 0, 0, 0)
+  __syscall_cancel (__NR_##name, __SSC (a1), 0, 0, 0, 0, 0 \
+		    __SYSCALL_CANCEL7_ARG)
 #define __SYSCALL_CANCEL2(name, a1, a2) \
-  __syscall_cancel (__NR_##name, __SSC (a1), __SSC (a2), 0, 0, 0, 0)
+  __syscall_cancel (__NR_##name, __SSC (a1), __SSC (a2), 0, 0, 0, 0 \
+		    __SYSCALL_CANCEL7_ARG)
 #define __SYSCALL_CANCEL3(name, a1, a2, a3) \
   __syscall_cancel (__NR_##name, __SSC (a1), __SSC (a2), __SSC (a3), \
-		    0, 0, 0)
+		    0, 0, 0 __SYSCALL_CANCEL7_ARG)
 #define __SYSCALL_CANCEL4(name, a1, a2, a3, a4) \
   __syscall_cancel (__NR_##name, __SSC (a1), __SSC (a2), __SSC (a3), \
-		    __SSC(a4), 0, 0)
+		    __SSC(a4), 0, 0 __SYSCALL_CANCEL7_ARG)
 #define __SYSCALL_CANCEL5(name, a1, a2, a3, a4, a5) \
   __syscall_cancel (__NR_##name, __SSC (a1), __SSC (a2), __SSC (a3), \
-		    __SSC(a4), __SSC (a5), 0)
+		    __SSC(a4), __SSC (a5), 0 __SYSCALL_CANCEL7_ARG)
 #define __SYSCALL_CANCEL6(name, a1, a2, a3, a4, a5, a6) \
   __syscall_cancel (__NR_##name, __SSC (a1), __SSC (a2), __SSC (a3), \
-		    __SSC (a4), __SSC (a5), __SSC (a6))
+		    __SSC (a4), __SSC (a5), __SSC (a6) \
+		    __SYSCALL_CANCEL7_ARG)
+#define __SYSCALL_CANCEL7(name, a1, a2, a3, a4, a5, a6, a7) \
+  __syscall_cancel (__NR_##name, __SSC (a1), __SSC (a2), __SSC (a3), \
+		    __SSC (a4), __SSC (a5), __SSC (a6), __SSC (a7))
 
 #define __SYSCALL_CANCEL_NARGS_X(a,b,c,d,e,f,g,h,n,...) n
 #define __SYSCALL_CANCEL_NARGS(...) \

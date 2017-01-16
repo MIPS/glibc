@@ -24,21 +24,22 @@ long int
 __syscall_cancel (__syscall_arg_t nr, __syscall_arg_t a1,
 		  __syscall_arg_t a2, __syscall_arg_t a3,
 		  __syscall_arg_t a4, __syscall_arg_t a5,
-		  __syscall_arg_t a6)
+		  __syscall_arg_t a6 __SYSCALL_CANCEL7_ARG_DEF)
 {
   struct pthread *self = THREAD_SELF;
 
   /* If cancellation is not enabled, call the syscall directly.  */
   if (self->cancelstate == PTHREAD_CANCEL_DISABLE)
     {
-      long int r = INTERNAL_SYSCALL_NCS_CALL (nr, a1, a2, a3, a4, a5, a6);
+      long int r = INTERNAL_SYSCALL_NCS_CALL (nr, a1, a2, a3, a4, a5, a6
+					      __SYSCALL_CANCEL7_ARG7);
       return INTERNAL_SYSCALL_ERROR_P (r) ? -INTERNAL_SYSCALL_ERRNO (r) : r;
     }
 
   /* Call the arch-specific entry points that contains the globals markers
      to be checked by SIGCANCEL handler.  */
   long int r = __syscall_cancel_arch (&self->cancelhandling, nr, a1, a2, a3,
-				      a4, a5, a6);
+				      a4, a5, a6 __SYSCALL_CANCEL7_ARG7);
 
   if (r == -EINTR
       && atomic_load_relaxed (&self->cancelhandling) & CANCELED_BITMASK
