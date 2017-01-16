@@ -10,3 +10,6 @@ MULTIPLE_THREADS_OFFSET	offsetof (struct pthread, header.multiple_threads)
 TLS_PRE_TCB_SIZE	sizeof (struct pthread)
 MUTEX_FUTEX		offsetof (pthread_mutex_t, __data.__lock)
 POINTER_GUARD		offsetof (tcbhead_t, pointer_guard)
+
+-- Not strictly offsets, used on syscall_cancel.S
+TCB_CANCELED_BITMASK	CANCELED_BITMASK
