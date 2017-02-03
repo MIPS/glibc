@@ -15,3 +15,6 @@ MUTEX_FUTEX		offsetof (pthread_mutex_t, __data.__lock)
 #define thread_offsetof(mem)    (unsigned int)(offsetof(struct pthread, mem) - sizeof(struct pthread))
 TID_THREAD_OFFSET		thread_offsetof (tid)
 MULTIPLE_THREADS_THREAD_OFFSET	thread_offsetof (header.multiple_threads)
+
+-- Not strictly offsets, used on syscall_cancel.S
+TCB_CANCELED_BIT	CANCELED_BIT

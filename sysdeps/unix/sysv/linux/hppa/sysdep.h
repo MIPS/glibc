@@ -24,6 +24,7 @@
 #include <sysdeps/unix/sysdep.h>
 #include <sysdeps/unix/sysv/linux/sysdep.h>
 #include <sysdeps/hppa/sysdep.h>
+#include <tls.h>
 
 /* Defines RTLD_PRIVATE_ERRNO.  */
 #include <dl-sysdep.h>
