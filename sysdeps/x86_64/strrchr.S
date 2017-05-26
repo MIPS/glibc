@@ -19,31 +19,50 @@
 
 #include <sysdep.h>
 
+#ifdef USE_AS_WCSRCHR
+# define PCMPEQ	pcmpeqd
+# define PMINU	pminud
+#else
+# define PCMPEQ	pcmpeqb
+# define PMINU	pminub
+#endif
+
 	.text
 ENTRY (strrchr)
 	movd	%esi, %xmm1
 	movq	%rdi, %rax
 	andl	$4095, %eax
+#ifndef USE_AS_WCSRCHR
 	punpcklbw	%xmm1, %xmm1
-	cmpq	$4032, %rax
 	punpcklwd	%xmm1, %xmm1
+#endif
 	pshufd	$0, %xmm1, %xmm1
+	cmpq	$4032, %rax
 	ja	L(cross_page)
 	movdqu	(%rdi), %xmm0
 	pxor	%xmm2, %xmm2
 	movdqa	%xmm0, %xmm3
-	pcmpeqb	%xmm1, %xmm0
-	pcmpeqb	%xmm2, %xmm3
+	PCMPEQ	%xmm1, %xmm0
+	PCMPEQ	%xmm2, %xmm3
 	pmovmskb	%xmm0, %ecx
 	pmovmskb	%xmm3, %edx
 	testq	%rdx, %rdx
 	je	L(next_48_bytes)
+#ifdef XUSE_AS_WCSRCHR
+	leaq	-4(%rdx), %rax
+#else
 	leaq	-1(%rdx), %rax
+#endif
 	xorq	%rdx, %rax
 	andq	%rcx, %rax
 	je	L(exit)
 	bsrq	%rax, %rax
 	addq	%rdi, %rax
+#ifdef USE_AS_WCSRCHR
+	subq	$3, %rax
+#endif
+	test	$1, %rax
+	jnz	L(hlt1)
 	ret
 
 	.p2align 4
@@ -51,21 +70,21 @@ L(next_48_bytes):
 	movdqu	16(%rdi), %xmm4
 	movdqa	%xmm4, %xmm5
 	movdqu	32(%rdi), %xmm3
-	pcmpeqb	%xmm1, %xmm4
-	pcmpeqb	%xmm2, %xmm5
+	PCMPEQ	%xmm1, %xmm4
+	PCMPEQ	%xmm2, %xmm5
 	movdqu	48(%rdi), %xmm0
 	pmovmskb	%xmm5, %edx
 	movdqa	%xmm3, %xmm5
-	pcmpeqb	%xmm1, %xmm3
-	pcmpeqb	%xmm2, %xmm5
-	pcmpeqb	%xmm0, %xmm2
+	PCMPEQ	%xmm1, %xmm3
+	PCMPEQ	%xmm2, %xmm5
+	PCMPEQ	%xmm0, %xmm2
 	salq	$16, %rdx
 	pmovmskb	%xmm3, %r8d
 	pmovmskb	%xmm5, %eax
 	pmovmskb	%xmm2, %esi
 	salq	$32, %r8
 	salq	$32, %rax
-	pcmpeqb	%xmm1, %xmm0
+	PCMPEQ	%xmm1, %xmm0
 	orq	%rdx, %rax
 	movq	%rsi, %rdx
 	pmovmskb	%xmm4, %esi
@@ -78,12 +97,22 @@ L(next_48_bytes):
 	orq	%rcx, %rsi
 	orq	%rdx, %rax
 	je	L(loop_header2)
+#ifdef XUSE_AS_WCSRCHR
+	leaq	-4(%rax), %rcx
+#else
 	leaq	-1(%rax), %rcx
+#endif
 	xorq	%rax, %rcx
 	andq	%rcx, %rsi
 	je	L(exit)
 	bsrq	%rsi, %rsi
+#ifdef USE_AS_WCSRCHR
+	leaq	-3(%rdi,%rsi), %rax
+#else
 	leaq	(%rdi,%rsi), %rax
+#endif
+	test	$1, %rax
+	jnz	L(hlt2)
 	ret
 
 	.p2align 4
@@ -109,24 +138,24 @@ L(loop_entry):
 	movdqa	48(%rdi), %xmm2
 	movdqa	%xmm3, %xmm0
 	movdqa	16(%rdi), %xmm4
-	pminub	%xmm2, %xmm0
+	PMINU	%xmm2, %xmm0
 	movdqa	(%rdi), %xmm5
-	pminub	%xmm4, %xmm0
-	pminub	%xmm5, %xmm0
-	pcmpeqb	%xmm7, %xmm0
+	PMINU	%xmm4, %xmm0
+	PMINU	%xmm5, %xmm0
+	PCMPEQ	%xmm7, %xmm0
 	pmovmskb	%xmm0, %eax
 	movdqa	%xmm5, %xmm0
-	pcmpeqb	%xmm1, %xmm0
+	PCMPEQ	%xmm1, %xmm0
 	pmovmskb	%xmm0, %r9d
 	movdqa	%xmm4, %xmm0
-	pcmpeqb	%xmm1, %xmm0
+	PCMPEQ	%xmm1, %xmm0
 	pmovmskb	%xmm0, %edx
 	movdqa	%xmm3, %xmm0
-	pcmpeqb	%xmm1, %xmm0
+	PCMPEQ	%xmm1, %xmm0
 	salq	$16, %rdx
 	pmovmskb	%xmm0, %r10d
 	movdqa	%xmm2, %xmm0
-	pcmpeqb	%xmm1, %xmm0
+	PCMPEQ	%xmm1, %xmm0
 	salq	$32, %r10
 	orq	%r10, %rdx
 	pmovmskb	%xmm0, %r8d
@@ -135,12 +164,12 @@ L(loop_entry):
 	orq	%r8, %rdx
 	testl	%eax, %eax
 	je	L(loop64)
-	pcmpeqb	%xmm6, %xmm4
-	pcmpeqb	%xmm6, %xmm3
-	pcmpeqb	%xmm6, %xmm5
+	PCMPEQ	%xmm6, %xmm4
+	PCMPEQ	%xmm6, %xmm3
+	PCMPEQ	%xmm6, %xmm5
 	pmovmskb	%xmm4, %eax
 	pmovmskb	%xmm3, %r10d
-	pcmpeqb	%xmm6, %xmm2
+	PCMPEQ	%xmm6, %xmm2
 	pmovmskb	%xmm5, %r9d
 	salq	$32, %r10
 	salq	$16, %rax
@@ -149,18 +178,40 @@ L(loop_entry):
 	orq	%r9, %rax
 	salq	$48, %r8
 	orq	%r8, %rax
+#ifdef USE_AS_WCSRCHR
+	leaq	-4(%rax), %r8
+#else
 	leaq	-1(%rax), %r8
+#endif
 	xorq	%rax, %r8
 	andq	%r8, %rdx
 	cmovne	%rdi, %rcx
 	cmovne	%rdx, %rsi
 	bsrq	%rsi, %rsi
+#ifdef USE_AS_WCSRCHR
+	leaq	-3(%rcx,%rsi), %rax
+#else
 	leaq	(%rcx,%rsi), %rax
+#endif
+	test	$1, %rax
+	jnz	L(hlt3)
 	ret
 
+L(hlt1):
+	hlt
+L(hlt2):
+	hlt
+L(hlt3):
+	hlt
+L(hlt4):
+	hlt
 	.p2align 4
 L(no_c_found):
+#ifdef USE_AS_WCSRCHR
+	movl	$4, %esi
+#else
 	movl	$1, %esi
+#endif
 	xorl	%ecx, %ecx
 	jmp	L(loop_header)
 
@@ -177,26 +228,26 @@ L(cross_page):
 	movdqu	(%rax), %xmm5
 	movdqa	%xmm5, %xmm6
 	movdqu	16(%rax), %xmm4
-	pcmpeqb	%xmm1, %xmm5
-	pcmpeqb	%xmm0, %xmm6
+	PCMPEQ	%xmm1, %xmm5
+	PCMPEQ	%xmm0, %xmm6
 	movdqu	32(%rax), %xmm3
 	pmovmskb	%xmm6, %esi
 	movdqa	%xmm4, %xmm6
 	movdqu	48(%rax), %xmm2
-	pcmpeqb	%xmm1, %xmm4
-	pcmpeqb	%xmm0, %xmm6
+	PCMPEQ	%xmm1, %xmm4
+	PCMPEQ	%xmm0, %xmm6
 	pmovmskb	%xmm6, %edx
 	movdqa	%xmm3, %xmm6
-	pcmpeqb	%xmm1, %xmm3
-	pcmpeqb	%xmm0, %xmm6
-	pcmpeqb	%xmm2, %xmm0
+	PCMPEQ	%xmm1, %xmm3
+	PCMPEQ	%xmm0, %xmm6
+	PCMPEQ	%xmm2, %xmm0
 	salq	$16, %rdx
 	pmovmskb	%xmm3, %r9d
 	pmovmskb	%xmm6, %r8d
 	pmovmskb	%xmm0, %ecx
 	salq	$32, %r9
 	salq	$32, %r8
-	pcmpeqb	%xmm1, %xmm2
+	PCMPEQ	%xmm1, %xmm2
 	orq	%r8, %rdx
 	salq	$48, %rcx
 	pmovmskb	%xmm5, %r8d
@@ -215,14 +266,25 @@ L(cross_page):
 	shrq	%cl, %rsi
 	testq	%rdx, %rdx
 	je	L(loop_header2)
+#ifdef XUSE_AS_WCSRCHR
+	leaq	-4(%rdx), %rax
+#else
 	leaq	-1(%rdx), %rax
+#endif
 	xorq	%rdx, %rax
 	andq	%rax, %rsi
 	je	L(exit)
 	bsrq	%rsi, %rax
 	addq	%rdi, %rax
+#ifdef USE_AS_WCSRCHR
+	subq	$3, %rax
+#endif
+	test	$1, %rax
+	jnz	L(hlt4)
 	ret
 END (strrchr)
 
+#ifndef USE_AS_WCSRCHR
 weak_alias (strrchr, rindex)
 libc_hidden_builtin_def (strrchr)
+#endif
