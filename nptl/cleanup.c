@@ -28,8 +28,10 @@ __pthread_register_cancel (__pthread_unwind_buf_t *buf)
   struct pthread *self = THREAD_SELF;
 
   /* Store old info.  */
-  ibuf->priv.data.prev = THREAD_GETMEM (self, cleanup_jmp_buf);
-  ibuf->priv.data.cleanup = THREAD_GETMEM (self, cleanup);
+  UNWIND_BUF_PRIV (self, ibuf)->data.prev
+    = THREAD_GETMEM (self, cleanup_jmp_buf);
+  UNWIND_BUF_PRIV (self, ibuf)->data.cleanup
+    = THREAD_GETMEM (self, cleanup);
 
   /* Store the new cleanup handler info.  */
   THREAD_SETMEM (self, cleanup_jmp_buf, (struct pthread_unwind_buf *) buf);
@@ -42,7 +44,9 @@ __cleanup_fct_attribute
 __pthread_unregister_cancel (__pthread_unwind_buf_t *buf)
 {
   struct pthread_unwind_buf *ibuf = (struct pthread_unwind_buf *) buf;
+  struct pthread *self = THREAD_SELF;
 
-  THREAD_SETMEM (THREAD_SELF, cleanup_jmp_buf, ibuf->priv.data.prev);
+  THREAD_SETMEM (self, cleanup_jmp_buf,
+		 UNWIND_BUF_PRIV (self, ibuf)->data.prev);
 }
 hidden_def (__pthread_unregister_cancel)
