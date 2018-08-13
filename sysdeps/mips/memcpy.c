@@ -26,6 +26,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
 */
 
+#ifdef  __GNUC__
+
+#undef memcpy
+
 /* Typical observed latency in cycles in fetching from DRAM.  */
 #define LATENCY_CYCLES 63
 
@@ -411,3 +415,9 @@ memcpy (void *a, const void *b, size_t len) __overloadable
   return unaligned_words (a, b, words, bytes, ret);
 #endif
 }
+
+libc_hidden_builtin_def (memcpy)
+
+#else
+#include <string/memcpy.c>
+#endif

@@ -26,6 +26,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
 */
 
+#ifdef  __GNUC__
+
+#undef memset
+
 #include <string.h>
 
 #if _MIPS_SIM == _ABIO32 || _MIPS_SIM == _ABIP32
@@ -40,7 +44,7 @@ typedef struct bits8
 {
   reg_t B0:8, B1:8, B2:8, B3:8;
 #if SIZEOF_reg_t == 8
-  reg_t B4:8, B5:8, B6:8, B7:8
+  reg_t B4:8, B5:8, B6:8, B7:8;
 #endif
 } bits8_t;
 typedef struct bits16
@@ -174,3 +178,10 @@ memset (void *a, int ifill, size_t len)
   bytes = len % sizeof (reg_t);
   return do_aligned_words (a, retval, fill.v, words, bytes);
 }
+
+
+libc_hidden_builtin_def (memset)
+
+#else
+#include <string/memset.c>
+#endif
