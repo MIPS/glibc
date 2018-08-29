@@ -41,27 +41,23 @@
    on such conservative assumptions, but if compiled with the correct
    -mtune=xx options, will perform even better on those specific
    platforms.  */
-#if _MIPS_TUNE_OCTEON2 || _MIPS_TUNE_OCTEON3
+#if defined(_MIPS_TUNE_OCTEON2) || defined(_MIPS_TUNE_OCTEON3)
  #define CACHE_LINE 128
  #define BLOCK_CYCLES 30
  #undef LATENCY_CYCLES
  #define LATENCY_CYCLES 150
-#elif _MIPS_TUNE_I6400 || _MIPS_TUNE_I6500
+#elif defined(_MIPS_TUNE_I6400) || defined(_MIPS_TUNE_I6500)
  #define CACHE_LINE 64
  #define BLOCK_CYCLES 16
-#elif _MIPS_TUNE_P6600
+#elif defined(_MIPS_TUNE_P6600)
  #define CACHE_LINE 32
  #define BLOCK_CYCLES 12
-#elif _MIPS_TUNE_INTERAPTIV ||  _MIPS_TUNE_INTERAPTIV_MR2
+#elif defined(_MIPS_TUNE_INTERAPTIV) || defined(_MIPS_TUNE_INTERAPTIV_MR2)
  #define CACHE_LINE 32
  #define BLOCK_CYCLES 30
 #else
  #define CACHE_LINE 32
- #if __nanomips__
-  #define BLOCK_CYCLES 20
- #else
-  #define BLOCK_CYCLES 11
- #endif
+ #define BLOCK_CYCLES 11
 #endif
 
 /* Pre-fetch look ahead = ceil (latency / block-cycles)  */
@@ -75,7 +71,7 @@
 #if !defined(UNALIGNED_INSTR_SUPPORT)
 /* does target have unaligned lw/ld/ualw/uald instructions? */
  #define UNALIGNED_INSTR_SUPPORT 0
- #if (__mips_isa_rev < 6 && !__mips1) || __nanomips__
+#if (__mips_isa_rev < 6 && !defined(__mips1))
   #undef UNALIGNED_INSTR_SUPPORT
   #define UNALIGNED_INSTR_SUPPORT 1
  #endif
@@ -83,7 +79,7 @@
 #if !defined(HW_UNALIGNED_SUPPORT)
 /* Does target have hardware support for unaligned accesses?  */
  #define HW_UNALIGNED_SUPPORT 0
- #if __mips_isa_rev >= 6 && !defined (__nanomips__)
+ #if __mips_isa_rev >= 6
   #undef HW_UNALIGNED_SUPPORT
   #define HW_UNALIGNED_SUPPORT 1
  #endif
@@ -97,7 +93,7 @@
 
 #include <string.h>
 
-#if __mips64
+#ifdef __mips64
 typedef unsigned long long reg_t;
 typedef struct
 {
@@ -158,7 +154,7 @@ do_bytes_remaining (void *a, const void *b, unsigned long len, void *ret)
       DO_BYTE(x, 0);
       DO_BYTE(x, 1);
       DO_BYTE(x, 2);
-#if __mips64
+#ifdef __mips64
       DO_BYTE(x, 3);
       DO_BYTE(x, 4);
       DO_BYTE(x, 5);
@@ -302,7 +298,7 @@ unaligned_words (reg_t * a, const reg_t * b,
       x[1] = bw.b.B1;
       x[2] = bw.b.B2;
       x[3] = bw.b.B3;
-#if __mips64
+#ifdef __mips64
       x[4] = bw.b.B4;
       x[5] = bw.b.B5;
       x[6] = bw.b.B6;
@@ -373,15 +369,11 @@ memcpy (void *a, const void *b, size_t len) __overloadable
 
   /* Start pre-fetches ahead of time.  */
   if (len > CACHE_LINE * (PREF_AHEAD - 1))
-    {
-      for (i = 1; i < PREF_AHEAD - 1; i++)
-	PREFETCH (b + CACHE_LINE * i);
-    }
+    for (i = 1; i < PREF_AHEAD - 1; i++)
+      PREFETCH ((char *)b + CACHE_LINE * i);
   else
-    {
-      for (i = 1; i < len / CACHE_LINE; i++)
-	PREFETCH (b + CACHE_LINE * i);
-    }
+    for (i = 1; i < len / CACHE_LINE; i++)
+      PREFETCH ((char *)b + CACHE_LINE * i);
 
   /* Align the second pointer to word/dword alignment.
      Note that the pointer is only 32-bits for o32/n32 ABIs.  For
