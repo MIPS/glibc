@@ -86,7 +86,7 @@
 #endif
 #define ENABLE_PREFETCH     1
 #if ENABLE_PREFETCH
- #define PREFETCH(addr)  __builtin_prefetch (addr, 0, 0);
+ #define PREFETCH(addr)  __builtin_prefetch (addr, 0, 0)
 #else
  #define PREFETCH(addr)
 #endif
