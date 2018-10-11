@@ -1,3 +1,24 @@
+2018-10-23  Albert ARIBAUD <albert.aribaud@3adev.fr>
+
+	* bits/timesize.h: New file.
+	* stdlib/Makefile (headers): Add bits/timesize.h.
+	* sysdeps/unix/sysv/linux/bits/msq-pad.h: Replace __WORDSIZE with __TIMESIZE.
+	* sysdeps/unix/sysv/linux/bits/sem-pad.h: Likewise.
+	* sysdeps/unix/sysv/linux/bits/shm-pad.h: Likewise.
+	* sysdeps/unix/sysv/linux/hppa/bits/msq-pad.h: Likewise.
+	* sysdeps/unix/sysv/linux/hppa/bits/sem-pad.h: Likewise.
+	* sysdeps/unix/sysv/linux/hppa/bits/shm-pad.h: Likewise.
+	* sysdeps/unix/sysv/linux/mips/bits/msq-pad.h: Likewise.
+	* sysdeps/unix/sysv/linux/powerpc/bits/msq-pad.h: Likewise.
+	* sysdeps/unix/sysv/linux/powerpc/bits/sem-pad.h: Likewise.
+	* sysdeps/unix/sysv/linux/powerpc/bits/shm-pad.h: Likewise.
+	* sysdeps/unix/sysv/linux/sparc/bits/msq-pad.h: Likewise.
+	* sysdeps/unix/sysv/linux/sparc/bits/sem-pad.h: Likewise.
+	* sysdeps/unix/sysv/linux/sparc/bits/shm-pad.h: Likewise.
+	* sysdeps/unix/sysv/linux/x86/bits/msq-pad.h: Delete file.
+	* sysdeps/unix/sysv/linux/x86/bits/shm-pad.h: Likewise.
+	* sysdeps/unix/sysv/linux/x86/bits/timesize.h: New file.
+
 2018-10-23  Adhemerval Zanella  <adhemerval.zanella@linaro.org>
 
 	* misc/tst-preadvwritev2-common.c (IOV_MAX): Define if not
