@@ -4,3 +4,6 @@
 #define thread_offsetof(mem)	(long)(offsetof (struct pthread, mem) - TLS_TCB_OFFSET - TLS_PRE_TCB_SIZE)
 
 MULTIPLE_THREADS_OFFSET		thread_offsetof (header.multiple_threads)
+
+-- Not strictly offsets, used on syscall_cancel.S
+TCB_CANCELED_BITMASK		CANCELED_BITMASK
