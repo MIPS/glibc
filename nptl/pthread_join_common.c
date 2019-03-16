@@ -20,6 +20,8 @@
 #include <atomic.h>
 #include <stap-probe.h>
 
+#include <sys/time.h>
+
 static void
 cleanup (void *arg)
 {

@@ -19,7 +19,7 @@
 #include <errno.h>
 #include <signal.h>
 #include <time.h>
-#include <sys/poll.h>
+#include <sys/select.h>
 #include <kernel-features.h>
 #include <sysdep-cancel.h>
 
