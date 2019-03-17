@@ -17,6 +17,7 @@
    <http://www.gnu.org/licenses/>.  */
 
 #include <string.h>
+#include <strings.h>
 
 extern __typeof (bcopy)   __bcopy_ppc attribute_hidden;
 extern __typeof (memmove) __memmove_ppc attribute_hidden;
