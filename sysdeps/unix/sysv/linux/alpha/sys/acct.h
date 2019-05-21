@@ -16,8 +16,8 @@
    <http://www.gnu.org/licenses/>.  */
 
 #ifndef _SYS_ACCT_H
-
 #define _SYS_ACCT_H	1
+
 #include <features.h>
 
 #include <bits/types/time_t.h>
