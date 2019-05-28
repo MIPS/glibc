@@ -15,7 +15,6 @@
    License along with the GNU C Library; if not, see
    <http://www.gnu.org/licenses/>.  */
 
-#define __need_size_t
 #include <stddef.h>
 #include <stdio.h>
 #include <errno.h>
