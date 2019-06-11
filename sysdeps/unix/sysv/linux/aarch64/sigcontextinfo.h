@@ -17,7 +17,7 @@
    <http://www.gnu.org/licenses/>.  */
 
 #include <stdint.h>
-#include <sys/ucontext.h>
+#include <signal.h>
 
 #define SIGCONTEXT siginfo_t *_si, ucontext_t *
 #define GET_PC(ctx) ((void *) (uintptr_t) (ctx)->uc_mcontext.pc)

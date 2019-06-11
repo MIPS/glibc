@@ -21,8 +21,8 @@
    use of struct sigcontext does not conform to POSIX namespace
    requirements.  */
 
-#ifndef _SYS_UCONTEXT_H
-#define _SYS_UCONTEXT_H	1
+#ifndef _BITS_UCONTEXT_H
+#define _BITS_UCONTEXT_H	1
 
 #include <features.h>
 
@@ -51,4 +51,4 @@ typedef struct ucontext_t
 
 #undef __ctx
 
-#endif /* sys/ucontext.h */
+#endif /* bits/ucontext.h */

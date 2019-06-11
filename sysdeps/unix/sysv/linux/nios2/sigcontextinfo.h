@@ -16,8 +16,7 @@
    License along with the GNU C Library; if not, see
    <http://www.gnu.org/licenses/>.  */
 
-#include <sys/ucontext.h>
-#include "kernel-features.h"
+#include <signal.h>
 
 #define SIGCONTEXT siginfo_t *_si, ucontext_t *
 #define GET_PC(ctx) ((void *) (ctx)->uc_mcontext.regs[27])

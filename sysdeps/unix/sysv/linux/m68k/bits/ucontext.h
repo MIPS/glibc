@@ -17,8 +17,8 @@
 
 /* System V/m68k ABI compliant context switching support.  */
 
-#ifndef _SYS_UCONTEXT_H
-#define _SYS_UCONTEXT_H	1
+#ifndef _BITS_UCONTEXT_H
+#define _BITS_UCONTEXT_H	1
 
 #include <features.h>
 
@@ -81,15 +81,6 @@ enum
   R_PS = 17
 # define R_PS	R_PS
 };
-
-/* Structure to describe FPU registers.  */
-typedef struct
-{
-  int f_pcr;
-  int f_psr;
-  int f_fpiaddr;
-  int f_fpregs[8][3];
-} fpregset_t;
 #endif
 
 #ifdef __USE_MISC
@@ -98,28 +89,42 @@ typedef struct
 # define __ctx(fld) __ ## fld
 #endif
 
+/* Structure to describe FPU registers.  */
+typedef struct
+{
+  int __ctx(f_pcr);
+  int __ctx(f_psr);
+  int __ctx(f_fpiaddr);
+#ifdef __mcoldfire__
+  int __ctx(f_fpregs)[8][2];
+#else
+  int __ctx(f_fpregs)[8][3];
+#endif
+} fpregset_t;
+
 /* Context to describe whole processor state.  */
 typedef struct
 {
   int __ctx(version);
   gregset_t __ctx(gregs);
+  fpregset_t __ctx(fpregs);
 } mcontext_t;
 
 #ifdef __USE_MISC
-# define MCONTEXT_VERSION 1
+# define MCONTEXT_VERSION 2
 #endif
 
 /* Userlevel context.  */
 typedef struct ucontext_t
 {
-  unsigned long int __ctx(uc_flags);
+  unsigned long __ctx(uc_flags);
   struct ucontext_t *uc_link;
-  sigset_t uc_sigmask;
   stack_t uc_stack;
   mcontext_t uc_mcontext;
-  long int __glibc_reserved1[201];
+  unsigned long __glibc_reserved1[80];
+  sigset_t uc_sigmask;
 } ucontext_t;
 
 #undef __ctx
 
-#endif /* sys/ucontext.h */
+#endif /* bits/ucontext.h */
