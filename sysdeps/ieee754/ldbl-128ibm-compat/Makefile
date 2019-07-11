@@ -6,6 +6,15 @@ ldbl-extra-routines += fwscanf \
 		       vwscanf
 endif
 
+ifeq ($(subdir),wcsmbs)
+ldbl-extra-routines += isoc99_fwscanf \
+		       isoc99_swscanf \
+		       isoc99_wscanf \
+		       isoc99_vfwscanf \
+		       isoc99_vswscanf \
+		       isoc99_vwscanf
+endif
+
 ifeq ($(subdir),stdio-common)
 ldbl-extra-routines += printf_size \
 		       asprintf \
@@ -32,7 +41,13 @@ ldbl-extra-routines += printf_size \
 		       vfscanf \
 		       vscanf \
 		       vsscanf \
-		       vfwscanf
+		       vfwscanf \
+		       isoc99_fscanf \
+		       isoc99_scanf \
+		       isoc99_sscanf \
+		       isoc99_vfscanf \
+		       isoc99_vscanf \
+		       isoc99_vsscanf
 
 # Printing long double values with IEEE binary128 format reuses part
 # of the internal float128 implementation (__printf_fp, __printf_fphex,
@@ -67,12 +82,30 @@ CFLAGS-test-wscanf-ibm128.c += -mabi=ibmlongdouble -Wno-psabi
 
 $(objpfx)test-wscanf-ieee128: gnulib-tests += $(f128-loader-link)
 
+tests-internal += test-isoc99-scanf-ieee128 test-isoc99-scanf-ibm128
+CFLAGS-test-isoc99-scanf-ieee128.c += -mfloat128 -mabi=ieeelongdouble -Wno-psabi -std=c99
+CFLAGS-test-isoc99-scanf-ibm128.c += -mabi=ibmlongdouble -Wno-psabi -std=c99
+
+$(objpfx)test-isoc99-scanf-ieee128: gnulib-tests += $(f128-loader-link)
+
+tests-internal += test-isoc99-wscanf-ieee128 test-isoc99-wscanf-ibm128
+CFLAGS-test-isoc99-wscanf-ieee128.c += -mfloat128 -mabi=ieeelongdouble -Wno-psabi -std=c99
+CFLAGS-test-isoc99-wscanf-ibm128.c += -mabi=ibmlongdouble -Wno-psabi -std=c99
+
+$(objpfx)test-isoc99-wscanf-ieee128: gnulib-tests += $(f128-loader-link)
+
 ifeq ($(run-built-tests),yes)
 tests-special += $(objpfx)test-scanf-ieee128.out
 tests-special += $(objpfx)test-scanf-ibm128.out
 
 tests-special += $(objpfx)test-wscanf-ieee128.out
 tests-special += $(objpfx)test-wscanf-ibm128.out
+
+tests-special += $(objpfx)test-isoc99-scanf-ieee128.out
+tests-special += $(objpfx)test-isoc99-scanf-ibm128.out
+
+tests-special += $(objpfx)test-isoc99-wscanf-ieee128.out
+tests-special += $(objpfx)test-isoc99-wscanf-ibm128.out
 endif
 
 $(objpfx)test-scanf-ieee128.out: \
@@ -96,6 +129,30 @@ $(objpfx)test-wscanf-ieee128.out: \
 $(objpfx)test-wscanf-ibm128.out: \
   ../sysdeps/ieee754/ldbl-128ibm-compat/test-scanf-ldbl-compat.sh \
   $(objpfx)test-wscanf-ibm128
+	$(SHELL) $^ '$(test-program-prefix)' $@; \
+	$(evaluate-test)
+
+$(objpfx)test-isoc99-scanf-ieee128.out: \
+  ../sysdeps/ieee754/ldbl-128ibm-compat/test-isoc99-scanf-ldbl-compat.sh \
+  $(objpfx)test-isoc99-scanf-ieee128
+	$(SHELL) $^ '$(test-program-prefix)' $@; \
+	$(evaluate-test)
+
+$(objpfx)test-isoc99-scanf-ibm128.out: \
+  ../sysdeps/ieee754/ldbl-128ibm-compat/test-isoc99-scanf-ldbl-compat.sh \
+  $(objpfx)test-isoc99-scanf-ibm128
+	$(SHELL) $^ '$(test-program-prefix)' $@; \
+	$(evaluate-test)
+
+$(objpfx)test-isoc99-wscanf-ieee128.out: \
+  ../sysdeps/ieee754/ldbl-128ibm-compat/test-isoc99-scanf-ldbl-compat.sh \
+  $(objpfx)test-isoc99-wscanf-ieee128
+	$(SHELL) $^ '$(test-program-prefix)' $@; \
+	$(evaluate-test)
+
+$(objpfx)test-isoc99-wscanf-ibm128.out: \
+  ../sysdeps/ieee754/ldbl-128ibm-compat/test-isoc99-scanf-ldbl-compat.sh \
+  $(objpfx)test-isoc99-wscanf-ibm128
 	$(SHELL) $^ '$(test-program-prefix)' $@; \
 	$(evaluate-test)
 
