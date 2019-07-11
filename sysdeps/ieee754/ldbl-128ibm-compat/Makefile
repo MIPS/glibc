@@ -47,7 +47,10 @@ ldbl-extra-routines += printf_size \
 		       isoc99_sscanf \
 		       isoc99_vfscanf \
 		       isoc99_vscanf \
-		       isoc99_vsscanf
+		       isoc99_vsscanf \
+		       obprintf \
+		       obstack_chk \
+		       vobstack_chk
 
 # Printing long double values with IEEE binary128 format reuses part
 # of the internal float128 implementation (__printf_fp, __printf_fphex,
@@ -69,6 +72,14 @@ CFLAGS-test-printf-ibm128.c += -mabi=ibmlongdouble -Wno-psabi
 tests-internal += test-wprintf-ieee128 test-wprintf-ibm128
 CFLAGS-test-wprintf-ieee128.c += -mfloat128 -mabi=ieeelongdouble -Wno-psabi
 CFLAGS-test-wprintf-ibm128.c += -mabi=ibmlongdouble -Wno-psabi
+
+tests-internal += test-obstack-ieee128 test-obstack-ibm128
+CFLAGS-test-obstack-ieee128.c += -mfloat128 -mabi=ieeelongdouble -Wno-psabi
+CFLAGS-test-obstack-ibm128.c += -mabi=ibmlongdouble -Wno-psabi
+
+tests-internal += test-obstack-chk-ieee128 test-obstack-chk-ibm128
+CFLAGS-test-obstack-chk-ieee128.c += -mfloat128 -mabi=ieeelongdouble -Wno-psabi
+CFLAGS-test-obstack-chk-ibm128.c += -mabi=ibmlongdouble -Wno-psabi
 
 tests-internal += test-scanf-ieee128 test-scanf-ibm128
 CFLAGS-test-scanf-ieee128.c += -mfloat128 -mabi=ieeelongdouble -Wno-psabi
