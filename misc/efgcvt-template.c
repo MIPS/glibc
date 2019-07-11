@@ -20,33 +20,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/param.h>
-#include <float.h>
 #include <libc-lock.h>
 #include <math_ldbl_opt.h>
-
-#ifndef FLOAT_TYPE
-# define FLOAT_TYPE double
-# define FUNC_PREFIX
-# define FLOAT_FMT_FLAG
-/* Actually we have to write (DBL_DIG + log10 (DBL_MAX_10_EXP)) but we
-   don't have log10 available in the preprocessor.  */
-# define MAXDIG (NDIGIT_MAX + 3)
-# define FCVT_MAXDIG (DBL_MAX_10_EXP + MAXDIG)
-# if DBL_MANT_DIG == 53
-#  define NDIGIT_MAX 17
-# elif DBL_MANT_DIG == 24
-#  define NDIGIT_MAX 9
-# elif DBL_MANT_DIG == 56
-#  define NDIGIT_MAX 18
-# else
-/* See IEEE 854 5.6, table 2 for this formula.  Unfortunately we need a
-   compile time constant here, so we cannot use it.  */
-#  error "NDIGIT_MAX must be precomputed"
-#  define NDIGIT_MAX (lrint (ceil (M_LN2 / M_LN10 * DBL_MANT_DIG + 1.0)))
-# endif
-#else
-# define LONG_DOUBLE_CVT
-#endif
 
 #define APPEND(a, b) APPEND2 (a, b)
 #define APPEND2(a, b) a##b

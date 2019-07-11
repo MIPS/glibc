@@ -17,7 +17,6 @@
    <https://www.gnu.org/licenses/>.  */
 
 #include <errno.h>
-#include <float.h>
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
@@ -26,38 +25,6 @@
 #include <sys/param.h>
 #include <math_ldbl_opt.h>
 
-#ifndef FLOAT_TYPE
-# define FLOAT_TYPE double
-# define FUNC_PREFIX
-# define FLOAT_FMT_FLAG
-# define FLOAT_NAME_EXT
-# define FLOAT_MIN_10_EXP DBL_MIN_10_EXP
-# if DBL_MANT_DIG == 53
-#  define NDIGIT_MAX 17
-# elif DBL_MANT_DIG == 24
-#  define NDIGIT_MAX 9
-# elif DBL_MANT_DIG == 56
-#  define NDIGIT_MAX 18
-# else
-/* See IEEE 854 5.6, table 2 for this formula.  Unfortunately we need a
-   compile time constant here, so we cannot use it.  */
-#  error "NDIGIT_MAX must be precomputed"
-#  define NDIGIT_MAX (lrint (ceil (M_LN2 / M_LN10 * DBL_MANT_DIG + 1.0)))
-# endif
-# if DBL_MIN_10_EXP == -37
-#  define FLOAT_MIN_10_NORM	1.0e-37
-# elif DBL_MIN_10_EXP == -307
-#  define FLOAT_MIN_10_NORM	1.0e-307
-# elif DBL_MIN_10_EXP == -4931
-#  define FLOAT_MIN_10_NORM	1.0e-4931
-# else
-/* libc can't depend on libm.  */
-#  error "FLOAT_MIN_10_NORM must be precomputed"
-#  define FLOAT_MIN_10_NORM	exp10 (DBL_MIN_10_EXP)
-# endif
-#else
-# define LONG_DOUBLE_CVT
-#endif
 
 #define APPEND(a, b) APPEND2 (a, b)
 #define APPEND2(a, b) a##b
