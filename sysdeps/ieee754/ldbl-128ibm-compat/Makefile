@@ -13,6 +13,12 @@ ldbl-extra-routines += isoc99_fwscanf \
 		       isoc99_vfwscanf \
 		       isoc99_vswscanf \
 		       isoc99_vwscanf
+
+tests-internal += test-wcstold-ibm128 test-wcstold-ieee128
+CFLAGS-test-wcstold-ieee128.c += -mfloat128 -mabi=ieeelongdouble -Wno-psabi
+CFLAGS-test-wcstold-ibm128.c += -mabi=ibmlongdouble -Wno-psabi
+
+$(objpfx)test-wcstold-ieee128: gnulib-tests += $(f128-loader-link)
 endif
 
 ifeq ($(subdir),stdio-common)
@@ -287,6 +293,12 @@ CFLAGS-test-strfmon-ibm128.c += -mabi=ibmlongdouble -Wno-psabi
 CFLAGS-test-strfmon-ieee128.c += -mfloat128 -mabi=ieeelongdouble -Wno-psabi
 $(objpfx)tst-strfmon-ibm128.out: $(gen-locales)
 $(objpfx)tst-strfmon-ieee128.out: $(gen-locales)
+
+tests-internal += test-strfrom-ibm128 test-strfrom-ieee128
+CFLAGS-test-strfrom-ieee128.c += -mfloat128 -mabi=ieeelongdouble -Wno-psabi
+CFLAGS-test-strfrom-ibm128.c += -mabi=ibmlongdouble -Wno-psabi
+
+$(objpfx)test-strfrom-ieee128: gnulib-tests += $(f128-loader-link)
 endif
 
 # Add IEEE binary128 files as make targets.
