@@ -19,7 +19,12 @@ do_test (void)
 		rather than in the binary.  printf and _IO_printf
 		are aliased and which one comes first in the
 		hash table is up to the linker.  */
-	     && strcmp (i.dli_sname, "_IO_printf") != 0);
+	     && strcmp (i.dli_sname, "_IO_printf") != 0
+	     /* On architectures where long double with IEEE binary128
+		format is available as a third option (initially, true
+		for powerpc64le), printf may be redirected to
+		__printfieee128.  */
+	     && strcmp (i.dli_sname, "__printfieee128") != 0);
 }
 
 #include <support/test-driver.c>
