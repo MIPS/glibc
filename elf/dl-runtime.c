@@ -23,7 +23,6 @@
 #include <unistd.h>
 #include <sys/param.h>
 #include <ldsodefs.h>
-#include <sysdep-cancel.h>
 #include "dynamic-link.h"
 #include <tls.h>
 #include <dl-irel.h>

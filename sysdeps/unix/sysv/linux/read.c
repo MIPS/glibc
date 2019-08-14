@@ -17,7 +17,7 @@
    <https://www.gnu.org/licenses/>.  */
 
 #include <unistd.h>
-#include <sysdep-cancel.h>
+#include <sysdep.h>
 
 /* Read NBYTES into BUF from FD.  Return the number read or -1.  */
 ssize_t

@@ -17,7 +17,6 @@
    <https://www.gnu.org/licenses/>.  */
 
 #include <sys/socket.h>
-#include <sysdep-cancel.h>
 #include <socketcall.h>
 #include <shlib-compat.h>
 

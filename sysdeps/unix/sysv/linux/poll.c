@@ -19,7 +19,6 @@
 #include <errno.h>
 #include <sys/poll.h>
 
-#include <sysdep-cancel.h>
 #include <sys/syscall.h>
 
 int

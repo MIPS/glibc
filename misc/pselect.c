@@ -21,7 +21,6 @@
 #include <stddef.h>	/* For NULL.  */
 #include <sys/time.h>
 #include <sys/select.h>
-#include <sysdep-cancel.h>
 
 
 /* Check the first NFDS descriptors each in READFDS (if not NULL) for read

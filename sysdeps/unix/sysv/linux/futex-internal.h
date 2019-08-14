@@ -22,7 +22,6 @@
 #include <sysdeps/nptl/futex-internal.h>
 #include <errno.h>
 #include <lowlevellock-futex.h>
-#include <sysdep-cancel.h>
 
 /* See sysdeps/nptl/futex-internal.h for documentation; this file only
    contains Linux-specific comments.

@@ -18,7 +18,6 @@
 #include <errno.h>
 #include <signal.h>
 #include <string.h>
-#include <sysdep-cancel.h>
 
 int
 __sigtimedwait (const sigset_t *set, siginfo_t *info,

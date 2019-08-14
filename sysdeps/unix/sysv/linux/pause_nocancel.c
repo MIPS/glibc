@@ -18,7 +18,6 @@
 
 #include <signal.h>
 #include <unistd.h>
-#include <sysdep-cancel.h>
 #include <not-cancel.h>
 
 int

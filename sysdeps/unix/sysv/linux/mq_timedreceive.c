@@ -17,7 +17,7 @@
    <https://www.gnu.org/licenses/>.  */
 
 #include <mqueue.h>
-#include <sysdep-cancel.h>
+#include <sysdep.h>
 
 /* Receive the oldest from highest priority messages in message queue
    MQDES, stop waiting if ABS_TIMEOUT expires.  */

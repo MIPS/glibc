@@ -19,7 +19,6 @@
 #include <sys/random.h>
 #include <errno.h>
 #include <unistd.h>
-#include <sysdep-cancel.h>
 
 #ifdef __NR_getrandom
 /* Write up to LENGTH bytes of randomness starting at BUFFER.

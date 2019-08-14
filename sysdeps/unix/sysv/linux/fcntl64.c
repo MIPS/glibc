@@ -23,7 +23,6 @@
 #undef __fcntl
 #include <stdarg.h>
 #include <errno.h>
-#include <sysdep-cancel.h>
 
 #ifndef __NR_fcntl64
 # define __NR_fcntl64 __NR_fcntl

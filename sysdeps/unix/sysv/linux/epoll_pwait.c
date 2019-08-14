@@ -20,7 +20,6 @@
 #include <unistd.h>
 #include <sys/epoll.h>
 
-#include <sysdep-cancel.h>
 #include <sys/syscall.h>
 
 #ifdef __NR_epoll_pwait

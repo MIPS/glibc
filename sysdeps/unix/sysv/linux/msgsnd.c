@@ -18,7 +18,7 @@
 
 #include <sys/msg.h>
 #include <ipc_priv.h>
-#include <sysdep-cancel.h>
+#include <sysdep.h>
 
 int
 __libc_msgsnd (int msqid, const void *msgp, size_t msgsz, int msgflg)

@@ -17,7 +17,7 @@
    <https://www.gnu.org/licenses/>.  */
 
 #include <sys/uio.h>
-#include <sysdep-cancel.h>
+#include <sysdep.h>
 
 #if !defined(__NR_preadv64v2) && defined(__NR_preadv2)
 # define __NR_preadv64v2 __NR_preadv2

@@ -18,7 +18,6 @@
 
 #include <stdlib.h>
 #include <ldsodefs.h>
-#include <sysdep-cancel.h>
 
 
 int

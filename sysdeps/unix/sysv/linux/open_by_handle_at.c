@@ -19,7 +19,7 @@
 #include <fcntl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <sysdep-cancel.h>
+#include <sysdep.h>
 
 int
 open_by_handle_at (int mount_fd, struct file_handle *handle, int flags)

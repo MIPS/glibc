@@ -19,7 +19,6 @@
 #include <fcntl.h>
 #include <stdarg.h>
 #include <errno.h>
-#include <sysdep-cancel.h>
 
 #ifndef __OFF_T_MATCHES_OFF64_T
 

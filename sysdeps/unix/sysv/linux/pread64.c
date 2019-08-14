@@ -17,7 +17,7 @@
    <https://www.gnu.org/licenses/>.  */
 
 #include <unistd.h>
-#include <sysdep-cancel.h>
+#include <sysdep.h>
 
 #ifndef __NR_pread64
 # define __NR_pread64 __NR_pread

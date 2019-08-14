@@ -21,8 +21,6 @@
 #include <time.h>
 #include <sys/poll.h>
 #include <kernel-features.h>
-#include <sysdep-cancel.h>
-
 
 #ifdef __NR_pselect6
 # ifndef __ASSUME_PSELECT

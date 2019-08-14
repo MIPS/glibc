@@ -17,7 +17,6 @@
    <https://www.gnu.org/licenses/>.  */
 
 #include <errno.h>
-#include <sysdep-cancel.h>
 #include <unistd.h>
 
 ssize_t

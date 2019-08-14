@@ -19,7 +19,6 @@
 #include <errno.h>
 #include <sys/resource.h>
 #include <stddef.h>
-#include <sysdep-cancel.h>
 
 /* Wait for a child to die.  When one does, put its status in *STAT_LOC
    and return its process ID.  For errors, return (pid_t) -1.  */

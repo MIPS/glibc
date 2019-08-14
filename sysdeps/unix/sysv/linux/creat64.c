@@ -18,7 +18,6 @@
 
 #include <fcntl.h>
 #include <sys/types.h>
-#include <sysdep-cancel.h>
 
 /* Create FILE with protections MODE.  */
 int

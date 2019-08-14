@@ -25,7 +25,6 @@
 #include <dlfcn.h>
 #include <ldsodefs.h>
 #include <dl-hash.h>
-#include <sysdep-cancel.h>
 #include <dl-tls.h>
 #include <dl-irel.h>
 

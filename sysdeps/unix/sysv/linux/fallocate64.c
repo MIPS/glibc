@@ -17,7 +17,6 @@
 
 #include <errno.h>
 #include <fcntl.h>
-#include <sysdep-cancel.h>
 
 
 /* Reserve storage for the data of the file associated with FD.  */

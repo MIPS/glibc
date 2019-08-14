@@ -18,7 +18,7 @@
 
 #include <fcntl.h>
 #include <sys/uio.h>
-#include <sysdep-cancel.h>
+#include <sysdep.h>
 
 ssize_t
 vmsplice (int fd, const struct iovec *iov, size_t count, unsigned int flags)

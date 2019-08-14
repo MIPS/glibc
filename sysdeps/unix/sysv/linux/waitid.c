@@ -19,7 +19,6 @@
 #include <stddef.h>
 #include <errno.h>
 #include <sys/wait.h>
-#include <sysdep-cancel.h>
 
 int
 __waitid (idtype_t idtype, id_t id, siginfo_t *infop, int options)

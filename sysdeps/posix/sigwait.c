@@ -20,7 +20,6 @@
 #include <errno.h>
 #include <signal.h>
 #include <stddef.h>		/* For NULL.  */
-#include <sysdep-cancel.h>
 
 /* This is our dummy signal handler we use here.  */
 static void ignore_signal (int sig);

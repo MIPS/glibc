@@ -17,7 +17,7 @@
    <https://www.gnu.org/licenses/>.  */
 
 #include <sys/uio.h>
-#include <sysdep-cancel.h>
+#include <sysdep.h>
 
 #if !defined(__NR_pwritev64v2) && defined(__NR_pwritev2)
 # define __NR_pwritev64v2 __NR_pwritev2

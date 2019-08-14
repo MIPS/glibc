@@ -17,7 +17,7 @@
    <https://www.gnu.org/licenses/>.  */
 
 #include <unistd.h>
-#include <sysdep-cancel.h>
+#include <sysdep.h>
 
 #ifndef __NR_pwrite64
 # define __NR_pwrite64 __NR_pwrite

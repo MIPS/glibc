@@ -22,7 +22,6 @@
 #undef sigpause
 
 #include <sigset-cvt-mask.h>
-#include <sysdep-cancel.h>
 
 int
 __sigpause (int sig_or_mask, int is_sig)

@@ -19,7 +19,6 @@
 #include <fcntl.h>
 #include <stdarg.h>
 #include <errno.h>
-#include <sysdep-cancel.h>
 #include <not-cancel.h>
 
 #ifndef __NR_fcntl64

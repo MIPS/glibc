@@ -21,7 +21,6 @@
 
 #ifndef __ASSEMBLER__
 #include <sysdep.h>
-#include <sysdep-cancel.h>
 #include <time.h>
 #include <sysdeps/unix/sysdep.h>
 #include <kernel-features.h>

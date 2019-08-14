@@ -29,7 +29,6 @@
 #include <ldsodefs.h>
 #include <sys/types.h>
 #include <sys/mman.h>
-#include <sysdep-cancel.h>
 #include <tls.h>
 #include <stap-probe.h>
 

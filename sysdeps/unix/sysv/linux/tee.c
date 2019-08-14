@@ -17,7 +17,7 @@
    <https://www.gnu.org/licenses/>.  */
 
 #include <fcntl.h>
-#include <sysdep-cancel.h>
+#include <sysdep.h>
 
 ssize_t
 tee (int src, int dest, size_t len, unsigned int flags)

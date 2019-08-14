@@ -28,7 +28,6 @@
 #include <sys/param.h>
 #include <libc-lock.h>
 #include <ldsodefs.h>
-#include <sysdep-cancel.h>
 #include <tls.h>
 #include <stap-probe.h>
 #include <atomic.h>

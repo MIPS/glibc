@@ -18,7 +18,7 @@
 
 #include <unistd.h>
 #include <sys/uio.h>
-#include <sysdep-cancel.h>
+#include <sysdep.h>
 
 ssize_t
 __writev (int fd, const struct iovec *iov, int iovcnt)

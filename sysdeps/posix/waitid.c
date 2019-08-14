@@ -24,7 +24,6 @@
 #include <stddef.h>
 #include <sys/wait.h>
 #include <sys/types.h>
-#include <sysdep-cancel.h>
 
 
 #ifdef DO_WAITID

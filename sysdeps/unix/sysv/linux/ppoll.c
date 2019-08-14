@@ -20,8 +20,6 @@
 #include <signal.h>
 #include <time.h>
 #include <sys/poll.h>
-#include <sysdep-cancel.h>
-
 
 int
 ppoll (struct pollfd *fds, nfds_t nfds, const struct timespec *timeout,
