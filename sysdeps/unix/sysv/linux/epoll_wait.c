@@ -16,12 +16,8 @@
    License along with the GNU C Library.  If not, see
    <https://www.gnu.org/licenses/>.  */
 
-#include <stddef.h>
-#include <unistd.h>
-#include <sys/types.h>
 #include <sys/epoll.h>
-
-#include <sysdep-cancel.h>
+#include <sysdep.h>
 
 int
 epoll_wait (int epfd, struct epoll_event *events, int maxevents, int timeout)

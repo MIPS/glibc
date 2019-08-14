@@ -17,8 +17,8 @@
    <https://www.gnu.org/licenses/>.  */
 
 #include <errno.h>
-#include <sysdep-cancel.h>
 #include <unistd.h>
+#include <sysdep.h>
 
 ssize_t
 copy_file_range (int infd, __off64_t *pinoff,

@@ -18,7 +18,7 @@
 #include <errno.h>
 #include <termios.h>
 #include <sys/ioctl.h>
-#include <sysdep-cancel.h>
+#include <sysdep.h>
 
 /* Wait for pending output to be written on FD.  */
 int

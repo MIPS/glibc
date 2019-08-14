@@ -16,12 +16,9 @@
    License along with the GNU C Library.  If not, see
    <https://www.gnu.org/licenses/>.  */
 
-#include <sys/time.h>
-#include <sys/types.h>
 #include <sys/select.h>
-#include <errno.h>
-#include <sysdep-cancel.h>
 #include <shlib-compat.h>
+#include <sysdep.h>
 
 int
 __new_select (int nfds, fd_set *readfds, fd_set *writefds, fd_set *exceptfds,

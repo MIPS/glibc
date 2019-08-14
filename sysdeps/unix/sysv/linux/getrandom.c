@@ -19,7 +19,7 @@
 #include <sys/random.h>
 #include <errno.h>
 #include <unistd.h>
-#include <sysdep-cancel.h>
+#include <sysdep.h>
 
 /* Write up to LENGTH bytes of randomness starting at BUFFER.
    Return the number of bytes written, or -1 on error.  */

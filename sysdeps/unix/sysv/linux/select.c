@@ -16,11 +16,9 @@
    License along with the GNU C Library.  If not, see
    <https://www.gnu.org/licenses/>.  */
 
-#include <sys/time.h>
-#include <sys/types.h>
+#include <kernel-features.h>
 #include <sys/select.h>
-#include <errno.h>
-#include <sysdep-cancel.h>
+#include <sysdep.h>
 #include <time64-support.h>
 
 /* Check the first NFDS descriptors each in READFDS (if not NULL) for read

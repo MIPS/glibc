@@ -17,7 +17,7 @@
    <https://www.gnu.org/licenses/>.  */
 
 #include <sys/uio.h>
-#include <sysdep-cancel.h>
+#include <sysdep.h>
 
 ssize_t
 pwritev64v2 (int fd, const struct iovec *vector, int count, off64_t offset,

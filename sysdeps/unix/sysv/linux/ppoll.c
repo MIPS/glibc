@@ -16,14 +16,10 @@
    License along with the GNU C Library; if not, see
    <https://www.gnu.org/licenses/>.  */
 
-#include <errno.h>
-#include <signal.h>
-#include <time.h>
-#include <sys/poll.h>
-#include <sysdep-cancel.h>
 #include <kernel-features.h>
+#include <sys/poll.h>
 #include <time64-support.h>
-
+#include <sysdep.h>
 
 int
 __ppoll64 (struct pollfd *fds, nfds_t nfds, const struct __timespec64 *timeout,

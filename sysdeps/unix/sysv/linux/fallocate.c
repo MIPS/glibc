@@ -15,9 +15,8 @@
    License along with the GNU C Library; if not, see
    <https://www.gnu.org/licenses/>.  */
 
-#include <errno.h>
 #include <fcntl.h>
-#include <sysdep-cancel.h>
+#include <sysdep.h>
 
 #ifndef __OFF_T_MATCHES_OFF64_T
 /* Reserve storage for the data of the file associated with FD.  */

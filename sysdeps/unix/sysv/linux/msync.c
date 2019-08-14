@@ -17,7 +17,7 @@
    <https://www.gnu.org/licenses/>.  */
 
 #include <sys/mman.h>
-#include <sysdep-cancel.h>
+#include <sysdep.h>
 
 int
 msync (void *addr, size_t length, int flags)

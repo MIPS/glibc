@@ -21,7 +21,6 @@
 
 #ifndef __ASSEMBLER__
 # include <sysdep.h>
-# include <sysdep-cancel.h>
 # include <kernel-features.h>
 #endif
 

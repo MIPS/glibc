@@ -16,7 +16,7 @@
    <https://www.gnu.org/licenses/>.  */
 
 #include <signal.h>
-#include <sysdep-cancel.h>
+#include <sysdep.h>
 
 /* Change the set of blocked signals to SET,
    wait until a signal arrives, and restore the set of blocked signals.  */

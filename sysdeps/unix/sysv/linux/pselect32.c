@@ -17,7 +17,7 @@
    <https://www.gnu.org/licenses/>.  */
 
 #include <sys/select.h>
-#include <sysdep-cancel.h>
+#include <sysdep.h>
 
 #ifndef __ASSUME_TIME64_SYSCALLS
 

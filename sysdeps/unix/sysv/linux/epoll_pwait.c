@@ -15,13 +15,8 @@
    License along with the GNU C Library; if not, see
    <https://www.gnu.org/licenses/>.  */
 
-#include <errno.h>
-#include <signal.h>
-#include <unistd.h>
 #include <sys/epoll.h>
-
-#include <sysdep-cancel.h>
-#include <sys/syscall.h>
+#include <sysdep.h>
 
 /* Wait for events on an epoll instance "epfd". Returns the number of
    triggered events returned in "events" buffer. Or -1 in case of

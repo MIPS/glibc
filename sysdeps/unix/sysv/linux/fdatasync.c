@@ -18,7 +18,7 @@
    <https://www.gnu.org/licenses/>.  */
 
 #include <unistd.h>
-#include <sysdep-cancel.h>
+#include <sysdep.h>
 
 /* Synchronize at least the data part of a file with the underlying
    media.  */

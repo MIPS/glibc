@@ -16,7 +16,7 @@
    <https://www.gnu.org/licenses/>.  */
 
 #include <sys/uio.h>
-#include <sysdep-cancel.h>
+#include <sysdep.h>
 
 #ifdef __ASSUME_PWRITEV
 

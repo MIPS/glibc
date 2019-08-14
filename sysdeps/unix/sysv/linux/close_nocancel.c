@@ -17,7 +17,6 @@
    <https://www.gnu.org/licenses/>.  */
 
 #include <unistd.h>
-#include <sysdep-cancel.h>
 #include <not-cancel.h>
 
 int

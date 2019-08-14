@@ -17,7 +17,6 @@
 
 #include <fcntl.h>
 #include <sys/types.h>
-#include <sysdep-cancel.h>
 
 #undef	creat
 

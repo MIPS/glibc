@@ -17,7 +17,7 @@
    <https://www.gnu.org/licenses/>.  */
 
 #include <fcntl.h>
-#include <sysdep-cancel.h>
+#include <sysdep.h>
 
 ssize_t
 splice (int fd_in, loff_t *off_in, int fd_out, loff_t *off_out, size_t len,

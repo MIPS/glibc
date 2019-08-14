@@ -17,7 +17,7 @@
    <https://www.gnu.org/licenses/>.  */
 
 #include <mqueue.h>
-#include <sysdep-cancel.h>
+#include <sysdep.h>
 
 /* Add message pointed by MSG_PTR to message queue MQDES, stop blocking
    on full message queue if ABS_TIMEOUT expires.  */

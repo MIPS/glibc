@@ -20,7 +20,6 @@
 #include <signal.h>
 #include <sys/socket.h>
 
-#include <sysdep-cancel.h>
 #include <sys/syscall.h>
 #include <socketcall.h>
 #include <kernel-features.h>

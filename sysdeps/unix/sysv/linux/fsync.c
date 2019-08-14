@@ -18,7 +18,7 @@
    <https://www.gnu.org/licenses/>.  */
 
 #include <unistd.h>
-#include <sysdep-cancel.h>
+#include <sysdep.h>
 
 /* Make all changes done to FD actually appear on disk.  */
 int

@@ -17,7 +17,7 @@
    <https://www.gnu.org/licenses/>.  */
 
 #include <ipc_priv.h>
-#include <sysdep-cancel.h>
+#include <sysdep.h>
 
 ssize_t
 __libc_msgrcv (int msqid, void *msgp, size_t msgsz, long int msgtyp,

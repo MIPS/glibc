@@ -17,7 +17,6 @@
    <https://www.gnu.org/licenses/>.  */
 
 #include <time.h>
-#include <sysdep-cancel.h>
 
 #include "thrd_priv.h"
 

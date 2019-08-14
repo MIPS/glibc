@@ -19,8 +19,8 @@
 #include <sys/wait.h>
 #include <sys/resource.h>
 #include <sys/types.h>
-#include <sysdep-cancel.h>
 #include <tv32-compat.h>
+#include <sysdep.h>
 
 pid_t
 __wait4_time64 (pid_t pid, int *stat_loc, int options, struct __rusage64 *usage)

@@ -24,7 +24,6 @@
 #include <ldsodefs.h>
 #include <dl-hash.h>
 #include <dl-machine.h>
-#include <sysdep-cancel.h>
 #include <libc-lock.h>
 #include <tls.h>
 #include <atomic.h>

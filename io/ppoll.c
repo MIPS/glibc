@@ -21,8 +21,6 @@
 #include <signal.h>
 #include <stddef.h>	/* For NULL.  */
 #include <sys/poll.h>
-#include <sysdep-cancel.h>
-#include <time.h>
 
 
 int

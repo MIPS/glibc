@@ -17,6 +17,7 @@
 
 #include <signal.h>
 #include <sysdep.h>
+#include <string.h>
 
 int
 __sigtimedwait64 (const sigset_t *set, siginfo_t *info,

@@ -16,7 +16,6 @@
    <https://www.gnu.org/licenses/>.  */
 
 #include <signal.h>
-#include <sysdep-cancel.h>
 
 /* Return any pending signal or wait for one for the given time.  */
 int

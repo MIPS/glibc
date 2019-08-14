@@ -20,7 +20,6 @@
 #include <signal.h>
 #include <time.h>
 #include <sys/poll.h>
-#include <sysdep-cancel.h>
 
 #ifndef __ASSUME_PSELECT
 int

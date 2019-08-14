@@ -18,8 +18,8 @@
 #include <time.h>
 #include <kernel-features.h>
 #include <errno.h>
+#include <sysdep.h>
 
-#include <sysdep-cancel.h>
 #include "kernel-posix-cpu-timers.h"
 
 #include <shlib-compat.h>

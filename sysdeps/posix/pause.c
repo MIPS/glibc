@@ -18,7 +18,6 @@
 
 #include <signal.h>
 #include <unistd.h>
-#include <sysdep-cancel.h>
 #include <sigsetops.h>
 
 /* Suspend the process until a signal arrives.

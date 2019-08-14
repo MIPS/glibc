@@ -18,7 +18,6 @@
 #include <errno.h>
 #include <time.h>
 
-
 /* Pause execution for a number of nanoseconds.  */
 int
 __nanosleep (const struct timespec *requested_time,

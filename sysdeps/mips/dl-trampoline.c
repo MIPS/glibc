@@ -24,7 +24,6 @@
 #include <elf.h>
 #include <ldsodefs.h>
 #include <dl-machine.h>
-#include <sysdep-cancel.h>
 
 /* Get link map for callers object containing STUB_PC.  */
 static inline struct link_map *

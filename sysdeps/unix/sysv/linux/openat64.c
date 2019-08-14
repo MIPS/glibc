@@ -18,8 +18,7 @@
 
 #include <fcntl.h>
 #include <stdarg.h>
-
-#include <sysdep-cancel.h>
+#include <sysdep.h>
 
 #ifdef __OFF_T_MATCHES_OFF64_T
 # define EXTRA_OPEN_FLAGS 0

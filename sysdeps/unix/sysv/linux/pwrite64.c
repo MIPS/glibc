@@ -17,7 +17,7 @@
    <https://www.gnu.org/licenses/>.  */
 
 #include <unistd.h>
-#include <sysdep-cancel.h>
+#include <sysdep.h>
 #include <shlib-compat.h>
 
 ssize_t
