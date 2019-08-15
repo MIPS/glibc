@@ -18,23 +18,27 @@
 
 #include <pthread.h>
 #include <signal.h>
-#include <stdio.h>
-#include <unistd.h>
+
+#include <support/xunistd.h>
+#include <support/xthread.h>
+#include <support/check.h>
+#include <support/process_state.h>
 
 
+/* The pipe will be used pass the thread TID to master thread.  */
+static int tidfd[2];
+/* The pipe will be used to check the cancellation.  */
 static int fd[2];
 
 
 static void *
 tf (void *arg)
 {
-  char buf[100];
+  pid_t tid = gettid ();
+  TEST_COMPARE (write (tidfd[1], &tid, sizeof (tid)), sizeof (tid));
 
-  if (read (fd[0], buf, sizeof (buf)) == sizeof (buf))
-    {
-      puts ("read succeeded");
-      return (void *) 1l;
-    }
+  char buf[100];
+  read (fd[0], buf, sizeof (buf));
 
   return NULL;
 }
@@ -45,53 +49,24 @@ do_test (void)
 {
   pthread_t th;
   void *r;
-  struct sigaction sa;
 
-  sa.sa_handler = SIG_IGN;
-  sigemptyset (&sa.sa_mask);
-  sa.sa_flags = 0;
+  xpipe (tidfd);
+  xpipe (fd);
 
-  if (sigaction (SIGPIPE, &sa, NULL) != 0)
-    {
-      puts ("sigaction failed");
-      return 1;
-    }
+  th = xpthread_create (NULL, tf, NULL);
 
-  if (pipe (fd) != 0)
-    {
-      puts ("pipe failed");
-      return 1;
-    }
+  pid_t tid;
+  TEST_COMPARE (read (tidfd[0], &tid, sizeof (tid)), sizeof (tid));
 
-  if (pthread_create (&th, NULL, tf, NULL) != 0)
-    {
-      puts ("create failed");
-      return 1;
-    }
+  support_process_state_wait (tid, support_process_state_sleeping);
 
-  if (pthread_cancel (th) != 0)
-    {
-      puts ("cancel failed");
-      return 1;
-    }
+  xpthread_cancel (th);
 
-  /* This will cause the read in the child to return.  */
-  close (fd[0]);
+  r = xpthread_join (th);
 
-  if (pthread_join (th, &r) != 0)
-    {
-      puts ("join failed");
-      return 1;
-    }
-
-  if (r != PTHREAD_CANCELED)
-    {
-      puts ("result is wrong");
-      return 1;
-    }
+  TEST_VERIFY (r == PTHREAD_CANCELED);
 
   return 0;
 }
 
-#define TEST_FUNCTION do_test ()
-#include "../test-skeleton.c"
+#include <support/test-driver.c>

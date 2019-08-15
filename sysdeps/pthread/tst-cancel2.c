@@ -18,21 +18,39 @@
 
 #include <pthread.h>
 #include <signal.h>
-#include <stdio.h>
-#include <unistd.h>
+#include <fcntl.h>
+
+#include <support/xunistd.h>
+#include <support/xthread.h>
+#include <support/check.h>
+#include <support/process_state.h>
 
 
+/* The pipe will be used pass the thread TID to master thread.  */
+static int tidfd[2];
+/* The pipe will be used to check the cancellation.  */
 static int fd[2];
 
 
 static void *
 tf (void *arg)
 {
+  int pipesz = fcntl(fd[1], F_GETPIPE_SZ);
+  TEST_VERIFY (pipesz != -1);
+
+  pid_t tid = gettid ();
+  TEST_COMPARE (write (tidfd[1], &tid, sizeof (tid)), sizeof (tid));
+
   /* The buffer size must be larger than the pipe size so that the
      write blocks.  */
-  char buf[100000];
+  char buf[pipesz + 1];
 
-  while (write (fd[1], buf, sizeof (buf)) > 0);
+  /* When cancellation acts, first write might return if kernel fill
+     the socket buffer with partial data.  */
+  TEST_COMPARE (write (fd[1], buf, sizeof (buf)), pipesz);
+
+  /* This will act on the pending cancellation.  */
+  write (fd[1], buf, sizeof (buf));
 
   return (void *) 42l;
 }
@@ -43,53 +61,24 @@ do_test (void)
 {
   pthread_t th;
   void *r;
-  struct sigaction sa;
 
-  sa.sa_handler = SIG_IGN;
-  sigemptyset (&sa.sa_mask);
-  sa.sa_flags = 0;
+  xpipe (tidfd);
+  xpipe (fd);
 
-  if (sigaction (SIGPIPE, &sa, NULL) != 0)
-    {
-      puts ("sigaction failed");
-      return 1;
-    }
+  th = xpthread_create (NULL, tf, NULL);
 
-  if (pipe (fd) != 0)
-    {
-      puts ("pipe failed");
-      return 1;
-    }
+  pid_t tid;
+  TEST_COMPARE (read (tidfd[0], &tid, sizeof (tid)), sizeof (tid));
 
-  if (pthread_create (&th, NULL, tf, NULL) != 0)
-    {
-      puts ("create failed");
-      return 1;
-    }
+  support_process_state_wait (tid, support_process_state_sleeping);
 
-  if (pthread_cancel (th) != 0)
-    {
-      puts ("cancel failed");
-      return 1;
-    }
+  xpthread_cancel (th);
 
-  /* This will cause the write in the child to return.  */
-  close (fd[0]);
+  r = xpthread_join (th);
 
-  if (pthread_join (th, &r) != 0)
-    {
-      puts ("join failed");
-      return 1;
-    }
-
-  if (r != PTHREAD_CANCELED)
-    {
-      printf ("result is wrong: expected %p, got %p\n", PTHREAD_CANCELED, r);
-      return 1;
-    }
+  TEST_VERIFY (r == PTHREAD_CANCELED);
 
   return 0;
 }
 
-#define TEST_FUNCTION do_test ()
-#include "../test-skeleton.c"
+#include <support/test-driver.c>
