@@ -73,9 +73,6 @@ do_test (void)
       return 1;
     }
 
-  /* This will cause the write in the child to return.  */
-  close (fd[0]);
-
   if (pthread_join (th, &r) != 0)
     {
       puts ("join failed");
