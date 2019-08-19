@@ -23,8 +23,7 @@
 
 #ifdef SHARED
 int
-__gettimeofday_syscall (struct timeval *restrict tv,
-			struct timezone *restrict tz)
+__gettimeofday_syscall (struct timeval *restrict tv, void *restrict tz)
 {
   return INLINE_SYSCALL_CALL (gettimeofday, tv, tz);
 }
@@ -40,7 +39,7 @@ libc_ifunc (__gettimeofday,
 	    : (void *) __gettimeofday_syscall);
 #else
 int
-__gettimeofday (struct timeval *restrict tv, struct timezone *restrict tz)
+__gettimeofday (struct timeval *restrict tv, void *restrict tz)
 {
   return INLINE_VSYSCALL (gettimeofday, 2, tv, tz);
 }

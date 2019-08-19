@@ -22,8 +22,7 @@
 #include <sysdep-vdso.h>
 
 int
-__gettimeofday_syscall (struct timeval *restrict tv,
-			struct timezone *restrict tz)
+__gettimeofday_syscall (struct timeval *restrict tv, void *restrict tz)
 {
   return INLINE_SYSCALL_CALL (gettimeofday, tv, tz);
 }

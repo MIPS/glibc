@@ -29,8 +29,7 @@
 /* Used as a fallback in the ifunc resolver if VDSO is not available
    and for libc.so internal __gettimeofday calls.  */
 int
-__gettimeofday_vsyscall (struct timeval *restrict tv,
-			 struct timezone *restrict tz)
+__gettimeofday_vsyscall (struct timeval *restrict tv, void *restrict tz)
 {
   return INLINE_SYSCALL_CALL (gettimeofday, tv, tz);
 }
@@ -49,7 +48,7 @@ libc_ifunc (__gettimeofday,
 	    vdso_gettimeofday ?: (void *) __gettimeofday_vsyscall)
 #else
 int
-__gettimeofday (struct timeval *restrict tv, struct timezone *restrict tz)
+__gettimeofday (struct timeval *restrict tv, void *restrict tz)
 {
   return INLINE_VSYSCALL (gettimeofday, 2, tv, tz);
 }
