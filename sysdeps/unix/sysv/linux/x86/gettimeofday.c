@@ -17,45 +17,25 @@
    <http://www.gnu.org/licenses/>.  */
 
 #include <sys/time.h>
+#define HAVE_VSYSCALL
+#include <dl-vdso.h>
+#include <sysdep-vdso.h>
 
-#ifdef SHARED
-
-# include <dl-vdso.h>
-# include <errno.h>
-
-static int
-__gettimeofday_syscall (struct timeval *tv, struct timezone *tz)
+int
+__gettimeofday_syscall (struct timeval *restrict tv,
+			struct timezone *restrict tz)
 {
-  return INLINE_SYSCALL (gettimeofday, 2, tv, tz);
+  return INLINE_SYSCALL_CALL (gettimeofday, tv, tz);
 }
 
-# ifndef __gettimeofday_type
-/* The i386 gettimeofday.c includes this file with a defined
-   __gettimeofday_type macro.  For x86_64 we have to define it to __gettimeofday
-   as the internal symbol is the ifunc'ed one.  */
-#  define __gettimeofday_type __gettimeofday
-# endif
-
+#ifdef SHARED
 # undef INIT_ARCH
 # define INIT_ARCH() PREPARE_VERSION_KNOWN (linux26, LINUX_2_6)
 /* If the vDSO is not available we fall back to syscall.  */
-libc_ifunc_hidden (__gettimeofday_type, __gettimeofday,
-		   (_dl_vdso_vsym ("__vdso_gettimeofday", &linux26)
-		    ?: &__gettimeofday_syscall))
-libc_hidden_def (__gettimeofday)
-
+libc_ifunc (__gettimeofday,
+	    (_dl_vdso_vsym ("__vdso_gettimeofday", &linux26)
+	    ?: &__gettimeofday_syscall))
 #else
-
-# include <sysdep.h>
-# include <errno.h>
-
-int
-__gettimeofday (struct timeval *tv, struct timezone *tz)
-{
-  return INLINE_SYSCALL (gettimeofday, 2, tv, tz);
-}
-libc_hidden_def (__gettimeofday)
-
+strong_alias (__gettimeofday_syscall, __gettimeofday)
 #endif
 weak_alias (__gettimeofday, gettimeofday)
-libc_hidden_weak (gettimeofday)
