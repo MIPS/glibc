@@ -79,6 +79,6 @@ libc_hidden_def (time)
 
 #else
 
-#include <sysdeps/posix/time.c>
+#include <time/time.c>
 
 #endif /* !SHARED */
