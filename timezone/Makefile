@@ -73,7 +73,7 @@ CFLAGS-zic.c += $(tz-cflags) -Wno-unused-variable
 # leapseconds.
 define build-testdata
 $(built-program-cmd) -d $(testdata) -y ./yearistype $<; \
-$(evaluate-test)
+while [ ! -f $(common-objpfx)$(test-name) ]; do sleep 1; done; $(evaluate-test)
 endef
 
 $(objpfx)test-tz.out: $(addprefix $(testdata)/, America/New_York Etc/UTC UTC)
