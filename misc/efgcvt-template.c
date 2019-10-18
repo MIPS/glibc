@@ -76,26 +76,3 @@ __APPEND (FUNC_PREFIX, gcvt) (FLOAT_TYPE value, int ndigit, char *buf)
   sprintf (buf, "%.*" FLOAT_FMT_FLAG "g", MIN (ndigit, NDIGIT_MAX), value);
   return buf;
 }
-
-#if LONG_DOUBLE_COMPAT (libc, GLIBC_2_0)
-# ifdef LONG_DOUBLE_CVT
-#  define cvt_symbol(symbol) \
-  cvt_symbol_1 (libc, __APPEND (FUNC_PREFIX, symbol), \
-	      APPEND (FUNC_PREFIX, symbol), GLIBC_2_4)
-#  define cvt_symbol_1(lib, local, symbol, version) \
-    versioned_symbol (lib, local, symbol, version)
-# else
-#  define cvt_symbol(symbol) \
-  cvt_symbol_1 (libc, __APPEND (FUNC_PREFIX, symbol), \
-	      APPEND (q, symbol), GLIBC_2_0); \
-  strong_alias (__APPEND (FUNC_PREFIX, symbol), APPEND (FUNC_PREFIX, symbol))
-#  define cvt_symbol_1(lib, local, symbol, version) \
-  compat_symbol (lib, local, symbol, version)
-# endif
-#else
-# define cvt_symbol(symbol) \
-  strong_alias (__APPEND (FUNC_PREFIX, symbol), APPEND (FUNC_PREFIX, symbol))
-#endif
-cvt_symbol(fcvt);
-cvt_symbol(ecvt);
-cvt_symbol(gcvt);

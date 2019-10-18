@@ -17,3 +17,17 @@
    <https://www.gnu.org/licenses/>.  */
 
 #include "efgcvt.c"
+
+#if LONG_DOUBLE_COMPAT (libc, GLIBC_2_0)
+# define cvt_symbol(symbol) \
+  cvt_symbol_1 (libc, __APPEND (FUNC_PREFIX, symbol), \
+	      APPEND (FUNC_PREFIX, symbol), GLIBC_2_4)
+# define cvt_symbol_1(lib, local, symbol, version) \
+    versioned_symbol (lib, local, symbol, version)
+#else
+# define cvt_symbol(symbol) \
+  strong_alias (__APPEND (FUNC_PREFIX, symbol), APPEND (FUNC_PREFIX, symbol))
+#endif
+cvt_symbol(fcvt);
+cvt_symbol(ecvt);
+cvt_symbol(gcvt);
