@@ -1502,7 +1502,7 @@ ERROR: ld.so: object '%s' cannot be loaded as audit interface: %s; ignored.\n",
 
 			  /* The dynamic linker link map is statically
 			     allocated, initialize the data now.   */
-			  GL(dl_rtld_map).l_audit[cnt].cookie
+			  link_map_audit_state (&GL(dl_rtld_map), cnt)->cookie
 			    = (intptr_t) &GL(dl_rtld_map);
 			}
 		      else
@@ -1606,7 +1606,8 @@ ERROR: ld.so: object '%s' cannot be loaded as audit interface: %s; ignored.\n",
       for (unsigned int cnt = 0; cnt < GLRO(dl_naudit); ++cnt)
 	{
 	  if (afct->activity != NULL)
-	    afct->activity (&main_map->l_audit[cnt].cookie, LA_ACT_ADD);
+	    afct->activity (&link_map_audit_state (main_map, cnt)->cookie,
+			    LA_ACT_ADD);
 
 	  afct = afct->next;
 	}
@@ -2282,7 +2283,8 @@ ERROR: ld.so: object '%s' cannot be loaded as audit interface: %s; ignored.\n",
 	  for (unsigned int cnt = 0; cnt < GLRO(dl_naudit); ++cnt)
 	    {
 	      if (afct->activity != NULL)
-		afct->activity (&head->l_audit[cnt].cookie, LA_ACT_CONSISTENT);
+		afct->activity (&link_map_audit_state (head, cnt)->cookie,
+				LA_ACT_CONSISTENT);
 
 	      afct = afct->next;
 	    }
