@@ -279,8 +279,13 @@
 	_sys_result;							\
 })
 
-#define __SYSCALL_CLOBBERS "$1", "$3", "$10", "$11", "$12", "$13", \
-	"$14", "$15", "$24", "$25", "hi", "lo", "memory"
+#if __mips_isa_rev >= 6
+# define __SYSCALL_CLOBBERS "$1", "$3", "$10", "$11", "$12", "$13", \
+	 "$14", "$15", "$24", "$25", "memory"
+#else
+# define __SYSCALL_CLOBBERS "$1", "$3", "$10", "$11", "$12", "$13", \
+	 "$14", "$15", "$24", "$25", "hi", "lo", "memory"
+#endif
 
 /* Standard MIPS syscalls have an error flag, and return a positive errno
    when the error flag is set. Emulate this behaviour for vsyscalls so that
