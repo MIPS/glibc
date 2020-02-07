@@ -482,11 +482,19 @@ $(objpfx)dl-allobjs.os: $(all-rtld-routines:%=$(objpfx)%.os)
 # are compiled with special flags, and puts these modules into rtld-libc.a
 # for us.  Then we do the real link using rtld-libc.a instead of libc_pic.a.
 
+# Known weak symbols ignored by the sanity check after the ld.so link.
+rtld-weak-symbols =
+
+# POSIX extended regular expression matching all weak symbols
+define rtld-weak-symbols-regexp
+$(shell echo $(sort $(rtld-weak-symbols)) | tr ' ' '|')
+endef
+
 # These symbols need to be stubbed out during symbol discovery because
 # their implementation is provided differently in rtld, and the symbol
 # discovery mechanism is not compatible with the libc implementation
 # when compiled for libc.
-rtld-stubbed-symbols =
+rtld-stubbed-symbols = $(rtld-weak-symbols)
 
 # The GCC arguments that implement $(rtld-stubbed-symbols).
 rtld-stubbed-symbols-args = \
@@ -547,6 +555,7 @@ $(objpfx)ld.so: $(objpfx)librtld.os $(ld-map)
 		  -Wl,-defsym=_begin=0
 	$(call after-link,$@.new)
 	$(READELF) -s $@.new \
+	  | grep -vE '\sWEAK\s.*\s('"$(rtld-weak-symbols-regexp)"')$$' \
 	  | $(AWK) '($$7 ~ /^UND(|EF)$$/ && $$1 != "0:" && $$4 != "REGISTER") { print; p=1 } END { exit p != 0 }'
 	mv -f $@.new $@
 
