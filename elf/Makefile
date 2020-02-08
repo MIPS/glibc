@@ -483,7 +483,11 @@ $(objpfx)dl-allobjs.os: $(all-rtld-routines:%=$(objpfx)%.os)
 # for us.  Then we do the real link using rtld-libc.a instead of libc_pic.a.
 
 # Known weak symbols ignored by the sanity check after the ld.so link.
-rtld-weak-symbols =
+rtld-weak-symbols = \
+  calloc \
+  free \
+  malloc \
+  realloc \
 
 # POSIX extended regular expression matching all weak symbols
 define rtld-weak-symbols-regexp

@@ -534,6 +534,9 @@ _dl_start (void *arg)
      header table in core.  Put the rest of _dl_start into a separate
      function, that way the compiler cannot put accesses to the GOT
      before ELF_DYNAMIC_RELOCATE.  */
+
+  __rtld_malloc_init_stubs ();
+
   {
 #ifdef DONT_USE_BOOTSTRAP_MAP
     ElfW(Addr) entry = _dl_start_final (arg);
@@ -2319,6 +2322,10 @@ ERROR: '%s': cannot process note segment.\n", _dl_argv[0]);
 
       rtld_timer_accum (&relocate_time, start);
     }
+
+  /* After self-relocation, it is safe to call the real malloc from
+     the dynamic loader.  */
+  __rtld_malloc_init_real ();
 
   /* Do any necessary cleanups for the startup OS interface code.
      We do these now so that no calls are made after rtld re-relocation

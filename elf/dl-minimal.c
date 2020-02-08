@@ -31,6 +31,51 @@
 
 #include <assert.h>
 
+/* The rtld startup code calls __rtld_malloc_init_stubs after the
+  first self-relocation to adjust the pointers to the minimal
+  implementation below.  After complete relocation,
+  __rtld_malloc_init_real is called to replace the pointers with the
+  real implementation.  */
+__typeof (calloc) *__rtld_calloc;
+__typeof (free) *__rtld_free;
+__typeof (malloc) *__rtld_malloc;
+__typeof (realloc) *__rtld_realloc;
+
+/* Defined below.  */
+static __typeof (calloc) rtld_calloc;
+static __typeof (free) rtld_free;
+static __typeof (malloc) rtld_malloc;
+static __typeof (realloc) rtld_realloc;
+
+void
+__rtld_malloc_init_stubs (void)
+{
+  __rtld_calloc = &rtld_calloc;
+  __rtld_free = &rtld_free;
+  __rtld_malloc = &rtld_malloc;
+  __rtld_realloc = &rtld_realloc;
+}
+
+/* Aliases to to access the real implementation.  */
+__typeof (calloc) real_calloc __asm__ ("calloc") __attribute__ ((weak));
+__typeof (free) real_free __asm__ ("free") __attribute__ ((weak));
+__typeof (malloc) real_malloc __asm__ ("malloc") __attribute__ ((weak));
+__typeof (realloc) real_realloc __asm__ ("realloc") __attribute__ ((weak));
+
+void
+__rtld_malloc_init_real (void)
+{
+  /* We cannot use relocations and initializers for this because the
+     changes made by __rtld_malloc_init_stubs require RELA-style
+     relocations that do not depend on the previous pointer
+     contents.  */
+
+  __rtld_calloc = &real_calloc;
+  __rtld_free = &real_free;
+  __rtld_malloc = &real_malloc;
+  __rtld_realloc = &real_realloc;
+}
+
 /* Minimal malloc allocator for used during initial link.  After the
    initial link, a full malloc implementation is interposed, either
    the one in libc, or a different one supplied by the user through
@@ -38,14 +83,9 @@
 
 static void *alloc_ptr, *alloc_end, *alloc_last_block;
 
-/* Declarations of global functions.  */
-extern void weak_function free (void *ptr);
-extern void * weak_function realloc (void *ptr, size_t n);
-
-
 /* Allocate an aligned memory block.  */
-void * weak_function
-malloc (size_t n)
+static void *
+rtld_malloc (size_t n)
 {
   if (alloc_end == 0)
     {
@@ -87,8 +127,8 @@ malloc (size_t n)
 /* We use this function occasionally since the real implementation may
    be optimized when it can assume the memory it returns already is
    set to NUL.  */
-void * weak_function
-calloc (size_t nmemb, size_t size)
+static void *
+rtld_calloc (size_t nmemb, size_t size)
 {
   /* New memory from the trivial malloc above is always already cleared.
      (We make sure that's true in the rare occasion it might not be,
@@ -104,8 +144,8 @@ calloc (size_t nmemb, size_t size)
 }
 
 /* This will rarely be called.  */
-void weak_function
-free (void *ptr)
+void
+rtld_free (void *ptr)
 {
   /* We can free only the last block allocated.  */
   if (ptr == alloc_last_block)
@@ -118,8 +158,8 @@ free (void *ptr)
 }
 
 /* This is only called with the most recent block returned by malloc.  */
-void * weak_function
-realloc (void *ptr, size_t n)
+void *
+rtld_realloc (void *ptr, size_t n)
 {
   if (ptr == NULL)
     return malloc (n);
