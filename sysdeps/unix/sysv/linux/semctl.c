@@ -22,13 +22,19 @@
 #include <sysdep.h>
 #include <shlib-compat.h>
 #include <errno.h>
+#include <struct__semid_ds32.h>
 #include <linux/posix_types.h>  /* For __kernel_mode_t.  */
 
 /* Define a `union semun' suitable for Linux here.  */
 union semun
 {
   int val;			/* value for SETVAL */
-  struct semid_ds *buf;		/* buffer for IPC_STAT & IPC_SET */
+#if (__WORDSIZE == 32 && __TIMESIZE == 64 \
+     && (!defined __SYSCALL_WORDSIZE || __SYSCALL_WORDSIZE == 32))
+  union { struct semid_ds s; struct __semid_ds32 s32; } *buf;   /* 32-bit buffer for IPC_STAT */
+#else
+  struct semid_ds *buf;   /* buffer for IPC_STAT & IPC_SET */
+#endif
   unsigned short int *array;	/* array for GETALL & SETALL */
   struct seminfo *__buf;	/* buffer for IPC_INFO */
 };
@@ -44,13 +50,30 @@ union semun
 static int
 semctl_syscall (int semid, int semnum, int cmd, union semun arg)
 {
+  int ret;
 #ifdef __ASSUME_DIRECT_SYSVIPC_SYSCALLS
-  return INLINE_SYSCALL_CALL (semctl, semid, semnum, cmd | __IPC_64,
-			      arg.array);
+  ret = INLINE_SYSCALL_CALL (semctl, semid, semnum, cmd | __IPC_64,
+                             arg.array);
 #else
-  return INLINE_SYSCALL_CALL (ipc, IPCOP_semctl, semid, semnum, cmd | __IPC_64,
-			      SEMCTL_ARG_ADDRESS (arg));
+  ret = INLINE_SYSCALL_CALL (ipc, IPCOP_semctl, semid, semnum, cmd | __IPC_64,
+                             SEMCTL_ARG_ADDRESS (arg));
 #endif
+
+#if (__WORDSIZE == 32 && __TIMESIZE == 64 \
+     && (!defined __SYSCALL_WORDSIZE || __SYSCALL_WORDSIZE == 32))
+  if (ret == 0 && (cmd == IPC_STAT || cmd == SEM_STAT || cmd == SEM_STAT_ANY))
+    {
+      arg.buf->s = (struct semid_ds) {
+        .sem_perm = arg.buf->s32.sem_perm,
+        .sem_nsems = arg.buf->s32.sem_nsems,
+        .sem_otime = (arg.buf->s32.sem_otime
+                      | ((time_t) arg.buf->s32.sem_otime_high << 32)),
+        .sem_ctime = (arg.buf.s32.sem_ctime
+                      | ((time_t) arg.buf->s32.sem_ctime_high << 32)),
+      };
+    }
+#endif
+  return ret;
 }
 
 int
@@ -101,12 +124,12 @@ __new_semctl (int semid, int semnum, int cmd, ...)
         case SEM_STAT:
         case SEM_STAT_ANY:
 #ifdef __ASSUME_SYSVIPC_BROKEN_MODE_T
-          arg.buf->sem_perm.mode >>= 16;
+          arg.buf->s.sem_perm.mode >>= 16;
 #else
 	  /* Old Linux kernel versions might not clear the mode padding.  */
 	  if (sizeof ((struct semid_ds){0}.sem_perm.mode)
 	      != sizeof (__kernel_mode_t))
-	    arg.buf->sem_perm.mode &= 0xFFFF;
+	    arg.buf->s.sem_perm.mode &= 0xFFFF;
 #endif
 	}
     }
