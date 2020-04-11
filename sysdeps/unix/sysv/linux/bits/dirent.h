@@ -47,7 +47,7 @@ struct dirent64
 #define d_fileno	d_ino	/* Backwards compatibility.  */
 
 #undef  _DIRENT_HAVE_D_NAMLEN
-#define _DIRENT_HAVE_D_RECLEN
+#define _DIRENT_HAVE_D_RECLEN		1
 #define _DIRENT_HAVE_D_OFF
 #define _DIRENT_HAVE_D_TYPE
 
