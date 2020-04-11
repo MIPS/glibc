@@ -48,7 +48,7 @@ struct dirent64
 
 #undef  _DIRENT_HAVE_D_NAMLEN
 #define _DIRENT_HAVE_D_RECLEN		1
-#define _DIRENT_HAVE_D_OFF
+#define _DIRENT_HAVE_D_OFF		1
 #define _DIRENT_HAVE_D_TYPE
 
 /* Inform libc code that these two types are effectively identical.  */

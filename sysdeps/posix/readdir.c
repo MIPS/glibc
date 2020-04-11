@@ -82,11 +82,7 @@ __READDIR (DIR *dirp)
 
       dirp->offset += reclen;
 
-#ifdef _DIRENT_HAVE_D_OFF
       dirp->filepos = dp->d_off;
-#else
-      dirp->filepos += reclen;
-#endif
 
       /* Skip deleted files.  */
     } while (dp->d_ino == 0);

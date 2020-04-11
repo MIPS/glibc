@@ -84,11 +84,7 @@ __READDIR_R (DIR *dirp, DIRENT_TYPE *entry, DIRENT_TYPE **result)
 
       dirp->offset += reclen;
 
-#ifdef _DIRENT_HAVE_D_OFF
       dirp->filepos = dp->d_off;
-#else
-      dirp->filepos += reclen;
-#endif
 
 #ifdef NAME_MAX
       if (reclen > offsetof (DIRENT_TYPE, d_name) + NAME_MAX + 1)
