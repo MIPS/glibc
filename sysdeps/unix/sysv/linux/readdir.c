@@ -19,31 +19,23 @@
 #include <dirent.h>
 
 #if !_DIRENT_MATCHES_DIRENT64
-#include <dirstream.h>
+#include <dirstream_nolfs.h>
 
 /* Read a directory entry from DIRP.  */
 struct dirent *
-__readdir (DIR *dirp)
+__readdir_unlocked (DIR *dirp)
 {
   struct dirent *dp;
   int saved_errno = errno;
 
-#if IS_IN (libc)
-  __libc_lock_lock (dirp->lock);
-#endif
-
   do
     {
-      size_t reclen;
-
       if (dirp->offset >= dirp->size)
 	{
 	  /* We've emptied out our buffer.  Refill it.  */
 
-	  size_t maxread = dirp->allocation;
-	  ssize_t bytes;
-
-	  bytes = __getdents (dirp->fd, dirp->data, maxread);
+	  ssize_t bytes = __getdents64 (dirp->fd, dirstream_data (dirp),
+					dirstream_alloc_size (dirp));
 	  if (bytes <= 0)
 	    {
 	      /* On some systems getdents fails with ENOENT when the
@@ -58,22 +50,35 @@ __readdir (DIR *dirp)
 	      dp = NULL;
 	      break;
 	    }
-	  dirp->size = (size_t) bytes;
+	  dirp->size = bytes;
 
 	  /* Reset the offset into the buffer.  */
 	  dirp->offset = 0;
 	}
 
-      dp = (struct dirent *) &dirp->data[dirp->offset];
-
-      reclen = dp->d_reclen;
-
-      dirp->offset += reclen;
-
-      dirp->filepos = dp->d_off;
+      dp = dirstream_ret_entry (dirp);
+      if (dp == NULL)
+	{
+	  __set_errno (EOVERFLOW);
+	  break;
+	}
 
       /* Skip deleted files.  */
     } while (dp->d_ino == 0);
+
+  return dp;
+}
+
+struct dirent *
+__readdir (DIR *dirp)
+{
+  struct dirent *dp;
+
+#if IS_IN (libc)
+  __libc_lock_lock (dirp->lock);
+#endif
+
+  dp = __readdir_unlocked (dirp);
 
 #if IS_IN (libc)
   __libc_lock_unlock (dirp->lock);
