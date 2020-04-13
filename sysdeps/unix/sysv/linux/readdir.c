@@ -17,6 +17,7 @@
    <https://www.gnu.org/licenses/>.  */
 
 #include <dirent.h>
+#include <unistd.h>
 
 #if !_DIRENT_MATCHES_DIRENT64
 #include <dirstream_nolfs.h>
@@ -33,7 +34,6 @@ __readdir_unlocked (DIR *dirp)
       if (dirp->offset >= dirp->size)
 	{
 	  /* We've emptied out our buffer.  Refill it.  */
-
 	  ssize_t bytes = __getdents64 (dirp->fd, dirstream_data (dirp),
 					dirstream_alloc_size (dirp));
 	  if (bytes <= 0)
@@ -57,11 +57,6 @@ __readdir_unlocked (DIR *dirp)
 	}
 
       dp = dirstream_ret_entry (dirp);
-      if (dp == NULL)
-	{
-	  __set_errno (EOVERFLOW);
-	  break;
-	}
 
       /* Skip deleted files.  */
     } while (dp->d_ino == 0);

@@ -78,10 +78,7 @@ dirstream_ret_entry (struct __dirstream *ds)
 	  dp64->d_reclen - offsetof (struct dirent64, d_name));
 
   ds->offset += dp->d_reclen;
-  ds->filepos = dp->d_off;
-  if (ds->filepos != dp->d_off)
-    /* Overflow.  */
-    return NULL;
+  ds->filepos = dp64->d_off;
 
   return dp;
 }

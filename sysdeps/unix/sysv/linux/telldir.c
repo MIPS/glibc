@@ -18,10 +18,51 @@
 #include <dirent.h>
 
 #include <dirstream.h>
+#include <telldir.h>
 
 /* Return the current position of DIRP.  */
 long int
 telldir (DIR *dirp)
 {
+#ifndef __LP64__
+  union dirstream_packed dsp;
+
+  __libc_lock_lock (dirp->lock);
+
+  if (dirp->filepos < (1 << SEEK_BITS)
+      && dirp->offset < (1 << OFFSET_BITS))
+    {
+      dsp.s.is_packed = 1;
+      dsp.s.offset = dirp->offset;
+      dsp.s.seek = dirp->filepos;
+      goto out;
+    }
+
+  dsp.l = -1;
+
+  size_t i;
+  for (i = 0; i < dirstream_loc_size (&dirp->locs); i++)
+    {
+      struct dirstream_loc *loc = dirstream_loc_at (&dirp->locs, i);
+      if (loc->filepos == dirp->filepos)
+	break;
+    }
+  if (i == dirstream_loc_size (&dirp->locs))
+    {
+      dirstream_loc_add (&dirp->locs,
+	(struct dirstream_loc) { dirp->filepos });
+      if (dirstream_loc_has_failed (&dirp->locs))
+	goto out;
+    }
+
+  dsp.i.is_packed = 0;
+  dsp.i.index = i;
+
+out:
+  __libc_lock_unlock (dirp->lock);
+
+  return dsp.l;
+#else
   return dirp->filepos;
+#endif
 }

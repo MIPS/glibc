@@ -26,10 +26,36 @@
 void
 seekdir (DIR *dirp, long int pos)
 {
+#ifndef __LP64__
+  union dirstream_packed dsp;
+  off64_t filepos;
+
+  dsp.l = pos;
+
+  if (dsp.s.is_packed == 1)
+    filepos = dsp.s.seek;
+  else
+    {
+      if (dsp.i.index >= dirstream_loc_size (&dirp->locs))
+	return;
+
+      struct dirstream_loc *loc = dirstream_loc_at (&dirp->locs, dsp.i.index);
+      filepos = loc->filepos;
+    }
+  if (dirp->filepos == filepos)
+    return;
+
+  __lseek64 (dirp->fd, filepos, SEEK_SET);
+
+  dirp->filepos = filepos;
+  dirp->offset = 0;
+  dirp->size = 0;
+#else
   __libc_lock_lock (dirp->lock);
-  (void) __lseek (dirp->fd, pos, SEEK_SET);
+  __lseek (dirp->fd, pos, SEEK_SET);
   dirp->size = 0;
   dirp->offset = 0;
   dirp->filepos = pos;
   __libc_lock_unlock (dirp->lock);
+#endif
 }
