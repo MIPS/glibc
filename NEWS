@@ -21,6 +21,9 @@ Deprecated and removed features, and other changes affecting compatibility:
   corresponds to the AT_PLATFORM system name, or employs the legacy AT_HWCAP
   search mechanism, which was deprecated in version 2.33.
 
+* The function getdirentries is now deprecated, applications should use
+  either getdents64, readdir64 or readdir.
+
 Changes to build and runtime requirements:
 
   [Add changes to build and runtime requirements here]
