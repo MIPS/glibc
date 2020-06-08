@@ -101,6 +101,9 @@ call_init_paths (const struct dl_main_state *state)
 void _dl_usage (const char *argv0, const char *wrong_option)
   attribute_hidden __attribute__ ((__noreturn__));
 
+/* Print ld.so version information and exit.  */
+void _dl_version (void) attribute_hidden __attribute__ ((__noreturn__));
+
 /* Print ld.so --help output and exit.  */
 void _dl_help (const char *argv0, struct dl_main_state *state)
   attribute_hidden __attribute__ ((__noreturn__));
