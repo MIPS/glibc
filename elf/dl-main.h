@@ -19,7 +19,9 @@
 #ifndef _DL_MAIN
 #define _DL_MAIN
 
+#include <ldsodefs.h>
 #include <limits.h>
+#include <stdlib.h>
 
 /* Length limits for names and paths, to protect the dynamic linker,
    particularly when __libc_enable_secure is active.  */
@@ -91,5 +93,8 @@ call_init_paths (const struct dl_main_state *state)
 {
   _dl_init_paths (state->library_path);
 }
+
+/* Print ld.so usage information and exit.  */
+void _dl_usage (void) attribute_hidden __attribute__ ((__noreturn__));
 
 #endif /* _DL_MAIN */
