@@ -60,7 +60,7 @@ struct audit_list
 };
 
 /* This is a list of all the modes the dynamic loader can be in.  */
-enum mode { normal, list, verify, trace };
+enum mode { normal, list, verify, trace, rtld_help };
 
 /* Aggregated state information extracted from environment variables
    and the ld.so command line.  */
@@ -98,6 +98,11 @@ call_init_paths (const struct dl_main_state *state)
 }
 
 /* Print ld.so usage information and exit.  */
-void _dl_usage (void) attribute_hidden __attribute__ ((__noreturn__));
+void _dl_usage (const char *argv0, const char *wrong_option)
+  attribute_hidden __attribute__ ((__noreturn__));
+
+/* Print ld.so --help output and exit.  */
+void _dl_help (const char *argv0, struct dl_main_state *state)
+  attribute_hidden __attribute__ ((__noreturn__));
 
 #endif /* _DL_MAIN */
