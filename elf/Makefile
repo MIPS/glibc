@@ -59,7 +59,8 @@ elide-routines.os = $(all-dl-routines) dl-support enbl-secure dl-origin \
 # ld.so uses those routines, plus some special stuff for being the program
 # interpreter and operating independent of libc.
 rtld-routines	= rtld $(all-dl-routines) dl-sysdep dl-environ dl-minimal \
-  dl-error-minimal dl-conflict dl-hwcaps dl-usage
+  dl-error-minimal dl-conflict dl-hwcaps dl-hwcaps_split dl-hwcaps-subdirs \
+  dl-usage
 all-rtld-routines = $(rtld-routines) $(sysdep-rtld-routines)
 
 CFLAGS-dl-runtime.c += -fexceptions -fasynchronous-unwind-tables
@@ -217,7 +218,7 @@ tests-internal += loadtest unload unload2 circleload1 \
 	 neededtest neededtest2 neededtest3 neededtest4 \
 	 tst-tls3 tst-tls6 tst-tls7 tst-tls8 tst-dlmopen2 \
 	 tst-ptrguard1 tst-stackguard1 tst-libc_dlvsym \
-	 tst-create_format1 tst-tls-surplus
+	 tst-create_format1 tst-tls-surplus tst-dl-hwcaps_split
 tests-container += tst-pldd tst-dlopen-tlsmodid-container \
   tst-dlopen-self-container
 test-srcs = tst-pathopt
