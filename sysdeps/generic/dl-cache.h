@@ -16,6 +16,11 @@
    License along with the GNU C Library; if not, see
    <https://www.gnu.org/licenses/>.  */
 
+#ifndef _DL_CACHE_H
+#define _DL_CACHE_H
+
+#include <endian.h>
+#include <stdbool.h>
 #include <stdint.h>
 
 #ifndef _DL_CACHE_DEFAULT_ID
@@ -83,17 +88,51 @@ struct file_entry_new
   uint64_t hwcap;		/* Hwcap entry.	 */
 };
 
+/* See flags member of struct cache_file_new below.  */
+enum
+  {
+   cache_file_new_flags_endian = (__BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+				  ? 2 : 3)
+  };
+
 struct cache_file_new
 {
   char magic[sizeof CACHEMAGIC_NEW - 1];
   char version[sizeof CACHE_VERSION - 1];
   uint32_t nlibs;		/* Number of entries.  */
   uint32_t len_strings;		/* Size of string table. */
-  uint32_t unused[5];		/* Leave space for future extensions
+
+  /* flags & 3 is used to indicate the endianness of the cache.
+     0: no endianness information available
+        (An old ldconfig version without endianness support wrote the file.)
+     1: cache is invalid
+     2: little endian
+     3: big endian
+
+     The remaining bits are unused and should be generated as zero and
+     ignored by readers.  */
+  uint8_t flags;
+
+  uint8_t padding_unsed[3];	/* Not used, for future extensions.  */
+
+  uint32_t unused[4];		/* Leave space for future extensions
 				   and align to 8 byte boundary.  */
   struct file_entry_new libs[0]; /* Entries describing libraries.  */
   /* After this the string table of size len_strings is found.	*/
 };
+
+/* Returns false if *CACHE has the wrong endianness for this
+   architecture, and true if the endianness matches (or is
+   unknown).  */
+static inline bool
+cache_file_new_matches_endian (const struct cache_file_new *cache)
+{
+  /* A zero value for cache->flags means that no endianness
+     information is available.  */
+  return cache->flags == 0
+    || (cache->flags & 3) == cache_file_new_flags_endian;
+}
+
 
 /* Used to align cache_file_new.  */
 #define ALIGN_CACHE(addr)				\
@@ -101,3 +140,5 @@ struct cache_file_new
  & (~(__alignof__ (struct cache_file_new) - 1)))
 
 extern int _dl_cache_libcmp (const char *p1, const char *p2) attribute_hidden;
+
+#endif /* _DL_CACHE_H */
