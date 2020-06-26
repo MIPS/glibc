@@ -22,7 +22,7 @@
 #define TLS_LD(x)	TLS_IE(x)
 
 #define TLS_GD(x)					\
-  ({ int *__result;					\
+  ({ void *__result;					\
      __asm__ ("add r0, pcl, @" #x "@tlsgd      \n"     	\
 	  ".tls_gd_ld " #x "`bl __tls_get_addr@plt \n"	\
 	  "mov %0, r0                    \n"		\
@@ -32,14 +32,14 @@
      __result; })
 
 #define TLS_LE(x)					\
-  ({ int *__result;					\
+  ({ void *__result;					\
      void *tp = __builtin_thread_pointer ();		\
      __asm__ ("add %0, %1, @" #x "@tpoff   \n"		\
 	  : "=r" (__result) : "r"(tp));	        	\
      __result; })
 
 #define TLS_IE(x)					\
-  ({ int *__result;					\
+  ({ void *__result;					\
      void *tp = __builtin_thread_pointer ();		\
      __asm__ ("ld %0, [pcl, @" #x "@tlsie]      \n"     \
 	  "add %0, %1, %0                       \n"	\

@@ -22,6 +22,7 @@
 #include <dl-sysdep.h>
 
 #ifndef __ASSEMBLER__
+
 # include <stdbool.h>
 # include <stddef.h>
 # include <stdint.h>
@@ -133,16 +134,6 @@ typedef struct
 #define THREAD_GSCOPE_WAIT() \
   GL(dl_wait_lookup_done) ()
 
-#else
-
-# include <tcb-offsets.h>
-
-# r25 is dedicated TLS register for ARC
-.macro THREAD_SELF reg
-	# struct pthread is just ahead of TCB
-	sub     \reg, r25, TLS_PRE_TCB_SIZE
-.endm
-
-#endif /* __ASSEMBLER__ */
+#endif /* !__ASSEMBLER__ */
 
 #endif	/* tls.h */

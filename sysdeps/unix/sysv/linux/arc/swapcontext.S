@@ -58,7 +58,7 @@ ENTRY (__swapcontext)
 	mov r0, SIG_SETMASK
 	mov r8, __NR_rt_sigprocmask
 	ARC_TRAP_INSN
-	brhi r0, -1024, L (call_syscall_err)
+	brhi r0, -4096, L (call_syscall_err)
 
 	add r9, r9, UCONTEXT_MCONTEXT
 	LDR (r0,    r9, 22)

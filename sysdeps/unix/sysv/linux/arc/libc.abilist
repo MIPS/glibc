@@ -1405,12 +1405,16 @@ GLIBC_2.32 pthread_attr_getdetachstate F
 GLIBC_2.32 pthread_attr_getinheritsched F
 GLIBC_2.32 pthread_attr_getschedparam F
 GLIBC_2.32 pthread_attr_getschedpolicy F
+GLIBC_2.32 pthread_attr_getscope F
+GLIBC_2.32 pthread_attr_getsigmask_np F
 GLIBC_2.32 pthread_attr_init F
 GLIBC_2.32 pthread_attr_setaffinity_np F
 GLIBC_2.32 pthread_attr_setdetachstate F
 GLIBC_2.32 pthread_attr_setinheritsched F
 GLIBC_2.32 pthread_attr_setschedparam F
 GLIBC_2.32 pthread_attr_setschedpolicy F
+GLIBC_2.32 pthread_attr_setscope F
+GLIBC_2.32 pthread_attr_setsigmask_np F
 GLIBC_2.32 pthread_cond_broadcast F
 GLIBC_2.32 pthread_cond_destroy F
 GLIBC_2.32 pthread_cond_init F

@@ -28,6 +28,6 @@ ENTRY (syscall)
 	mov_s	r5, r6
 
 	ARC_TRAP_INSN
-	brhi	r0, -1024, L (call_syscall_err)
+	brhi	r0, -4096, L (call_syscall_err)
 	j	[blink]
 PSEUDO_END (syscall)

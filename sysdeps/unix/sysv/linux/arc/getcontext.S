@@ -56,8 +56,8 @@ ENTRY (__getcontext)
 	mov r0, SIG_BLOCK
 	mov r8, __NR_rt_sigprocmask
 	ARC_TRAP_INSN
-	brhi    r0, -1024, L (call_syscall_err)
-	j.d	[blink]
+	brhi r0, -4096, L (call_syscall_err)
+	j.d [blink]
 	mov r0, 0	/* Success, error handled in .Lcall_syscall_err.  */
 
 PSEUDO_END (__getcontext)
