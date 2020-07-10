@@ -12,13 +12,13 @@ hidden_proto (mq_setattr)
 # endif
 #include <struct___timespec64.h>
 #if __TIMESIZE == 64
-# define __mq_timedsend_time64 __mq_timedsend
+# define __mq_timedsend64 __mq_timedsend
 # define __mq_timedreceive64 __mq_timedreceive
 #else
-extern int __mq_timedsend_time64 (mqd_t mqdes, const char *msg_ptr,
-                                  size_t msg_len, unsigned int msg_prio,
-                                  const struct __timespec64 *abs_timeout);
-librt_hidden_proto (__mq_timedsend_time64)
+extern int __mq_timedsend64 (mqd_t mqdes, const char *msg_ptr,
+			     size_t msg_len, unsigned int msg_prio,
+			     const struct __timespec64 *abs_timeout);
+librt_hidden_proto (__mq_timedsend64)
 extern ssize_t __mq_timedreceive64 (mqd_t mqdes,
                                     char *__restrict msg_ptr,
                                     size_t msg_len,

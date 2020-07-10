@@ -22,19 +22,17 @@
 /* Add message pointed by MSG_PTR to message queue MQDES, stop blocking
    on full message queue if ABS_TIMEOUT expires.  */
 int
-__mq_timedsend_time64 (mqd_t mqdes, const char *msg_ptr, size_t msg_len,
-                       unsigned int msg_prio,
-                       const struct __timespec64 *abs_timeout)
+__mq_timedsend64 (mqd_t mqdes, const char *msg_ptr, size_t msg_len,
+		  unsigned int msg_prio,
+		  const struct __timespec64 *abs_timeout)
 {
-#ifdef __ASSUME_TIME64_SYSCALLS
 # ifndef __NR_mq_timedsend_time64
 #  define __NR_mq_timedsend_time64 __NR_mq_timedsend
 # endif
-  return SYSCALL_CANCEL (mq_timedsend_time64, mqdes, msg_ptr, msg_len,
-                         msg_prio, abs_timeout);
-#else
   int ret = SYSCALL_CANCEL (mq_timedsend_time64, mqdes, msg_ptr, msg_len,
-                            msg_prio, abs_timeout);
+			    msg_prio, abs_timeout);
+
+#ifndef __ASSUME_TIME64_SYSCALLS
   if (ret == 0 || errno != ENOSYS)
     return ret;
 
@@ -50,13 +48,15 @@ __mq_timedsend_time64 (mqd_t mqdes, const char *msg_ptr, size_t msg_len,
       ts32 = valid_timespec64_to_timespec (*abs_timeout);
     }
 
-  return SYSCALL_CANCEL (mq_timedsend, mqdes, msg_ptr, msg_len, msg_prio,
-                         abs_timeout != NULL ? &ts32 : NULL);
+  ret = SYSCALL_CANCEL (mq_timedsend, mqdes, msg_ptr, msg_len, msg_prio,
+			abs_timeout != NULL ? &ts32 : NULL);
 #endif
+
+  return ret;
 }
 
 #if __TIMESIZE != 64
-librt_hidden_def (__mq_timedsend_time64)
+librt_hidden_def (__mq_timedsend64)
 
 int
 __mq_timedsend (mqd_t mqdes, const char *msg_ptr, size_t msg_len,
@@ -66,8 +66,8 @@ __mq_timedsend (mqd_t mqdes, const char *msg_ptr, size_t msg_len,
   if (abs_timeout != NULL)
     ts64 = valid_timespec_to_timespec64 (*abs_timeout);
 
-  return __mq_timedsend_time64 (mqdes, msg_ptr, msg_len, msg_prio,
-                                abs_timeout != NULL ? &ts64 : NULL);
+  return __mq_timedsend64 (mqdes, msg_ptr, msg_len, msg_prio,
+			   abs_timeout != NULL ? &ts64 : NULL);
 }
 #endif
 
