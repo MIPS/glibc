@@ -22,7 +22,7 @@
 #include <sys/poll.h>
 #include <sysdep-cancel.h>
 #include <kernel-features.h>
-
+#include <time64-support.h>
 
 int
 __ppoll64 (struct pollfd *fds, nfds_t nfds, const struct __timespec64 *timeout,
@@ -40,13 +40,20 @@ __ppoll64 (struct pollfd *fds, nfds_t nfds, const struct __timespec64 *timeout,
 #ifndef __NR_ppoll_time64
 # define __NR_ppoll_time64 __NR_ppoll
 #endif
-  int ret = SYSCALL_CANCEL (ppoll_time64, fds, nfds, timeout, sigmask,
+  int ret;
+
+  if (supports_time64 ())
+    {
+      ret = SYSCALL_CANCEL (ppoll_time64, fds, nfds, timeout, sigmask,
 			    __NSIG_BYTES);
 
-#ifdef __ASSUME_TIME64_SYSCALLS
-  if (ret >= 0 || errno != ENOSYS)
-    return ret;
+      if (ret == 0 || errno != ENOSYS)
+	return ret;
 
+      mark_time64_unsupported ();
+    }
+
+#ifndef __ASSUME_TIME64_SYSCALLS
   struct timespec ts32;
   if (timeout)
     {
