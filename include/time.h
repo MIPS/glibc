@@ -271,6 +271,15 @@ extern struct tm *__tz_convert (__time64_t timer, int use_localtime,
 extern int __nanosleep (const struct timespec *__requested_time,
 			struct timespec *__remaining);
 hidden_proto (__nanosleep)
+#if __TIMESIZE == 64
+# define __nanosleep64 __nanosleep
+#else
+extern int __nanosleep64 (const struct __timespec64 *__requested_time,
+			  struct __timespec64 *__remaining);
+hidden_proto (__nanosleep64)
+#endif
+
+
 extern int __getdate_r (const char *__string, struct tm *__resbufp)
   attribute_hidden;
 
@@ -294,14 +303,14 @@ libc_hidden_proto (__difftime64)
 extern double __difftime (time_t time1, time_t time0);
 
 #if __TIMESIZE == 64
-# define __clock_nanosleep_time64 __clock_nanosleep
+# define __clock_nanosleep64 __clock_nanosleep
 # define __clock_gettime64 __clock_gettime
 # define __timespec_get64 __timespec_get
 #else
-extern int __clock_nanosleep_time64 (clockid_t clock_id,
-                                     int flags, const struct __timespec64 *req,
-                                     struct __timespec64 *rem);
-libc_hidden_proto (__clock_nanosleep_time64)
+extern int __clock_nanosleep64 (clockid_t clock_id,
+                                int flags, const struct __timespec64 *req,
+                                struct __timespec64 *rem);
+libc_hidden_proto (__clock_nanosleep64)
 extern int __clock_gettime64 (clockid_t clock_id, struct __timespec64 *tp);
 libc_hidden_proto (__clock_gettime64)
 extern int __timespec_get64 (struct __timespec64 *ts, int base);

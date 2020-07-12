@@ -27,8 +27,8 @@
 /* We can simply use the syscall.  The CPU clocks are not supported
    with this function.  */
 int
-__clock_nanosleep_time64 (clockid_t clock_id, int flags, const struct __timespec64 *req,
-                          struct __timespec64 *rem)
+__clock_nanosleep64 (clockid_t clock_id, int flags,
+		     const struct __timespec64 *req, struct __timespec64 *rem)
 {
   if (clock_id == CLOCK_THREAD_CPUTIME_ID)
     return EINVAL;
@@ -68,7 +68,7 @@ __clock_nanosleep_time64 (clockid_t clock_id, int flags, const struct __timespec
 }
 
 #if __TIMESIZE != 64
-libc_hidden_def (__clock_nanosleep_time64)
+libc_hidden_def (__clock_nanosleep64)
 
 int
 __clock_nanosleep (clockid_t clock_id, int flags, const struct timespec *req,
@@ -78,7 +78,7 @@ __clock_nanosleep (clockid_t clock_id, int flags, const struct timespec *req,
   struct __timespec64 treq64, trem64;
 
   treq64 = valid_timespec_to_timespec64 (*req);
-  r = __clock_nanosleep_time64 (clock_id, flags, &treq64, &trem64);
+  r = __clock_nanosleep64 (clock_id, flags, &treq64, &trem64);
 
   if (r == EINTR && rem != NULL && (flags & TIMER_ABSTIME) == 0)
     *rem = valid_timespec64_to_timespec (trem64);
