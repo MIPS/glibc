@@ -48,7 +48,7 @@ __fstatat (int fd, const char *file, struct stat *st, int flag)
 	  || ! in_blkcnt_t_range (st64.st_blocks))
 	return INLINE_SYSCALL_ERROR_RETURN_VALUE (EOVERFLOW);
 
-      /* Clear internal pad and reserved fields.  */
+      /* Clear both pad and reserved fields.  */
       memset (st, 0, sizeof (*st));
 
       st->st_dev = st64.st_dev,
