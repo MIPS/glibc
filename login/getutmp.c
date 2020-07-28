@@ -17,17 +17,47 @@
 
 #include <string.h>
 #include <utmp.h>
+#include <stddef.h>
+#define getutmpx __redirect_getutmpx
 #include <utmpx.h>
+#undef getutmpx
+
+#define CHECK_SIZE_AND_OFFSET(field) \
+  _Static_assert (sizeof ((struct utmp){0}.field)		\
+		  == sizeof ((struct utmpx){0}.field),		\
+		  "sizeof ((struct utmp){0}." #field " != "	\
+		  "sizeof ((struct utmpx){0}" #field);	\
+  _Static_assert (offsetof (struct utmp, field)			\
+		  == offsetof (struct utmpx, field),		\
+		  "offsetof (struct utmp, " #field ") != "	\
+		  "offsetof (struct utmpx, " #field ")");
+
+/* This ensure the getutmp to getutmpx alias is valid.  */
+_Static_assert (sizeof (struct utmp) == sizeof (struct utmpx),
+		"sizeof (struct utmp) != sizeof (struct utmpx)");
+CHECK_SIZE_AND_OFFSET (ut_type)
+CHECK_SIZE_AND_OFFSET (ut_pid)
+CHECK_SIZE_AND_OFFSET (ut_line)
+CHECK_SIZE_AND_OFFSET (ut_user)
+CHECK_SIZE_AND_OFFSET (ut_id)
+CHECK_SIZE_AND_OFFSET (ut_host)
+CHECK_SIZE_AND_OFFSET (ut_tv)
+
 
 /* Copy the information in UTMPX to UTMP. */
 void
-getutmp (const struct utmpx *utmpx, struct utmp *utmp)
+__getutmp (const struct utmpx *utmpx, struct utmp *utmp)
 {
+  memset (utmp, 0, sizeof (struct utmpx));
   utmp->ut_type = utmpx->ut_type;
   utmp->ut_pid = utmpx->ut_pid;
   memcpy (utmp->ut_line, utmpx->ut_line, sizeof (utmp->ut_line));
   memcpy (utmp->ut_user, utmpx->ut_user, sizeof (utmp->ut_user));
   memcpy (utmp->ut_id, utmpx->ut_id, sizeof (utmp->ut_id));
   memcpy (utmp->ut_host, utmpx->ut_host, sizeof (utmp->ut_host));
-  utmp->ut_tv = utmpx->ut_tv;
+  utmp->ut_tv.tv_sec = utmpx->ut_tv.tv_sec;
+  utmp->ut_tv.tv_usec = utmpx->ut_tv.tv_usec;
 }
+
+weak_alias (__getutmp, getutmp)
+strong_alias (__getutmp, getutmpx)

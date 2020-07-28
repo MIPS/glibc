@@ -16,22 +16,15 @@
    License along with the GNU C Library; if not, see
    <https://www.gnu.org/licenses/>.  */
 
-#include <string.h>
-#include <utmp.h>
-/* This is an ugly hack but we must not see the getutmpx declaration.  */
-#define getutmpx XXXgetutmpx
-#include <utmpx.h>
-#undef getutmpx
+#undef weak_alias
+#define weak_alias(a, b)
+#undef strong_alias
+#define strong_alias(a, b)
+
+#include <login/getutmp.c>
 
 #include "utmp-compat.h"
 
-#undef weak_alias
-#define weak_alias(n,a)
-#define getutmp __getutmp
-#define getutmpx __getutmpx
-#include "sysdeps/gnu/getutmp.c"
-#undef getutmp
-#undef getutmpx
-
 default_symbol_version (__getutmp, getutmp, UTMP_COMPAT_BASE);
+_strong_alias (__getutmp, __getutmpx)
 default_symbol_version (__getutmpx, getutmpx, UTMP_COMPAT_BASE);

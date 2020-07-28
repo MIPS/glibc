@@ -25,7 +25,7 @@
 # undef weak_alias
 # define weak_alias(n,a)
 #endif
-#include "sysdeps/gnu/updwtmp.c"
+#include <login/updwtmp.c>
 
 #if defined SHARED
 default_symbol_version (__updwtmp, updwtmp, UTMP_COMPAT_BASE);

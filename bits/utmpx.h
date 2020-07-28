@@ -51,7 +51,7 @@ struct __exit_status
   };
 
 
-#include <bits/struct_utmpx.h>
+#include <bits/types/struct_utmpx.h>
 
 
 /* Values for the `ut_type' field of a `struct utmpx'.  */

@@ -26,7 +26,7 @@ include ../Makeconfig
 headers	:= utmp.h bits/utmp.h lastlog.h pty.h \
 	   bits/types/struct_lastlog.h \
 	   bits/types/struct_utmp.h \
-	   bits/struct_utmpx.h
+	   bits/types/struct_utmpx.h
 
 routines := getlogin getlogin_r setlogin getlogin_r_chk \
 	    getutent getutent_r getutid getutline getutid_r getutline_r \
