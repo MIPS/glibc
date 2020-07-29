@@ -23,6 +23,8 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <utmp.h>
+#include <utmp-compat.h>
+#include <shlib-compat.h>
 
 
 /* Return the result of ttyname in the buffer pointed to by TTY, which should
@@ -78,7 +80,7 @@ tty_name (int fd, char **tty, size_t buf_len)
 }
 
 void
-login (const struct utmp *ut)
+__login (const struct utmp *ut)
 {
 #ifdef PATH_MAX
   char _tty[PATH_MAX + UT_LINESIZE];
@@ -137,3 +139,9 @@ login (const struct utmp *ut)
   /* Update the WTMP file.  Here we have to add a new entry.  */
   updwtmp (_PATH_WTMP, &copy);
 }
+hidden_def (__login)
+#if SHLIB_COMPAT(libutil, GLIBC_2_0, UTMP_COMPAT_BASE)
+versioned_symbol (libutil, __login, login, UTMP_COMPAT_BASE);
+#else
+weak_alias (__login, login)
+#endif

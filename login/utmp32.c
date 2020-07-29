@@ -1,5 +1,5 @@
-/* Copyright (C) 2008-2020 Free Software Foundation, Inc.
-   Contributed by Andreas Krebbel <Andreas.Krebbel@de.ibm.com>.
+/* Compability symbols for utmp with 32-bit entry times.
+   Copyright (C) 2008-2020 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -23,6 +23,11 @@
 
 #include "utmp32.h"
 #include "utmp-convert.h"
+
+#include <utmp-compat.h>
+#include <shlib-compat.h>
+
+#if SHLIB_COMPAT(libc, GLIBC_2_0, UTMP_COMPAT_BASE)
 
 /* Allocate a static buffer to be returned to the caller.  As well as
    with the existing version of these functions the caller has to be
@@ -63,7 +68,7 @@ getutid32 (const struct utmp32 *id)
 {
   ACCESS_UTMP_ENTRY (__getutid, id)
 }
-symbol_version (getutid32, getutid, GLIBC_2.0);
+compat_symbol (libc, getutid32, getutid, GLIBC_2_0);
 
 /* Search forward from the current point in the utmp file until the
    next entry with a ut_line matching LINE->ut_line.  */
@@ -72,7 +77,7 @@ getutline32 (const struct utmp32 *line)
 {
   ACCESS_UTMP_ENTRY (__getutline, line)
 }
-symbol_version (getutline32, getutline, GLIBC_2.0);
+compat_symbol (libc, getutline32, getutline, GLIBC_2_0);
 
 /* Write out entry pointed to by UTMP_PTR into the utmp file.  */
 struct utmp32 *
@@ -80,7 +85,7 @@ pututline32 (const struct utmp32 *utmp_ptr)
 {
   ACCESS_UTMP_ENTRY (__pututline, utmp_ptr)
 }
-symbol_version (pututline32, pututline, GLIBC_2.0);
+compat_symbol (libc, pututline32, pututline, GLIBC_2_0);
 
 /* Read next entry from a utmp-like file.  */
 struct utmp32 *
@@ -96,10 +101,9 @@ getutent32 (void)
   utmp_convert64to32 (out64, out32);
   return out32;
 }
-symbol_version (getutent32, getutent, GLIBC_2.0);
+compat_symbol (libc, getutent32, getutent, GLIBC_2_0);
 
 /* Reentrant versions of the file for handling utmp files.  */
-
 int
 getutent32_r (struct utmp32 *buffer, struct utmp32 **result)
 {
@@ -119,11 +123,11 @@ getutent32_r (struct utmp32 *buffer, struct utmp32 **result)
 
   return 0;
 }
-symbol_version (getutent32_r, getutent_r, GLIBC_2.0);
+compat_symbol (libc, getutent32_r, getutent_r, GLIBC_2_0);
 
 int
 getutid32_r (const struct utmp32 *id, struct utmp32 *buffer,
-	       struct utmp32 **result)
+	     struct utmp32 **result)
 {
   struct utmp in64;
   struct utmp out64;
@@ -144,11 +148,11 @@ getutid32_r (const struct utmp32 *id, struct utmp32 *buffer,
 
   return 0;
 }
-symbol_version (getutid32_r, getutid_r, GLIBC_2.0);
+compat_symbol (libc, getutid32_r, getutid_r, GLIBC_2_0);
 
 int
 getutline32_r (const struct utmp32 *line,
-		 struct utmp32 *buffer, struct utmp32 **result)
+	       struct utmp32 *buffer, struct utmp32 **result)
 {
   struct utmp in64;
   struct utmp out64;
@@ -170,7 +174,7 @@ getutline32_r (const struct utmp32 *line,
   return 0;
 
 }
-symbol_version (getutline32_r, getutline_r, GLIBC_2.0);
+compat_symbol (libc, getutline32_r, getutline_r, GLIBC_2_0);
 
 /* Append entry UTMP to the wtmp-like file WTMP_FILE.  */
 void
@@ -181,4 +185,6 @@ updwtmp32 (const char *wtmp_file, const struct utmp32 *utmp)
   utmp_convert32to64 (utmp, &in32);
   __updwtmp (wtmp_file, &in32);
 }
-symbol_version (updwtmp32, updwtmp, GLIBC_2.0);
+compat_symbol (libc, updwtmp32, updwtmp, GLIBC_2_0);
+
+#endif /* SHLIB_COMPAT(libc, GLIBC_2_0, UTMP_COMPAT_BASE)   */

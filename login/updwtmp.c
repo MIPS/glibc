@@ -19,7 +19,8 @@
 #include <utmp.h>
 #include <string.h>
 #include <unistd.h>
-
+#include <utmp-compat.h>
+#include <shlib-compat.h>
 #include "utmp-private.h"
 
 #ifndef TRANSFORM_UTMP_FILE_NAME
@@ -41,4 +42,8 @@ __updwtmp (const char *wtmp_file, const struct utmp *utmp)
   __libc_updwtmp (file_name, utmp);
 }
 libc_hidden_def (__updwtmp)
+#if SHLIB_COMPAT(libc, GLIBC_2_0, UTMP_COMPAT_BASE)
+versioned_symbol (libc, __updwtmp, updwtmp, UTMP_COMPAT_BASE);
+#else
 weak_alias (__updwtmp, updwtmp)
+#endif

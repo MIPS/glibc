@@ -1,5 +1,5 @@
-/* Copyright (C) 2008-2020 Free Software Foundation, Inc.
-   Contributed by Andreas Krebbel <Andreas.Krebbel@de.ibm.com>.
+/* Compability symbols for utmpx with 32-bit entry times.
+   Copyright (C) 2008-2020 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -26,6 +26,11 @@
 
 #include "utmpx32.h"
 #include "utmpx-convert.h"
+
+#include <utmp-compat.h>
+#include <shlib-compat.h>
+
+#if SHLIB_COMPAT(libc, GLIBC_2_1, UTMP_COMPAT_BASE)
 
 /* Allocate a static buffer to be returned to the caller.  As well as
    with the existing version of these functions the caller has to be
@@ -75,7 +80,7 @@ getutxent32 (void)
   return out32;
 
 }
-symbol_version (getutxent32, getutxent, GLIBC_2.1);
+compat_symbol (libc, getutxent32, getutxent, GLIBC_2_1);
 
 /* Get the user accounting database entry corresponding to ID.  */
 struct utmpx32 *
@@ -83,7 +88,7 @@ getutxid32 (const struct utmpx32 *id)
 {
   ACCESS_UTMPX_ENTRY (__getutxid, id);
 }
-symbol_version (getutxid32, getutxid, GLIBC_2.1);
+compat_symbol (libc, getutxid32, getutxid, GLIBC_2_1);
 
 /* Get the user accounting database entry corresponding to LINE.  */
 struct utmpx32 *
@@ -91,7 +96,7 @@ getutxline32 (const struct utmpx32 *line)
 {
   ACCESS_UTMPX_ENTRY (__getutxline, line);
 }
-symbol_version (getutxline32, getutxline, GLIBC_2.1);
+compat_symbol (libc, getutxline32, getutxline, GLIBC_2_1);
 
 /* Write the entry UTMPX into the user accounting database.  */
 struct utmpx32 *
@@ -99,7 +104,7 @@ pututxline32 (const struct utmpx32 *utmpx)
 {
   ACCESS_UTMPX_ENTRY (__pututxline, utmpx);
 }
-symbol_version (pututxline32, pututxline, GLIBC_2.1);
+compat_symbol (libc, pututxline32, pututxline, GLIBC_2_1);
 
 /* Append entry UTMP to the wtmpx-like file WTMPX_FILE.  */
 void
@@ -110,7 +115,11 @@ updwtmpx32 (const char *wtmpx_file, const struct utmpx32 *utmpx)
   utmpx_convert32to64 (utmpx, &in64);
   __updwtmpx (wtmpx_file, &in64);
 }
-symbol_version (updwtmpx32, updwtmpx, GLIBC_2.1);
+compat_symbol (libc, updwtmpx32, updwtmpx, GLIBC_2_1);
+
+#endif /* SHLIB_COMPAT(libc, GLIBC_2_1_1, UTMP_COMPAT_BASE)   */
+
+#if SHLIB_COMPAT(libc, GLIBC_2_1_1, UTMP_COMPAT_BASE)
 
 /* Copy the information in UTMPX to UTMP.  */
 void
@@ -123,7 +132,7 @@ getutmp32 (const struct utmpx32 *utmpx, struct utmp32 *utmp)
   __getutmp (&in64, &out64);
   utmp_convert64to32 (&out64, utmp);
 }
-symbol_version (getutmp32, getutmp, GLIBC_2.1.1);
+compat_symbol (libc, getutmp32, getutmp, GLIBC_2_1_1);
 
 /* Copy the information in UTMP to UTMPX.  */
 void
@@ -136,4 +145,6 @@ getutmpx32 (const struct utmp32 *utmp, struct utmpx32 *utmpx)
   __getutmpx (&in64, &out64);
   utmpx_convert64to32 (&out64, utmpx);
 }
-symbol_version (getutmpx32, getutmpx, GLIBC_2.1.1);
+compat_symbol (libc, getutmpx32, getutmpx, GLIBC_2_1_1);
+
+#endif /* SHLIB_COMPAT(libc, GLIBC_2_1, UTMP_COMPAT_BASE)   */

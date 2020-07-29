@@ -31,7 +31,7 @@ headers	:= utmp.h bits/utmp.h lastlog.h pty.h \
 routines := getlogin getlogin_r setlogin getlogin_r_chk \
 	    getutent getutent_r getutid getutline getutid_r getutline_r \
 	    utmp_file utmpname updwtmp getpt grantpt unlockpt ptsname \
-	    ptsname_r_chk
+	    ptsname_r_chk utmp32 utmpx32
 
 CFLAGS-grantpt.c += -DLIBEXECDIR='"$(libexecdir)"'
 
@@ -53,7 +53,7 @@ tests := tst-utmp tst-utmpx tst-grantpt tst-ptsname tst-getlogin tst-updwtmpx \
 extra-libs      := libutil
 extra-libs-others := $(extra-libs)
 
-libutil-routines:= login login_tty logout logwtmp openpty forkpty
+libutil-routines:= login login_tty logout logwtmp openpty forkpty login32
 
 include ../Rules
 

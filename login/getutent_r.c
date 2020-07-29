@@ -20,7 +20,8 @@
 #include <libc-lock.h>
 #include <stdlib.h>
 #include <utmp.h>
-
+#include <utmp-compat.h>
+#include <shlib-compat.h>
 #include "utmp-private.h"
 
 /* We need to protect the opening of the file.  */
@@ -53,7 +54,11 @@ __getutent_r (struct utmp *buffer, struct utmp **result)
   return retval;
 }
 libc_hidden_def (__getutent_r)
+#if SHLIB_COMPAT(libc, GLIBC_2_0, UTMP_COMPAT_BASE)
+versioned_symbol (libc, __getutent_r, getutent_r, UTMP_COMPAT_BASE);
+#else
 weak_alias (__getutent_r, getutent_r)
+#endif
 
 
 struct utmp *
@@ -70,7 +75,11 @@ __pututline (const struct utmp *data)
   return buffer;
 }
 libc_hidden_def (__pututline)
+#if SHLIB_COMPAT(libc, GLIBC_2_0, UTMP_COMPAT_BASE)
+versioned_symbol (libc, __pututline, pututline, UTMP_COMPAT_BASE);
+#else
 weak_alias (__pututline, pututline)
+#endif
 
 
 void

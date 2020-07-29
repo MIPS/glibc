@@ -20,7 +20,8 @@
 #include <errno.h>
 #include <libc-lock.h>
 #include <utmp.h>
-
+#include <utmp-compat.h>
+#include <shlib-compat.h>
 #include "utmp-private.h"
 
 
@@ -43,4 +44,8 @@ __getutline_r (const struct utmp *line, struct utmp *buffer,
   return retval;
 }
 libc_hidden_def (__getutline_r)
+#if SHLIB_COMPAT(libc, GLIBC_2_0, UTMP_COMPAT_BASE)
+versioned_symbol (libc, __getutline_r, getutline_r, UTMP_COMPAT_BASE);
+#else
 weak_alias (__getutline_r, getutline_r)
+#endif

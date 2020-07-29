@@ -21,6 +21,8 @@
 #define getutmpx __redirect_getutmpx
 #include <utmpx.h>
 #undef getutmpx
+#include <utmp-compat.h>
+#include <shlib-compat.h>
 
 #define CHECK_SIZE_AND_OFFSET(field) \
   _Static_assert (sizeof ((struct utmp){0}.field)		\
@@ -59,5 +61,11 @@ __getutmp (const struct utmpx *utmpx, struct utmp *utmp)
   utmp->ut_tv.tv_usec = utmpx->ut_tv.tv_usec;
 }
 
-weak_alias (__getutmp, getutmp)
+#if SHLIB_COMPAT(libc, GLIBC_2_0, UTMP_COMPAT_BASE)
+versioned_symbol (libc, __getutmp, getutmp, UTMP_COMPAT_BASE);
+strong_alias (__getutmp, __getutmpx)
+versioned_symbol (libc, __getutmpx, getutmpx, UTMP_COMPAT_BASE);
+#else
+strong_alias (__getutmp, getutmp)
 strong_alias (__getutmp, getutmpx)
+#endif

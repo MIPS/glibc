@@ -51,4 +51,7 @@ libutil {
   GLIBC_2.0 {
     forkpty; login; login_tty; logout; logwtmp; openpty;
   }
+  GLIBC_2.33 {
+    login;
+  }
 }

@@ -18,9 +18,16 @@
 
 #include <utmp.h>
 #include <utmpx.h>
+#include <utmp-compat.h>
+#include <shlib-compat.h>
 
 struct utmpx *
-pututxline (const struct utmpx *utmpx)
+__pututxline (const struct utmpx *utmpx)
 {
   return (struct utmpx *) __pututline ((const struct utmp *) utmpx);
 }
+#if SHLIB_COMPAT(libc, GLIBC_2_0, UTMP_COMPAT_BASE)
+versioned_symbol (libc, __pututxline, pututxline, UTMP_COMPAT_BASE);
+#else
+weak_alias (__pututxline, pututxline)
+#endif

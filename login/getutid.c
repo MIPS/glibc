@@ -18,7 +18,8 @@
 
 #include <stdlib.h>
 #include <utmp.h>
-
+#include <shlib-compat.h>
+#include <utmp-compat.h>
 
 /* Local buffer to store the result.  */
 libc_freeres_ptr (static struct utmp *buffer);
@@ -40,4 +41,8 @@ __getutid (const struct utmp *id)
   return result;
 }
 libc_hidden_def (__getutid)
+#if SHLIB_COMPAT(libc, GLIBC_2_0, UTMP_COMPAT_BASE)
+versioned_symbol (libc, __getutid, getutid, UTMP_COMPAT_BASE);
+#else
 weak_alias (__getutid, getutid)
+#endif

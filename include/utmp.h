@@ -26,6 +26,9 @@ extern int __getutline_r (const struct utmp *__line,
 			  struct utmp *__buffer, struct utmp **__result);
 libc_hidden_proto (__getutline_r)
 
+extern void __login (const struct utmp *ut);
+hidden_proto (__login)
+
 libutil_hidden_proto (login_tty)
 
 # endif /* !_ISOMAC */

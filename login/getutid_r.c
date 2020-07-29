@@ -21,7 +21,8 @@
 #include <errno.h>
 #include <stdlib.h>
 #include <utmp.h>
-
+#include <utmp-compat.h>
+#include <shlib-compat.h>
 #include "utmp-private.h"
 
 
@@ -55,4 +56,8 @@ __getutid_r (const struct utmp *id, struct utmp *buffer, struct utmp **result)
   return retval;
 }
 libc_hidden_def (__getutid_r)
+#if SHLIB_COMPAT(libc, GLIBC_2_0, UTMP_COMPAT_BASE)
+versioned_symbol (libc, __getutid_r, getutid_r, UTMP_COMPAT_BASE);
+#else
 weak_alias (__getutid_r, getutid_r)
+#endif

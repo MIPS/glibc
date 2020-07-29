@@ -1,3 +1,4 @@
+GLIBC_2.33 login F
 GLIBC_2.4 forkpty F
 GLIBC_2.4 login F
 GLIBC_2.4 login_tty F

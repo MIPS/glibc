@@ -18,9 +18,16 @@
 
 #include <utmp.h>
 #include <utmpx.h>
+#include <utmp-compat.h>
+#include <shlib-compat.h>
 
 void
-updwtmpx (const char *wtmpx_file, const struct utmpx *utmpx)
+__updwtmpx (const char *wtmpx_file, const struct utmpx *utmpx)
 {
   __updwtmp (wtmpx_file, (const struct utmp *) utmpx);
 }
+#if SHLIB_COMPAT(libc, GLIBC_2_0, UTMP_COMPAT_BASE)
+versioned_symbol (libc, __updwtmpx, updwtmpx, UTMP_COMPAT_BASE);
+#else
+weak_alias (__updwtmpx, updwtmpx)
+#endif

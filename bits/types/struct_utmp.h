@@ -38,18 +38,16 @@ struct utmp
 /* The ut_session and ut_tv fields must be the same size when compiled
    32- and 64-bit.  This allows data files and shared memory to be
    shared between 32- and 64-bit applications.  */
-#if __WORDSIZE_TIME64_COMPAT32
-  int32_t ut_session;		/* Session ID, used for windowing.  */
+  int64_t ut_session;		/* Session ID, used for windowing.  */
+#if __TIMESIZE == 64
   struct
   {
-    int32_t tv_sec;		/* Seconds.  */
-    int32_t tv_usec;		/* Microseconds.  */
+    int64_t tv_sec;		/* Seconds.  */
+    int64_t tv_usec;		/* Microseconds.  */
   } ut_tv;			/* Time entry was made.  */
 #else
-  long int ut_session;		/* Session ID, used for windowing.  */
   struct timeval ut_tv;		/* Time entry was made.  */
 #endif
-
   int32_t ut_addr_v6[4];	/* Internet address of remote host.  */
-  char __glibc_reserved[20];		/* Reserved for future use.  */
+  char __glibc_reserved[8];		/* Reserved for future use.  */
 };

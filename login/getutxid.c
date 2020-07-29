@@ -18,9 +18,16 @@
 
 #include <utmp.h>
 #include <utmpx.h>
+#include <utmp-compat.h>
+#include <shlib-compat.h>
 
 struct utmpx *
-getutxid (const struct utmpx *id)
+__getutxid (const struct utmpx *id)
 {
   return (struct utmpx *) __getutid ((const struct utmp *) id);
 }
+#if SHLIB_COMPAT(libc, GLIBC_2_0, UTMP_COMPAT_BASE)
+versioned_symbol (libc, __getutxid, getutxid, UTMP_COMPAT_BASE);
+#else
+weak_alias (__getutxid, getutxid)
+#endif
