@@ -19,9 +19,3 @@
    __WORDSIZE is 32 and ptrdiff_t is type 'int' and leave undefined if
    __WORDSIZE is 64.  */
 #define __WORDSIZE32_PTRDIFF_LONG
-
-/* Set to 1 in order to force time types to be 32 bits instead of 64 bits in
-   struct lastlog and struct utmp{,x} on 64-bit ports.  This may be done in
-   order to make 64-bit ports compatible with 32-bit ports.  Set to 0 for
-   64-bit ports where the time types are 64-bits or for any 32-bit ports.  */
-#define __WORDSIZE_TIME64_COMPAT32

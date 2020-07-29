@@ -7,5 +7,3 @@
 # define __WORDSIZE32_SIZE_ULONG       1
 # define __WORDSIZE32_PTRDIFF_LONG      0
 #endif
-
-#define __WORDSIZE_TIME64_COMPAT32     0
