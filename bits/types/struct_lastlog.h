@@ -24,8 +24,8 @@
    previous logins.  */
 struct lastlog
   {
-#if __WORDSIZE_TIME64_COMPAT32
-    int32_t ll_time;
+#if __TIMESIZE != 64
+    int64_t ll_time;
 #else
     __time_t ll_time;
 #endif
