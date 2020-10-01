@@ -9,3 +9,6 @@ TLS_PRE_TCB_SIZE		sizeof (struct pthread)
 TLS_TCB_SIZE            	sizeof (tcbhead_t)
 
 PTHREAD_TID			offsetof (struct pthread, tid)
+
+-- Not strictly offsets, used on syscall_cancel.S
+TCB_CANCELED_BIT		CANCELED_BIT
