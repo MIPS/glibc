@@ -27,6 +27,7 @@
 #include <bits/setjmp.h>
 #include <bits/wordsize.h>
 #include <bits/types/struct_timespec.h>
+#include <bits/types/struct___jmp_buf_tag.h>
 
 
 /* Detach state.  */
@@ -740,8 +741,8 @@ extern void __pthread_unwind_next (__pthread_unwind_buf_t *__buf)
 #endif
 
 /* Function used in the macros.  */
-struct __jmp_buf_tag;
-extern int __sigsetjmp (struct __jmp_buf_tag *__env, int __savemask) __THROWNL;
+extern int __sigsetjmp (struct __jmp_buf_tag __env[1],
+			int __savemask) __THROWNL;
 
 
 /* Mutex handling.  */
