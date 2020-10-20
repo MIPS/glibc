@@ -102,21 +102,52 @@ versioned_symbol (libc, __readdir64, readdir64, GLIBC_2_2);
 # if SHLIB_COMPAT(libc, GLIBC_2_1, GLIBC_2_2)
 #  include <olddirent.h>
 
+/* Translate the DP64 entry to the old LFS one in the translation buffer
+   at dirstream DS.  Return true is the translation was possible or
+   false if either an internal fields can be represented in the non-LFS
+   entry or if the translation can not be resized.  */
+static bool
+dirstream_old_entry (struct __dirstream *ds, const struct dirent64 *dp64)
+{
+  /* Check for overflow.  */
+  ino_t d_ino = dp64->d_ino;
+  if (d_ino != dp64->d_ino)
+    return false;
+
+  /* Expand the translation buffer to hold the new namesize.  */
+  size_t d_reclen = sizeof (struct __old_dirent64)
+		    + dp64->d_reclen - offsetof (struct dirent64, d_name);
+  if (d_reclen > ds->tbuffer_size)
+    {
+      char *newbuffer = realloc (ds->tbuffer, d_reclen);
+      if (newbuffer == NULL)
+	return false;
+      ds->tbuffer = newbuffer;
+      ds->tbuffer_size = d_reclen;
+    }
+
+  struct __old_dirent64 *olddp64 = (struct __old_dirent64 *) ds->tbuffer;
+
+  olddp64->d_off = dp64->d_off;
+  olddp64->d_ino = dp64->d_ino;
+  olddp64->d_reclen = dp64->d_reclen;
+  olddp64->d_type = dp64->d_type;
+  memcpy (olddp64->d_name, dp64->d_name,
+	  dp64->d_reclen - offsetof (struct dirent64, d_name));
+
+  return true;
+}
+
 attribute_compat_text_section
 struct __old_dirent64 *
 __old_readdir64_unlocked (DIR *dirp)
 {
-  struct __old_dirent64 *dp;
-  int saved_errno = errno;
+  const int saved_errno = errno;
 
   if (dirp->offset >= dirp->size)
     {
       /* We've emptied out our buffer.  Refill it.  */
-
-      size_t maxread = dirp->allocation;
-      ssize_t bytes;
-
-      bytes = __old_getdents64 (dirp->fd, dirp->data, maxread);
+      ssize_t bytes = __getdents64 (dirp->fd, dirp->data, dirp->allocation);
       if (bytes <= 0)
 	{
 	  /* Linux may fail with ENOENT on some file systems if the
@@ -127,17 +158,24 @@ __old_readdir64_unlocked (DIR *dirp)
 	    __set_errno (saved_errno);
 	  return NULL;
 	}
-      dirp->size = (size_t) bytes;
+      dirp->size = bytes;
 
       /* Reset the offset into the buffer.  */
       dirp->offset = 0;
     }
 
-  dp = (struct __old_dirent64 *) &dirp->data[dirp->offset];
-  dirp->offset += dp->d_reclen;
-  dirp->filepos = dp->d_off;
+  struct dirent64 *dp64 = (struct dirent64 *) &dirp->data[dirp->offset];
+  dirp->offset += dp64->d_reclen;
 
-  return dp;
+  /* Skip entries which might overflow d_ino or for memory allocation failure
+     in case of large file names.  */
+  if (dirstream_old_entry (dirp, dp64))
+    {
+      dirp->filepos = dp64->d_off;
+      return (struct __old_dirent64 *) dirp->tbuffer;
+    }
+
+  return NULL;
 }
 
 attribute_compat_text_section
