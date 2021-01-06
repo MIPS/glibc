@@ -142,8 +142,6 @@ LIBC_START_MAIN (int (*main) (int, char **, char ** MAIN_AUXVEC_DECL),
   int result;
 
 #ifndef SHARED
-  _dl_relocate_static_pie ();
-
   char **ev = &argv[argc + 1];
 
   __environ = ev;
@@ -165,6 +163,32 @@ LIBC_START_MAIN (int (*main) (int, char **, char ** MAIN_AUXVEC_DECL),
   }
 #  endif
   _dl_aux_init (auxvec);
+# endif
+
+  /* Initialize very early so that tunables can use it.  */
+  __libc_init_secure ();
+
+  __tunables_init (__environ);
+
+  ARCH_INIT_CPU_FEATURES ();
+
+  /* Do static pie self relocation after tunables and cpu features
+     are setup for ifunc resolvers. Before this point relocations
+     must be avoided.  */
+  _dl_relocate_static_pie ();
+
+  /* Perform IREL{,A} relocations.  */
+  ARCH_SETUP_IREL ();
+
+  /* The stack guard goes into the TCB, so initialize it early.  */
+  ARCH_SETUP_TLS ();
+
+  /* In some architectures, IREL{,A} relocations happen after TLS setup in
+     order to let IFUNC resolvers benefit from TCB information, e.g. powerpc's
+     hwcap and platform fields available in the TCB.  */
+  ARCH_APPLY_IREL ();
+
+# ifdef HAVE_AUX_VECTOR
   if (GL(dl_phdr) == NULL)
 # endif
     {
@@ -183,24 +207,6 @@ LIBC_START_MAIN (int (*main) (int, char **, char ** MAIN_AUXVEC_DECL),
           GL(dl_phnum) = __ehdr_start.e_phnum;
         }
     }
-
-  /* Initialize very early so that tunables can use it.  */
-  __libc_init_secure ();
-
-  __tunables_init (__environ);
-
-  ARCH_INIT_CPU_FEATURES ();
-
-  /* Perform IREL{,A} relocations.  */
-  ARCH_SETUP_IREL ();
-
-  /* The stack guard goes into the TCB, so initialize it early.  */
-  ARCH_SETUP_TLS ();
-
-  /* In some architectures, IREL{,A} relocations happen after TLS setup in
-     order to let IFUNC resolvers benefit from TCB information, e.g. powerpc's
-     hwcap and platform fields available in the TCB.  */
-  ARCH_APPLY_IREL ();
 
   /* Set up the stack checker's canary.  */
   uintptr_t stack_chk_guard = _dl_setup_stack_chk_guard (_dl_random);
