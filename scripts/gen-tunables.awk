@@ -57,7 +57,7 @@ $1 == "}" {
       maxvals[top_ns,ns,tunable] = max_of[types[top_ns,ns,tunable]]
     }
     if (!env_alias[top_ns,ns,tunable]) {
-      env_alias[top_ns,ns,tunable] = "NULL"
+      env_alias[top_ns,ns,tunable] = "{0}"
     }
     if (!security_level[top_ns,ns,tunable]) {
       security_level[top_ns,ns,tunable] = "SXID_ERASE"

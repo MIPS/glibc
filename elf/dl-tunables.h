@@ -38,7 +38,7 @@ __tunables_init (char **unused __attribute__ ((unused)))
 /* A tunable.  */
 struct _tunable
 {
-  const char *name;			/* Internal name of the tunable.  */
+  const char name[64];			/* Internal name of the tunable.  */
   tunable_type_t type;			/* Data type of the tunable.  */
   tunable_val_t val;			/* The value.  */
   bool initialized;			/* Flag to indicate that the tunable is
@@ -54,7 +54,7 @@ struct _tunable
 					   target module if the value is
 					   considered unsafe.  */
   /* Compatibility elements.  */
-  const char *env_alias;		/* The compatibility environment
+  const char env_alias[24];		/* The compatibility environment
 					   variable name.  */
 };
 
