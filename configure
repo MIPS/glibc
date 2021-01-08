@@ -6837,6 +6837,20 @@ if test "$static_pie" = yes; then
   if test "$libc_cv_no_dynamic_linker" != yes; then
     as_fn_error $? "linker support for --no-dynamic-linker needed" "$LINENO" 5
   fi
+
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#ifndef PI_STATIC_AND_HIDDEN
+# error static pie depends on PI_STATIC_AND_HIDDEN
+#endif
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+
+else
+  as_fn_error $? "the target does not support static pie" "$LINENO" 5
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+
   # Default to PIE.
   libc_cv_pie_default=yes
   $as_echo "#define ENABLE_STATIC_PIE 1" >>confdefs.h

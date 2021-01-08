@@ -1846,6 +1846,11 @@ if test "$static_pie" = yes; then
   if test "$libc_cv_no_dynamic_linker" != yes; then
     AC_MSG_ERROR([linker support for --no-dynamic-linker needed])
   fi
+
+  AC_COMPILE_IFELSE([AC_LANG_SOURCE([[#ifndef PI_STATIC_AND_HIDDEN
+# error static pie depends on PI_STATIC_AND_HIDDEN
+#endif]])], , AC_MSG_ERROR([the target does not support static pie]))
+
   # Default to PIE.
   libc_cv_pie_default=yes
   AC_DEFINE(ENABLE_STATIC_PIE)
