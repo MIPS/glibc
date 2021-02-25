@@ -3446,7 +3446,9 @@ __libc_realloc (void *oldmem, size_t bytes)
       newp = __libc_malloc (bytes);
       if (newp != NULL)
         {
-          memcpy (newp, oldmem, oldsize - SIZE_SZ);
+	  size_t sz = CHUNK_AVAILABLE_SIZE (oldp) - CHUNK_HDR_SZ;
+	  memcpy (newp, oldmem, sz);
+	  (void) TAG_REGION (chunk2rawmem (oldp), sz);
           _int_free (ar_ptr, oldp, 0);
         }
     }
@@ -4850,10 +4852,10 @@ _int_realloc(mstate av, mchunkptr oldp, INTERNAL_SIZE_T oldsize,
           else
             {
 	      void *oldmem = chunk2mem (oldp);
+	      size_t sz = CHUNK_AVAILABLE_SIZE (oldp) - CHUNK_HDR_SZ;
 	      newmem = TAG_NEW_USABLE (newmem);
-	      memcpy (newmem, oldmem,
-		      CHUNK_AVAILABLE_SIZE (oldp) - CHUNK_HDR_SZ);
-	      (void) TAG_REGION (chunk2rawmem (oldp), oldsize);
+	      memcpy (newmem, oldmem, sz);
+	      (void) TAG_REGION (chunk2rawmem (oldp), sz);
               _int_free (av, oldp, 1);
               check_inuse_chunk (av, newp);
               return chunk2mem (newp);
