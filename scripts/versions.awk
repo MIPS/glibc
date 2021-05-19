@@ -93,6 +93,33 @@ function ord(c) {
   printf("%s %s %s\n", actlib, sortver, $0) | sort;
 }
 
+# Some targets do not set the ABI baseline for libdl.  As a result,
+# symbols originally in libdl need to be moved under historic symbol
+# versions, without altering the baseline version for libc itself.
+/^ *!libc_abi_extension/ {
+    libc_abi_extension_active = 1;
+}
+
+function libc_abi_extension() {
+    printf("\
+GLIBC_2.0 {\n\
+  global:\n\
+    dladdr;\n\
+    dlclose;\n\
+    dlerror;\n\
+    dlopen;\n\
+    dlsym;\n\
+  local:\n\
+    *;\n\
+};\n\
+GLIBC_2.1 {\n\
+  global:\n\
+    dlopen;\n\
+    dlvsym;\n\
+} GLIBC_2.0;\n\
+") > outfile;
+    return "GLIBC_2.1";
+}
 
 function closeversion(name, oldname) {
   if (firstinfile) {
@@ -157,8 +184,13 @@ END {
       oldlib = $1;
       real_outfile = buildroot oldlib ".map";
       outfile = real_outfile "T";
-      firstinfile = 1;
-      veryoldver = "";
+      if ($1 == "libc" && libc_abi_extension_active) {
+	  firstinfile = 0;
+	  veryoldver = libc_abi_extension();
+      } else {
+	  firstinfile = 1;
+	  veryoldver = "";
+      }
       printf(" %s.map", oldlib);
     }
     if ($2 != oldver) {
