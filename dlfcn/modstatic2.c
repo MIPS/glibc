@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <gnu/lib-names.h>
+#include <first-versions.h>
 
 int test (FILE *out, int a);
 
@@ -117,7 +118,7 @@ test (FILE *out, int a)
       exit (1);
     }
 
-  if (dlvsym (handle2, "_dlfcn_hook", "GLIBC_PRIVATE") == NULL)
+  if (dlvsym (handle2, "malloc", FIRST_VERSION_libc_malloc_STRING) == NULL)
     {
       fprintf (out, "dlvsym: %s\n", dlerror ());
       exit (1);
