@@ -501,7 +501,7 @@ $(objpfx)tst-stack3-mem.out: $(objpfx)tst-stack3.out
 	$(evaluate-test)
 generated += tst-stack3-mem.out tst-stack3.mtrace
 
-$(objpfx)tst-stack4: $(libdl) $(shared-thread-library)
+$(objpfx)tst-stack4: $(shared-thread-library)
 tst-stack4mod.sos=$(shell for i in 0 1 2 3 4 5 6 7 8 9 10 \
 				   11 12 13 14 15 16 17 18 19; do \
 			    for j in 0 1 2 3 4 5 6 7 8 9 10 \
@@ -517,12 +517,12 @@ clean:
 $(objpfx)tst-cleanup4: $(objpfx)tst-cleanup4aux.o $(shared-thread-library)
 $(objpfx)tst-cleanupx4: $(objpfx)tst-cleanupx4aux.o $(shared-thread-library)
 
-$(objpfx)tst-tls3: $(libdl) $(shared-thread-library)
+$(objpfx)tst-tls3: $(shared-thread-library)
 LDFLAGS-tst-tls3 = -rdynamic
 $(objpfx)tst-tls3.out: $(objpfx)tst-tls3mod.so
 $(objpfx)tst-tls3mod.so: $(shared-thread-library)
 
-$(objpfx)tst-tls3-malloc: $(libdl) $(shared-thread-library)
+$(objpfx)tst-tls3-malloc: $(shared-thread-library)
 LDFLAGS-tst-tls3-malloc = -rdynamic
 $(objpfx)tst-tls3-malloc.out: $(objpfx)tst-tls3mod.so
 
@@ -540,7 +540,7 @@ $(objpfx)tst-tls6.out: tst-tls6.sh $(objpfx)tst-tls5 \
 	$(evaluate-test)
 endif
 
-$(objpfx)tst-dlsym1: $(libdl) $(shared-thread-library)
+$(objpfx)tst-dlsym1: $(shared-thread-library)
 
 ifeq (yes,$(build-shared))
 librt = $(common-objpfx)rt/librt.so
@@ -565,7 +565,6 @@ $(addprefix $(objpfx), \
     $(tests-nolibpthread), \
     $(tests) $(tests-internal) $(xtests) $(test-srcs) $(tests-container))): \
 	$(objpfx)libpthread.so
-$(objpfx)tst-unload: $(libdl)
 # $(objpfx)../libc.so is used instead of $(common-objpfx)libc.so,
 # since otherwise libpthread.so comes before libc.so when linking.
 $(addprefix $(objpfx), $(tests-reverse)): \
@@ -582,7 +581,6 @@ endif
 
 tst-exec4-ARGS = $(host-test-program-cmd)
 
-$(objpfx)tst-execstack: $(libdl)
 $(objpfx)tst-execstack.out: $(objpfx)tst-execstack-mod.so
 LDFLAGS-tst-execstack = -Wl,-z,noexecstack
 CFLAGS-tst-execstack-mod.c += -Wno-trampolines
