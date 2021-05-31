@@ -416,8 +416,6 @@ libc {
     __pthread_cleanup_push;
     __pthread_cleanup_upto;
     __pthread_current_priority;
-    __pthread_disable_asynccancel;
-    __pthread_enable_asynccancel;
     __pthread_force_elision;
     __pthread_get_minstack;
     __pthread_keys;
@@ -428,6 +426,7 @@ libc {
     __pthread_unwind;
     __sched_fifo_max_prio;
     __sched_fifo_min_prio;
+    __syscall_cancel;
   }
 }
 

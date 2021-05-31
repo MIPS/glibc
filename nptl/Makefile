@@ -200,6 +200,7 @@ routines = \
   sem_timedwait \
   sem_unlink \
   sem_wait \
+  syscall_cancel \
   tpp \
   unwind \
   vars \
@@ -227,6 +228,7 @@ CFLAGS-unwind-forcedunwind.c += -fexceptions -fasynchronous-unwind-tables
 CFLAGS-pthread_cancel.c += -fexceptions -fasynchronous-unwind-tables
 CFLAGS-pthread_setcancelstate.c += -fexceptions -fasynchronous-unwind-tables
 CFLAGS-pthread_setcanceltype.c += -fexceptions -fasynchronous-unwind-tables
+CFLAGS-syscall_cancel.c += -fexceptions -fasynchronous-unwind-tables
 
 # These are internal functions which similar functionality as setcancelstate
 # and setcanceltype.
@@ -308,7 +310,9 @@ tests = tst-attr2 tst-attr3 tst-default-attr \
 	tst-pthread_exit-nothreads \
 	tst-pthread_exit-nothreads-static \
 	tst-thread-setspecific \
-	tst-cleanup5
+	tst-cleanup5 \
+	tst-cancel29 \
+	tst-cancel30
 
 tests-nolibpthread = \
   tst-pthread_exit-nothreads \

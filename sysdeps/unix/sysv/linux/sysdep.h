@@ -59,6 +59,15 @@
     -1l;					\
   })
 
+/* The return error from cancellable syscall has the same semantic as non
+   cancellable ones.  */
+#define SYSCALL_CANCEL_RET(__ret)				\
+  ({								\
+    __glibc_unlikely (INTERNAL_SYSCALL_ERROR_P (__ret))		\
+    ? SYSCALL_ERROR_LABEL (INTERNAL_SYSCALL_ERRNO (__ret))	\
+    : __ret;							\
+   })
+
 /* Provide a dummy argument that can be used to force register
    alignment for register pairs if required by the syscall ABI.  */
 #ifdef __ASSUME_ALIGNED_REGISTER_PAIRS

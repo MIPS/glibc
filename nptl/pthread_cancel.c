@@ -27,6 +27,7 @@
 #include <stdio.h>
 #include <gnu/lib-names.h>
 #include <sys/single_threaded.h>
+#include <cancellation-pc-check.h>
 
 /* For asynchronous cancellation we use a signal.  */
 static void
@@ -50,10 +51,16 @@ sigcancel_handler (int sig, siginfo_t *si, void *ctx)
       || (ch & EXITING_BITMASK) != 0)
     return;
 
-  /* Set the return value.  */
   THREAD_SETMEM (self, result, PTHREAD_CANCELED);
-  /* Make sure asynchronous cancellation is still enabled.  */
-  if (self->canceltype == PTHREAD_CANCEL_ASYNCHRONOUS)
+
+  /* Check if asynchronous cancellation mode is set or if interrupted
+     instruction pointer falls within the cancellable syscall bridge.  For
+     interruptable syscalls that might generate external side-effects (for
+     instance partial reads or writes), the kernel will set the IP to after
+     '__syscall_cancel_arch_end', thus disabling the cancellation and allowing
+     the process to handle such conditions.  */
+  if (self->canceltype == PTHREAD_CANCEL_ASYNCHRONOUS
+      || cancellation_pc_check (ctx))
     __do_cancel ();
 }
 
@@ -72,7 +79,11 @@ __pthread_cancel (pthread_t th)
     {
       struct sigaction sa;
       sa.sa_sigaction = sigcancel_handler;
-      sa.sa_flags = SA_SIGINFO;
+      /* The signal handle should be non-interruptible to avoid the risk of
+	 spurious EINTR caused by SIGCANCEL sent to process or if
+	 pthread_cancel is called while cancellation is disabled in the target
+	 thread.  */
+      sa.sa_flags = SA_SIGINFO | SA_RESTART;
       __sigemptyset (&sa.sa_mask);
       __libc_sigaction (SIGCANCEL, &sa, NULL);
       atomic_store_relaxed (&init_sigcancel, 1);

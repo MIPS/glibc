@@ -16,53 +16,40 @@
    License along with the GNU C Library; if not, see
    <https://www.gnu.org/licenses/>.  */
 
-#include <setjmp.h>
 #include <stdlib.h>
 #include "pthreadP.h"
-#include <futex-internal.h>
 
-
-/* The next two functions are similar to pthread_setcanceltype() but
-   more specialized for the use in the cancelable functions like write().
-   They do not need to check parameters etc.  These functions must be
-   AS-safe, with the exception of the actual cancellation, because they
-   are called by wrappers around AS-safe functions like write().*/
-int
-__pthread_enable_asynccancel (void)
+/* Cancellation function called by all cancellable syscalls.  */
+long int
+__syscall_cancel (__syscall_arg_t nr, __syscall_arg_t a1,
+		  __syscall_arg_t a2, __syscall_arg_t a3,
+		  __syscall_arg_t a4, __syscall_arg_t a5,
+		  __syscall_arg_t a6)
 {
   struct pthread *self = THREAD_SELF;
 
-  int oldval = THREAD_GETMEM (self, canceltype);
-  THREAD_SETMEM (self, canceltype, PTHREAD_CANCEL_ASYNCHRONOUS);
+  /* If cancellation is not enabled, call the syscall directly.  */
+  if (self->cancelstate == PTHREAD_CANCEL_DISABLE)
+    {
+      long int r = INTERNAL_SYSCALL_NCS_CALL (nr, a1, a2, a3, a4, a5, a6);
+      return INTERNAL_SYSCALL_ERROR_P (r) ? -INTERNAL_SYSCALL_ERRNO (r) : r;
+    }
 
-  int ch = THREAD_GETMEM (self, cancelhandling);
+  /* Call the arch-specific entry points that contains the globals markers
+     to be checked by SIGCANCEL handler.  */
+  long int r = __syscall_cancel_arch (&self->cancelhandling, nr, a1, a2, a3,
+				      a4, a5, a6);
 
-  if (self->cancelstate == PTHREAD_CANCEL_ENABLE
-      && (ch & CANCELED_BITMASK)
-      && !(ch & EXITING_BITMASK)
-      && !(ch & TERMINATED_BITMASK))
+  if (r == -EINTR
+      && atomic_load_relaxed (&self->cancelhandling) & CANCELED_BITMASK
+      && self->cancelstate == PTHREAD_CANCEL_ENABLE)
     {
       __do_cancel ();
     }
 
-  return oldval;
+  return r;
 }
-libc_hidden_def (__pthread_enable_asynccancel)
-
-/* See the comment for __pthread_enable_asynccancel regarding
-   the AS-safety of this function.  */
-void
-__pthread_disable_asynccancel (int oldtype)
-{
-  /* If asynchronous cancellation was enabled before we do not have
-     anything to do.  */
-  if (oldtype == PTHREAD_CANCEL_ASYNCHRONOUS)
-    return;
-
-  struct pthread *self = THREAD_SELF;
-  self->canceltype = PTHREAD_CANCEL_DEFERRED;
-}
-libc_hidden_def (__pthread_disable_asynccancel)
+libc_hidden_def (__syscall_cancel)
 
 void
 __do_cancel (void)

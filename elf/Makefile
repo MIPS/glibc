@@ -529,10 +529,7 @@ $(objpfx)dl-allobjs.os: $(all-rtld-routines:%=$(objpfx)%.os)
 # discovery mechanism is not compatible with the libc implementation
 # when compiled for libc.
 rtld-stubbed-symbols = \
-  __GI___pthread_disable_asynccancel \
-  __GI___pthread_enable_asynccancel \
-  __pthread_disable_asynccancel \
-  __pthread_enable_asynccancel \
+  __GI___pthread_unwind \
   calloc \
   free \
   malloc \

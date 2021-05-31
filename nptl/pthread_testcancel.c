@@ -24,11 +24,8 @@ void
 ___pthread_testcancel (void)
 {
   struct pthread *self = THREAD_SELF;
-  int cancelhandling = THREAD_GETMEM (self, cancelhandling);
   if (self->cancelstate == PTHREAD_CANCEL_ENABLE
-      && (cancelhandling & CANCELED_BITMASK)
-      && !(cancelhandling & EXITING_BITMASK)
-      && !(cancelhandling & TERMINATED_BITMASK))
+      && atomic_load_relaxed (&self->cancelhandling) & CANCELED_BITMASK)
     {
       __do_cancel ();
     }

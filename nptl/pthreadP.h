@@ -292,6 +292,10 @@ __exit_thread (void *value)
    implementation because it might be called by arch-specific asm code.  */
 _Noreturn void __do_cancel (void) attribute_hidden;
 
+extern long int __syscall_cancel_arch (volatile int *, __syscall_arg_t nr,
+     __syscall_arg_t arg1, __syscall_arg_t arg2, __syscall_arg_t arg3,
+     __syscall_arg_t arg4, __syscall_arg_t arg5, __syscall_arg_t arg6);
+libc_hidden_proto (__syscall_cancel)
 
 /* Internal prototypes.  */
 

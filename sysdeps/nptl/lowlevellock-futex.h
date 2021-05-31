@@ -120,20 +120,13 @@
 
 /* Like lll_futex_wait, but acting as a cancellable entrypoint.  */
 # define lll_futex_wait_cancel(futexp, val, private) \
-  ({                                                                   \
-    int __oldtype = LIBC_CANCEL_ASYNC ();			       \
-    long int __err = lll_futex_wait (futexp, val, LLL_SHARED);	       \
-    LIBC_CANCEL_RESET (__oldtype);				       \
-    __err;							       \
-  })
+  lll_futex_timed_wait_cancel (futexp, val, NULL, private)
 
 /* Like lll_futex_timed_wait, but acting as a cancellable entrypoint.  */
 # define lll_futex_timed_wait_cancel(futexp, val, timeout, private) \
-  ({									   \
-    int __oldtype = LIBC_CANCEL_ASYNC ();			       	   \
-    long int __err = lll_futex_timed_wait (futexp, val, timeout, private); \
-    LIBC_CANCEL_RESET (__oldtype);					   \
-    __err;								   \
+  ({									\
+     int __op = __lll_private_flag (FUTEX_WAIT, private);		\
+     INTERNAL_SYSCALL_CANCEL (futex, futexp, __op, val, timeout);	\
   })
 
 #endif  /* !__ASSEMBLER__  */
