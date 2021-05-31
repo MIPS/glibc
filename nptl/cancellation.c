@@ -42,7 +42,6 @@ __pthread_enable_asynccancel (void)
       && !(ch & EXITING_BITMASK)
       && !(ch & TERMINATED_BITMASK))
     {
-      THREAD_SETMEM (self, result, PTHREAD_CANCELED);
       __do_cancel ();
     }
 
@@ -64,3 +63,9 @@ __pthread_disable_asynccancel (int oldtype)
   self->canceltype = PTHREAD_CANCEL_DEFERRED;
 }
 libc_hidden_def (__pthread_disable_asynccancel)
+
+void
+__do_cancel (void)
+{
+  __exit_thread (PTHREAD_CANCELED);
+}
