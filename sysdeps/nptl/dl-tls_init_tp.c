@@ -97,4 +97,6 @@ __tls_init_tp (void)
 
   THREAD_SETMEM (pd, cancelstate, PTHREAD_CANCEL_ENABLE);
   THREAD_SETMEM (pd, canceltype, PTHREAD_CANCEL_DEFERRED);
+
+  THREAD_SETMEM (pd, joinstate, THREAD_STATE_JOINABLE);
 }

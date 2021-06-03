@@ -17,6 +17,7 @@
    <https://www.gnu.org/licenses/>.  */
 
 #include <atomic.h>
+#include <futex-internal.h>
 #include <nptl/pthreadP.h>
 
 _Noreturn static void
@@ -65,6 +66,12 @@ __libc_start_call_main (int (*main) (int, char **, char ** MAIN_AUXVEC_DECL),
       /* One less thread.  Decrement the counter.  If it is zero we
          terminate the entire process.  */
       result = 0;
+
+      /* For the case a thread is waiting for the main thread to finish.  */
+      struct pthread *self = THREAD_SELF;
+      atomic_store_release (&self->joinstate, THREAD_STATE_EXITED);
+      futex_wake (&self->joinstate, 1, FUTEX_PRIVATE);
+
       if (! atomic_decrement_and_test (&__nptl_nthreads))
         /* Not much left to do but to exit the thread, not the process.  */
 	while (1)

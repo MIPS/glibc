@@ -536,7 +536,7 @@ libc_hidden_proto (__pthread_setcanceltype)
 extern void __pthread_testcancel (void);
 libc_hidden_proto (__pthread_testcancel)
 extern int __pthread_clockjoin_ex (pthread_t, void **, clockid_t,
-				   const struct __timespec64 *, bool)
+				   const struct __timespec64 *)
   attribute_hidden;
 extern int __pthread_sigmask (int, const sigset_t *, sigset_t *);
 libc_hidden_proto (__pthread_sigmask);

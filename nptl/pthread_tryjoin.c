@@ -22,15 +22,16 @@
 int
 __pthread_tryjoin_np (pthread_t threadid, void **thread_return)
 {
-  /* Return right away if the thread hasn't terminated yet.  */
-  struct pthread *pd = (struct pthread *) threadid;
-  if (pd->tid != 0)
-    return EBUSY;
+  /* The THREAD_STATE_JOINABLE is straigthforward (the thread hasn't finished
+     yet).  Both THREAD_STATE_DETACHED and THREAD_STATE_EXITING might result
+     in a possible blocking call: a detached thread might change its state to
+     exiting and a exiting thread my take some time to change to
+     THREAD_STATE_EXITED.  */
 
-  /* If pd->tid == 0 then lll_wait_tid will not block on futex
-     operation.  */
-  return __pthread_clockjoin_ex (threadid, thread_return, 0 /* Ignored */,
-				 NULL, false);
+  struct pthread *pd = (struct pthread *) threadid;
+  return atomic_load_acquire (&pd->joinstate) != THREAD_STATE_EXITED
+	 ? EBUSY
+	 : __pthread_clockjoin_ex (threadid, thread_return, 0, NULL);
 }
 versioned_symbol (libc, __pthread_tryjoin_np, pthread_tryjoin_np, GLIBC_2_34);
 

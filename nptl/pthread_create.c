@@ -343,7 +343,7 @@ start_thread (void *arg)
          and free any resource prior return to the pthread_create caller.  */
       setup_failed = pd->setup_failed == 1;
       if (setup_failed)
-	pd->joinid = NULL;
+	pd->joinstate = THREAD_STATE_JOINABLE;
 
       /* And give it up right away.  */
       lll_unlock (pd->lock, LLL_PRIVATE);
@@ -473,16 +473,24 @@ start_thread (void *arg)
      the breakpoint reports TD_THR_RUN state rather than TD_THR_ZOMBIE.  */
   atomic_bit_set (&pd->cancelhandling, EXITING_BIT);
 
-  if (__glibc_unlikely (atomic_decrement_and_test (&__nptl_nthreads)))
-    /* This was the last thread.  */
-    exit (0);
 
-#ifndef __ASSUME_SET_ROBUST_LIST
-  /* If this thread has any robust mutexes locked, handle them now.  */
+  /* CONCURRENCY NOTES:
+
+     Concurrent pthread_detach() will either set state to
+     THREAD_STATE_DETACHED or wait the thread to terminate.  The exiting state
+     set here is set so a pthread_join() wait until all the required cleanup
+     steps are done.
+
+     The joinstate will be used to determine who is reponsible to call
+     __nptl_free_tcb below.  */
+
+  unsigned int joinstate = THREAD_STATE_JOINABLE;
+  atomic_compare_exchange_weak_acquire (&pd->joinstate, &joinstate,
+					THREAD_STATE_EXITING);
+
+  /* We handle robuts mutexes on exit thread path so pthread_join() see the
+     states when the thread is joined.  */
   void **robust;
-  /* We let the kernel do the notification if it is able to do so.
-     If we have to do it here there for sure are no PI mutexes involved
-     since the kernel support for them is even more recent.  */
   while ((robust = pd->robust_head.list)
 	 && robust != (void *) &pd->robust_head)
     {
@@ -511,7 +519,10 @@ start_thread (void *arg)
 	    futex_wake ((unsigned int *) &mtx->__lock, 1, shared);
 	}
     }
-#endif
+
+  if (__glibc_unlikely (atomic_decrement_and_test (&__nptl_nthreads)))
+    /* This was the last thread.  */
+    exit (0);
 
   if (!pd->user_stack)
     advise_stack_range (pd->stackblock, pd->stackblock_size, (uintptr_t) pd,
@@ -533,12 +544,16 @@ start_thread (void *arg)
       pd->setxid_futex = 0;
     }
 
-  /* If the thread is detached free the TCB.  */
-  if (IS_DETACHED (pd))
-    /* Free the TCB.  */
+  if (joinstate == THREAD_STATE_DETACHED)
     __nptl_free_tcb (pd);
-
+  else
+    {
 out:
+      /* Wake up a pthread_join() call.  */
+      atomic_store_release (&pd->joinstate, THREAD_STATE_EXITED);
+      futex_wake (&pd->joinstate, 1, FUTEX_PRIVATE);
+    }
+
   /* We cannot call '_exit' here.  '_exit' will terminate the process.
 
      The 'exit' implementation in the kernel will signal when the
@@ -640,7 +655,9 @@ __pthread_create_2_1 (pthread_t *newthread, const pthread_attr_t *attr,
   /* Initialize the field for the ID of the thread which is waiting
      for us.  This is a self-reference in case the thread is created
      detached.  */
-  pd->joinid = iattr->flags & ATTR_FLAG_DETACHSTATE ? pd : NULL;
+  pd->joinstate = iattr->flags & ATTR_FLAG_DETACHSTATE
+		  ? THREAD_STATE_DETACHED
+		  : THREAD_STATE_JOINABLE;
 
   /* The debug events are inherited from the parent.  */
   pd->eventbuf = self->eventbuf;
@@ -799,10 +816,11 @@ __pthread_create_2_1 (pthread_t *newthread, const pthread_attr_t *attr,
 
 	  /* Similar to pthread_join, but since thread creation has failed at
 	     startup there is no need to handle all the steps.  */
-	  pid_t tid;
-	  while ((tid = atomic_load_acquire (&pd->tid)) != 0)
-	    __futex_abstimed_wait_cancelable64 ((unsigned int *) &pd->tid,
-						tid, 0, NULL, LLL_SHARED);
+	  unsigned int state;
+	  while ((state = atomic_load_acquire (&pd->joinstate))
+                 != THREAD_STATE_EXITED)
+	    __futex_abstimed_wait_cancelable64 (&pd->joinstate, state, 0,
+                                                NULL, LLL_PRIVATE);
         }
 
       /* State (c) or (d) and we have ownership of PD (see CONCURRENCY
