@@ -540,6 +540,8 @@ else
 librt = $(common-objpfx)rt/librt.a
 endif
 
+$(objpfx)tst-cancel7: $(librt)
+$(objpfx)tst-cancelx7: $(librt)
 $(objpfx)tst-cancel17: $(librt)
 $(objpfx)tst-cancelx17: $(librt)
 

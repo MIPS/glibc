@@ -18,43 +18,56 @@
 
 #include <errno.h>
 #include <fcntl.h>
-#include <pthread.h>
-#include <signal.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
 #include <getopt.h>
+#include <signal.h>
+#include <stdlib.h>
+#include <semaphore.h>
 
+#include <support/check.h>
+#include <support/support.h>
+#include <support/temp_file.h>
+#include <support/xstdio.h>
+#include <support/xunistd.h>
 #include <support/xthread.h>
 
-const char *command;
-const char *pidfile;
-char pidfilename[] = "/tmp/tst-cancel7-XXXXXX";
+static const char *command;
+static const char *pidfile;
+static char *pidfilename;
+
+static const char sem_name[] = "/tst-cancel7-sem";
+static sem_t *sem;
 
 static void *
 tf (void *arg)
 {
+#if 0
   const char *args = " --direct --pidfile ";
   char *cmd = alloca (strlen (command) + strlen (args)
 		      + strlen (pidfilename) + 1);
 
   strcpy (stpcpy (stpcpy (cmd, command), args), pidfilename);
+#endif
+  char *cmd = xasprintf ("%s --direct --pidfile %s", command, pidfilename);
   system (cmd);
   /* This call should never return.  */
   return NULL;
 }
 
-
 static void
 sl (void)
 {
+#if 0
   FILE *f = fopen (pidfile, "w");
   if (f == NULL)
     exit (1);
+#endif
+  FILE *f = xfopen (pidfile, "w");
 
   fprintf (f, "%lld\n", (long long) getpid ());
   fflush (f);
+
+  if (sem_post (sem) != 0)
+    FAIL_EXIT1 ("sem_post: %m");
 
   struct flock fl =
     {
@@ -64,7 +77,7 @@ sl (void)
       .l_len = 1
     };
   if (fcntl (fileno (f), F_SETLK, &fl) != 0)
-    exit (1);
+    FAIL_EXIT1 ("fcntl (F_SETFL): %m");
 
   sigset_t ss;
   sigfillset (&ss);
@@ -76,57 +89,53 @@ sl (void)
 static void
 do_prepare (int argc, char *argv[])
 {
+  sem = sem_open (sem_name, O_RDWR | O_CREAT | O_EXCL | O_TRUNC, 0666, 0);
+  if (sem == SEM_FAILED)
+    {
+      if (errno != EEXIST)
+	FAIL_EXIT1 ("sem_open failed: %m");
+      sem = sem_open (sem_name, O_RDWR);
+      if (sem == SEM_FAILED)
+	FAIL_EXIT1 ("sem_open failed: %m");
+    }
+
   if (command == NULL)
     command = argv[0];
 
   if (pidfile)
     sl ();
 
-  int fd = mkstemp (pidfilename);
+  int fd = create_temp_file ("tst-cancel7-pid-", &pidfilename);
   if (fd == -1)
-    {
-      puts ("mkstemp failed");
-      exit (1);
-    }
+    FAIL_EXIT1 ("create_temp_file failed: %m");
 
-  write (fd, " ", 1);
-  close (fd);
+  xwrite (fd, " ", 1);
+  xclose (fd);
 }
 
 
 static int
 do_test (void)
 {
-  pthread_t th;
-  if (pthread_create (&th, NULL, tf, NULL) != 0)
-    {
-      puts ("pthread_create failed");
-      return 1;
-    }
+  pthread_t th = xpthread_create (NULL, tf, NULL);
 
   do
-    sleep (1);
+    nanosleep (&(struct timespec) { .tv_sec = 0, .tv_nsec = 100000000 }, NULL);
   while (access (pidfilename, R_OK) != 0);
+
+  if (sem_wait (sem) != 0)
+    FAIL_EXIT1 ("sem_wait: %m");
 
   xpthread_cancel (th);
   void *r = xpthread_join (th);
 
   sleep (1);
 
-  FILE *f = fopen (pidfilename, "r+");
-  if (f == NULL)
-    {
-      puts ("no pidfile");
-      return 1;
-    }
+  FILE *f = xfopen (pidfilename, "r+");
 
   long long ll;
   if (fscanf (f, "%lld\n", &ll) != 1)
-    {
-      puts ("could not read pid");
-      unlink (pidfilename);
-      return 1;
-    }
+    FAIL_EXIT1 ("fscanf: %m");
 
   struct flock fl =
     {
@@ -136,11 +145,7 @@ do_test (void)
       .l_len = 1
     };
   if (fcntl (fileno (f), F_GETLK, &fl) != 0)
-    {
-      puts ("F_GETLK failed");
-      unlink (pidfilename);
-      return 1;
-    }
+    FAIL_EXIT1 ("fcntl: %m");
 
   if (fl.l_type != F_UNLCK)
     {
@@ -148,13 +153,12 @@ do_test (void)
       if (fl.l_pid == ll)
 	kill (fl.l_pid, SIGKILL);
 
-      unlink (pidfilename);
       return 1;
     }
 
-  fclose (f);
+  xfclose (f);
 
-  unlink (pidfilename);
+  sem_unlink (sem_name);
 
   return r != PTHREAD_CANCELED;
 }
@@ -181,7 +185,7 @@ do_cleanup (void)
       fclose (f);
     }
 
-  unlink (pidfilename);
+  sem_unlink (sem_name);
 }
 
 #define OPT_COMMAND	10000
