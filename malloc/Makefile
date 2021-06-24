@@ -98,7 +98,7 @@ tests-exclude-mcheck = tst-mallocstate \
 
 tests-mcheck = $(filter-out $(tests-exclude-mcheck), $(tests))
 
-routines = malloc morecore mcheck mtrace obstack reallocarray \
+routines = malloc mcheck mtrace obstack reallocarray \
   scratch_buffer_dupfree \
   scratch_buffer_grow scratch_buffer_grow_preserve \
   scratch_buffer_set_array_size \
