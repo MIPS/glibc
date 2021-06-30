@@ -76,6 +76,9 @@ Major new features:
   equal to a giver integer.  This function is a GNU extension, although
   Solaris also provides a similar function.
 
+* The audit libraries will avoid unnecessary slowdown if PLT tracking is not
+  required (by not implementing the la_pltenter() or la_pltexit() callbacks).
+
 Deprecated and removed features, and other changes affecting compatibility:
 
 * The function pthread_mutex_consistent_np has been deprecated; programs
