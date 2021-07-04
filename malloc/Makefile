@@ -90,8 +90,6 @@ tests-exclude-mcheck = tst-mallocstate \
 	tst-malloc-thread-fail \
 	tst-malloc-usable-tunables \
 	tst-malloc_info \
-	tst-memalign \
-	tst-posix_memalign \
 	tst-compathooks-off tst-compathooks-on
 
 tests-mcheck = $(filter-out $(tests-exclude-mcheck), $(tests))
