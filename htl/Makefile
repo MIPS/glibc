@@ -203,6 +203,9 @@ libc-link.so = $(common-objpfx)libc.so
 
 extra-B-pthread.so = -B$(common-objpfx)htl/
 LDFLAGS-pthread.so = -Wl,--enable-new-dtags,-z,nodelete,-z,initfirst
+ifeq ($(ld-zunique),yes)
+LDFLAGS-pthread.so += -Wl,-z,unique
+endif
 
 include ../Rules
 
