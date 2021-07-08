@@ -23,6 +23,7 @@
 #include <unistd.h>
 #include <sys/param.h>
 
+#if SHLIB_COMPAT (libc_malloc_debug, GLIBC_2_0, GLIBC_2_34)
 /* Support only the glibc allocators.  */
 extern void *__libc_malloc (size_t);
 extern void __libc_free (void *);
@@ -479,4 +480,35 @@ malloc_set_state (void *msptr)
   return LIBC_SYMBOL (malloc_set_state) (msptr);
 }
 compat_symbol (libc, malloc_set_state, malloc_set_state, GLIBC_2_0);
+#endif
+
+/* Do not allow linking against the library.  */
+compat_symbol (libc_malloc_debug, aligned_alloc, aligned_alloc, GLIBC_2_16);
+compat_symbol (libc_malloc_debug, calloc, calloc, GLIBC_2_0);
+compat_symbol (libc_malloc_debug, free, free, GLIBC_2_0);
+compat_symbol (libc_malloc_debug, mallinfo2, mallinfo2, GLIBC_2_33);
+compat_symbol (libc_malloc_debug, mallinfo, mallinfo, GLIBC_2_0);
+compat_symbol (libc_malloc_debug, malloc_info, malloc_info, GLIBC_2_10);
+compat_symbol (libc_malloc_debug, malloc, malloc, GLIBC_2_0);
+compat_symbol (libc_malloc_debug, malloc_stats, malloc_stats, GLIBC_2_0);
+compat_symbol (libc_malloc_debug, malloc_trim, malloc_trim, GLIBC_2_0);
+compat_symbol (libc_malloc_debug, malloc_usable_size, malloc_usable_size,
+	       GLIBC_2_0);
+compat_symbol (libc_malloc_debug, mallopt, mallopt, GLIBC_2_0);
+compat_symbol (libc_malloc_debug, mcheck_check_all, mcheck_check_all,
+	       GLIBC_2_2);
+compat_symbol (libc_malloc_debug, mcheck, mcheck, GLIBC_2_0);
+compat_symbol (libc_malloc_debug, mcheck_pedantic, mcheck_pedantic, GLIBC_2_2);
+compat_symbol (libc_malloc_debug, memalign, memalign, GLIBC_2_0);
+compat_symbol (libc_malloc_debug, mprobe, mprobe, GLIBC_2_0);
+compat_symbol (libc_malloc_debug, mtrace, mtrace, GLIBC_2_0);
+compat_symbol (libc_malloc_debug, muntrace, muntrace, GLIBC_2_0);
+compat_symbol (libc_malloc_debug, posix_memalign, posix_memalign, GLIBC_2_2);
+compat_symbol (libc_malloc_debug, pvalloc, pvalloc, GLIBC_2_0);
+compat_symbol (libc_malloc_debug, realloc, realloc, GLIBC_2_0);
+compat_symbol (libc_malloc_debug, valloc, valloc, GLIBC_2_0);
+compat_symbol (libc_malloc_debug, __free_hook, __free_hook, GLIBC_2_0);
+compat_symbol (libc_malloc_debug, __malloc_hook, __malloc_hook, GLIBC_2_0);
+compat_symbol (libc_malloc_debug, __realloc_hook, __realloc_hook, GLIBC_2_0);
+compat_symbol (libc_malloc_debug, __memalign_hook, __memalign_hook, GLIBC_2_0);
 #endif
