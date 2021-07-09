@@ -43,6 +43,14 @@
    && (!(ABI_##lib##_##obsoleted - 0)					      \
        || ((ABI_##lib##_##introduced - 0) < (ABI_##lib##_##obsoleted - 0))))
 
+/* Like LIB_COMPAT, but it can check versions in other libraries.  It is
+   not always false for !IS_IN (LIB).  */
+#define OTHER_LIB_COMPAT(lib, introduced, obsoleted)	\
+  _OTHER_LIB_COMPAT (lib, introduced, obsoleted)
+#define _OTHER_LIB_COMPAT(lib, introduced, obsoleted)			\
+  (!(ABI_##lib##_##obsoleted - 0)					\
+   || ((ABI_##lib##_##introduced - 0) < (ABI_##lib##_##obsoleted - 0)))
+
 #ifdef SHARED
 
 /* Similar to LIB_COMPAT, but evaluate to 0 for static build.  The
@@ -56,10 +64,7 @@
 /* Like SHLIB_COMPAT, but it can check versions in other libraries.  It is
    not always false for !IS_IN (LIB).  */
 #define OTHER_SHLIB_COMPAT(lib, introduced, obsoleted)	\
-  _OTHER_SHLIB_COMPAT (lib, introduced, obsoleted)
-#define _OTHER_SHLIB_COMPAT(lib, introduced, obsoleted)			\
-  (!(ABI_##lib##_##obsoleted - 0)					\
-   || ((ABI_##lib##_##introduced - 0) < (ABI_##lib##_##obsoleted - 0)))
+  _OTHER_LIB_COMPAT (lib, introduced, obsoleted)
 
 /* That header also defines symbols like `VERSION_libm_GLIBC_2_1' to
    the version set name to use for e.g. symbols first introduced into

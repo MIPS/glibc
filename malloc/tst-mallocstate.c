@@ -377,6 +377,11 @@ my_free (void *ptr)
 static int
 do_test (void)
 {
+/* The test will not work on newer targets since __malloc_initialize_hook was
+   deprecated in 2.24.  */
+#if !OTHER_LIB_COMPAT (libc, GLIBC_2_0, GLIBC_2_24)
+  FAIL_UNSUPPORTED ("Target does not have __malloc_initialize_hook");
+#endif
   my_free (malloc (1));
   TEST_VERIFY_EXIT (heap_initialized);
 
