@@ -1363,6 +1363,20 @@ void _dl_audit_objopen (struct link_map *l, Lmid_t nsid, bool check_audit);
 /* Call the la_objclose () from audit modules for the link_map L on the
    namespace identification NSID.  */
 void _dl_audit_objclose (struct link_map *l, Lmid_t nsid);
+/* Call the la_symbind32() or la_symbind64() from audit modules for the
+   link_map L.  The RELOC_RESULT is the entry from link_map::l_reloc_result used
+   to keep track of the binding actions set by the audir modules, while DEFSYM
+   is the reference used to resolve the target symbol, VALUE is the relocation
+   result value (which might be overwritten by the callback), and RESULT is the
+   link_map for the symbol resolved.  */
+void _dl_audit_symbind (struct link_map *l, struct reloc_result *reloc_result,
+			const ElfW(Sym) *defsym, DL_FIXUP_VALUE_TYPE *value,
+			lookup_t result);
+/* Same as _dl_audit_symbind(), but called from the dlsym().  The flag
+   LA_SYMB_DLSYM will be set before calling la_symbind() callback.  */
+void _dl_audit_symbind_alt (struct link_map *l, const ElfW(Sym) *ref,
+			    void **value, lookup_t result);
+rtld_hidden_proto (_dl_audit_symbind_alt)
 #endif /* SHARED */
 
 #if PTHREAD_IN_LIBC && defined SHARED
