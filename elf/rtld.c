@@ -1359,11 +1359,6 @@ dl_main (const ElfW(Phdr) *phdr,
 
       phdr = main_map->l_phdr;
       phnum = main_map->l_phnum;
-      /* We overwrite here a pointer to a malloc()ed string.  But since
-	 the malloc() implementation used at this point is the dummy
-	 implementations which has no real free() function it does not
-	 makes sense to free the old string first.  */
-      main_map->l_name = (char *) "";
       *user_entry = main_map->l_entry;
 
 #ifdef HAVE_AUX_VECTOR
@@ -1426,6 +1421,7 @@ dl_main (const ElfW(Phdr) *phdr,
 	 information for the program.  */
     }
 
+  main_map->l_name = _dl_argv[0];
   main_map->l_map_end = 0;
   main_map->l_text_end = 0;
   /* Perhaps the executable has no PT_LOAD header entries at all.  */
