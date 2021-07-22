@@ -35,6 +35,7 @@
 #include <link.h>
 #include <dl-lookupcfg.h>
 #include <dl-sysdep.h>
+#include <dl-fixup-attribute.h>
 #include <libc-lock.h>
 #include <hp-timing.h>
 #include <tls.h>
@@ -1387,6 +1388,14 @@ rtld_hidden_proto (_dl_audit_symbind_alt)
 void _dl_audit_pltenter (struct link_map *l, struct reloc_result *reloc_result,
 			 DL_FIXUP_VALUE_TYPE *value, void *regs,
 			 long int *framesize);
+/* Call the la_pltexit() arch specific from audit modules for the link_map L.
+   The RELOC_ARGS is the relocation result value, INREGS is the arch-specific
+   input register state saved, and OUTREGS is the return value passed on the
+   callback.  */
+void DL_ARCH_FIXUP_ATTRIBUTE _dl_audit_pltexit (struct link_map *l,
+						ElfW(Word) reloc_arg,
+						const void *inregs,
+					       	void *outregs);
 #endif /* SHARED */
 
 #if PTHREAD_IN_LIBC && defined SHARED
