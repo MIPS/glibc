@@ -1379,6 +1379,14 @@ void _dl_audit_symbind_alt (struct link_map *l, const ElfW(Sym) *ref,
 /* Call the la_preinit() from audit modules for the link_map L.  */
 void _dl_audit_preinit (struct link_map *l);
 rtld_hidden_proto (_dl_audit_symbind_alt)
+/* Call the la_pltenter() arch specific from audit modules for the link_map L.
+   The RELOC_RESULT is the entry from link_map::l_reloc_result used to keep
+   track of the binding actions set by the audit modules, while VALUE is the
+   relocation result value, and REGS is the arch-specific register state
+   saved, and FRAMESIZE is the frame size pointer passed on the callback.  */
+void _dl_audit_pltenter (struct link_map *l, struct reloc_result *reloc_result,
+			 DL_FIXUP_VALUE_TYPE *value, void *regs,
+			 long int *framesize);
 #endif /* SHARED */
 
 #if PTHREAD_IN_LIBC && defined SHARED
