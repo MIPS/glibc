@@ -1376,6 +1376,8 @@ void _dl_audit_symbind (struct link_map *l, struct reloc_result *reloc_result,
    LA_SYMB_DLSYM will be set before calling la_symbind() callback.  */
 void _dl_audit_symbind_alt (struct link_map *l, const ElfW(Sym) *ref,
 			    void **value, lookup_t result);
+/* Call the la_preinit() from audit modules for the link_map L.  */
+void _dl_audit_preinit (struct link_map *l);
 rtld_hidden_proto (_dl_audit_symbind_alt)
 #endif /* SHARED */
 
