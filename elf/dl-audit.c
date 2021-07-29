@@ -190,7 +190,7 @@ rtld_hidden_def (_dl_audit_symbind_alt)
 void
 _dl_audit_symbind (struct link_map *l, struct reloc_result *reloc_result,
 		   const ElfW(Sym) *defsym, DL_FIXUP_VALUE_TYPE *value,
-		   lookup_t result)
+		   lookup_t result, bool bindnow)
 {
   reloc_result->bound = result;
   /* Compute index of the symbol entry in the symbol table of the DSO with the
@@ -217,7 +217,7 @@ _dl_audit_symbind (struct link_map *l, struct reloc_result *reloc_result,
 
   const char *strtab2 = (const void *) D_PTR (result, l_info[DT_STRTAB]);
 
-  unsigned int flags = 0;
+  unsigned int flags = bindnow ? LA_SYMB_BINDNOW : 0;
   struct audit_ifaces *afct = GLRO(dl_audit);
   for (unsigned int cnt = 0; cnt < GLRO(dl_naudit); ++cnt)
     {

@@ -1372,7 +1372,7 @@ void _dl_audit_objclose (struct link_map *l, Lmid_t nsid);
    link_map for the symbol resolved.  */
 void _dl_audit_symbind (struct link_map *l, struct reloc_result *reloc_result,
 			const ElfW(Sym) *defsym, DL_FIXUP_VALUE_TYPE *value,
-			lookup_t result);
+			lookup_t result, bool bindnow);
 /* Same as _dl_audit_symbind(), but called from the dlsym().  The flag
    LA_SYMB_DLSYM will be set before calling la_symbind() callback.  */
 void _dl_audit_symbind_alt (struct link_map *l, const ElfW(Sym) *ref,
