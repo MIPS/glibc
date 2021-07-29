@@ -153,7 +153,7 @@ elf_dynamic_do_Rel (struct link_map *map, struct r_scope_elem *scope[],
 				   ELF_MACHINE_JMP_SLOT);
 		  if (sym != NULL)
 		    _dl_audit_symbind (map, &map->l_reloc_result[ri++], sym,
-				       r_addr_arg, sym_map);
+				       r_addr_arg, sym_map, true);
 		}
 #endif
 	    }
@@ -204,7 +204,7 @@ elf_dynamic_do_Rel (struct link_map *map, struct r_scope_elem *scope[],
 				   ELF_MACHINE_JMP_SLOT);
 		  if (sym != NULL)
 		    _dl_audit_symbind (map, &map->l_reloc_result[ri++], sym,
-				       r_addr_arg, sym_map);
+				       r_addr_arg, sym_map, true);
 		}
 # endif
 	    }
