@@ -9,7 +9,15 @@ Version 2.35
 
 Major new features:
 
-  [Add new features here]
+* The glibc now handle objects marked with the GNU extension DF_GNU_1_UNIQUE,
+  where the DSO should be loaded only once and shared over namespaces.
+
+* The dlmopen interface now supports the RTLD_SHARED flag as a GNU extension.
+  If an object is loaded with the new RTLD_SHARED flag the glibc ensures
+  that a "master" copy exists (and is flagged as no-delete) in the
+  main namespace and a thin wrapper or clone is placed in the target
+  namespace.  This allows to shared DSO that can be loaded only once with
+  multiple namespaces.
 
 Deprecated and removed features, and other changes affecting compatibility:
 

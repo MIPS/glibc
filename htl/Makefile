@@ -202,9 +202,10 @@ $(inst_libdir)/libpthread_syms.a: $(srcdir)/libpthread_syms.a $(+force)
 libc-link.so = $(common-objpfx)libc.so
 
 extra-B-pthread.so = -B$(common-objpfx)htl/
+# Turn off DF_GNU_1_UNIQUE for libpthread now that it's a stub.
 LDFLAGS-pthread.so = -Wl,--enable-new-dtags,-z,nodelete,-z,initfirst
 ifeq ($(ld-zunique),yes)
-LDFLAGS-pthread.so += -Wl,-z,unique
+LDFLAGS-pthread.so += -Wl,-z,nounique
 endif
 
 include ../Rules
