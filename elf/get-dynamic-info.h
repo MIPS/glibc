@@ -19,6 +19,8 @@
 /* This file is included multiple times and therefore lacks a header
    file inclusion guard.  */
 
+#ifndef _GET_DYNAMIC_INFO_H
+
 #include <assert.h>
 #include <libc-diag.h>
 
@@ -180,3 +182,6 @@ elf_get_dynamic_info (struct link_map *l, ElfW(Dyn) *temp)
     info[DT_RPATH] = NULL;
 #endif
 }
+
+#define _GET_DYNAMIC_INFO_H
+#endif

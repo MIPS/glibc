@@ -499,13 +499,9 @@ _dl_start_final (void *arg, struct dl_start_final_info *info)
   return start_addr;
 }
 
-static ElfW(Addr) __attribute_used__
-_dl_start (void *arg)
-{
 #ifdef DONT_USE_BOOTSTRAP_MAP
 # define bootstrap_map GL(dl_rtld_map)
 #else
-  struct dl_start_final_info info;
 # define bootstrap_map info.l
 #endif
 
@@ -518,9 +514,13 @@ _dl_start (void *arg)
 #define RESOLVE_MAP(sym, version, flags) BOOTSTRAP_MAP
 #include "dynamic-link.h"
 
+static ElfW(Addr) __attribute_used__
+_dl_start (void *arg)
+{
 #ifdef DONT_USE_BOOTSTRAP_MAP
   rtld_timer_start (&start_time);
 #else
+ struct dl_start_final_info info;
   rtld_timer_start (&info.start_time);
 #endif
 
@@ -561,7 +561,7 @@ _dl_start (void *arg)
       /* Relocate ourselves so we can do normal function calls and
 	 data access using the global offset table.  */
 
-      ELF_DYNAMIC_RELOCATE (&bootstrap_map, 0, 0, 0);
+      ELF_DYNAMIC_RELOCATE (&bootstrap_map, 0, 0, 0, &bootstrap_map);
     }
   bootstrap_map.l_relocated = 1;
 

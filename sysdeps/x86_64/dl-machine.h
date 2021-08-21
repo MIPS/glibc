@@ -251,11 +251,11 @@ elf_machine_plt_value (struct link_map *map, const ElfW(Rela) *reloc,
 /* Perform the relocation specified by RELOC and SYM (which is fully resolved).
    MAP is the object containing the reloc.  */
 
-auto inline void
+static inline void
 __attribute__ ((always_inline))
 elf_machine_rela (struct link_map *map, const ElfW(Rela) *reloc,
 		  const ElfW(Sym) *sym, const struct r_found_version *version,
-		  void *const reloc_addr_arg, int skip_ifunc)
+		  void *const reloc_addr_arg, int skip_ifunc, struct link_map *boot_map)
 {
   ElfW(Addr) *const reloc_addr = reloc_addr_arg;
   const unsigned long int r_type = ELFW(R_TYPE) (reloc->r_info);
@@ -293,7 +293,11 @@ elf_machine_rela (struct link_map *map, const ElfW(Rela) *reloc,
 # ifndef RTLD_BOOTSTRAP
       const ElfW(Sym) *const refsym = sym;
 # endif
+#if defined RTLD_BOOTSTRAP || defined STATIC_PIE_BOOTSTRAP
+      struct link_map *sym_map = boot_map;
+#else
       struct link_map *sym_map = RESOLVE_MAP (&sym, version, r_type);
+#endif
       ElfW(Addr) value = SYMBOL_ADDRESS (sym_map, sym, true);
 
       if (sym != NULL
@@ -518,7 +522,7 @@ and creates an unsatisfiable circular dependency.\n",
     }
 }
 
-auto inline void
+static inline void
 __attribute ((always_inline))
 elf_machine_rela_relative (ElfW(Addr) l_addr, const ElfW(Rela) *reloc,
 			   void *const reloc_addr_arg)
@@ -537,7 +541,7 @@ elf_machine_rela_relative (ElfW(Addr) l_addr, const ElfW(Rela) *reloc,
     }
 }
 
-auto inline void
+static inline void
 __attribute ((always_inline))
 elf_machine_lazy_rel (struct link_map *map,
 		      ElfW(Addr) l_addr, const ElfW(Rela) *reloc,
@@ -573,7 +577,7 @@ elf_machine_lazy_rel (struct link_map *map,
 
       /* Always initialize TLS descriptors completely at load time, in
 	 case static TLS is allocated for it that requires locking.  */
-      elf_machine_rela (map, reloc, sym, version, reloc_addr, skip_ifunc);
+      elf_machine_rela (map, reloc, sym, version, reloc_addr, skip_ifunc, NULL);
     }
   else if (__glibc_unlikely (r_type == R_X86_64_IRELATIVE))
     {
