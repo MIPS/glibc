@@ -439,6 +439,16 @@ if test "$have_tunables" = yes; then
   AC_DEFINE(HAVE_TUNABLES)
 fi
 
+AC_ARG_ENABLE([float128],
+             AC_HELP_STRING([--disable-float128],
+                            [disable float128 support]),
+             [enable_float128=$enableval],
+             [enable_float128=yes])
+AC_SUBST(enable_float128)
+if test "$enable_float128" = yes; then
+  AC_DEFINE(ENABLE_FLOAT128)
+fi
+
 # The abi-tags file uses a fairly simplistic model for name recognition that
 # can't distinguish i486-pc-linux-gnu fully from i486-pc-gnu.  So we mutate a
 # $host_os of `gnu*' here to be `gnu-gnu*' just so that it can tell.

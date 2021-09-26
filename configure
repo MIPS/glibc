@@ -670,6 +670,7 @@ stack_protector
 libc_cv_ssp
 libc_cv_with_fp
 base_machine
+enable_float128
 have_tunables
 build_pt_chown
 build_nscd
@@ -789,6 +790,7 @@ enable_build_nscd
 enable_nscd
 enable_pt_chown
 enable_tunables
+enable_float128
 enable_mathvec
 enable_cet
 enable_scv
@@ -1460,6 +1462,7 @@ Optional Features:
   --enable-pt_chown       Enable building and installing pt_chown
   --enable-tunables       Enable tunables support. Known values are 'yes',
                           'no' and 'valstring'
+  --disable-float128      disable float128 support
   --enable-mathvec        Enable building and installing mathvec [default
                           depends on architecture]
   --enable-cet            enable Intel Control-flow Enforcement Technology
@@ -3764,6 +3767,19 @@ fi
 
 if test "$have_tunables" = yes; then
   $as_echo "#define HAVE_TUNABLES 1" >>confdefs.h
+
+fi
+
+# Check whether --enable-float128 was given.
+if test "${enable_float128+set}" = set; then :
+  enableval=$enable_float128; enable_float128=$enableval
+else
+  enable_float128=yes
+fi
+
+
+if test "$enable_float128" = yes; then
+  $as_echo "#define ENABLE_FLOAT128 1" >>confdefs.h
 
 fi
 

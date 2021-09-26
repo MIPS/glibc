@@ -290,4 +290,6 @@
 /* Define if -mmovbe is enabled by default on x86.  */
 #undef HAVE_X86_MOVBE
 
+#define ENABLE_FLOAT128 0
+
 #endif
