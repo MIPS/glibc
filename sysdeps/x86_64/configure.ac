@@ -14,6 +14,8 @@ dnl Check whether asm supports Intel MPX
 AC_CACHE_CHECK(for Intel MPX support, libc_cv_asm_mpx, [dnl
 cat > conftest.s <<\EOF
         bndmov %bnd0,(%rsp)
+        bnd
+        jmp *%r11
 EOF
 if AC_TRY_COMMAND(${CC-cc} -c $ASFLAGS conftest.s 1>&AS_MESSAGE_LOG_FD); then
   libc_cv_asm_mpx=yes

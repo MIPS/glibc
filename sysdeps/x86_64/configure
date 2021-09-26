@@ -30,6 +30,8 @@ if ${libc_cv_asm_mpx+:} false; then :
 else
   cat > conftest.s <<\EOF
         bndmov %bnd0,(%rsp)
+        bnd
+        jmp *%r11
 EOF
 if { ac_try='${CC-cc} -c $ASFLAGS conftest.s 1>&5'
   { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_try\""; } >&5
