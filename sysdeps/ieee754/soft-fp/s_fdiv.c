@@ -24,6 +24,9 @@
 #undef f32divf32x
 #undef fdivl
 
+#include <libc-diag.h>
+DIAG_PUSH_NEEDS_COMMENT;
+DIAG_IGNORE_NEEDS_COMMENT (11, "-Wmaybe-uninitialized");
 #include <math-narrow.h>
 #include <soft-fp.h>
 #include <single.h>
@@ -53,4 +56,5 @@ __fdiv (double x, double y)
   CHECK_NARROW_DIV (ret, x, y);
   return ret;
 }
+DIAG_POP_NEEDS_COMMENT;
 libm_alias_float_double (div)
