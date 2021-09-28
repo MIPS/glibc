@@ -22,6 +22,7 @@
 #include <math.h>
 #include <math_private.h>
 #include <libm-alias-double.h>
+#include <libc-diag.h>
 
 static const double one = 1.0;
 
@@ -81,5 +82,8 @@ __modf (double x, double *iptr)
     }
 }
 #ifndef __modf
+DIAG_PUSH_NEEDS_COMMENT;
+DIAG_IGNORE_NEEDS_COMMENT (11, "-Wbuiltin-declaration-mismatch");
 libm_alias_double (__modf, modf)
+DIAG_POP_NEEDS_COMMENT;
 #endif

@@ -23,6 +23,7 @@
 #include <math_private.h>
 #include <math-underflow.h>
 #include <libm-alias-double.h>
+#include <libc-diag.h>
 
 #define IN_SINCOS
 #include "s_sin.c"
@@ -100,4 +101,7 @@ __sincos (double x, double *sinx, double *cosx)
 
   *sinx = *cosx = x / x;
 }
+DIAG_PUSH_NEEDS_COMMENT;
+DIAG_IGNORE_NEEDS_COMMENT (11, "-Wbuiltin-declaration-mismatch");
 libm_alias_double (__sincos, sincos)
+DIAG_POP_NEEDS_COMMENT;
