@@ -103,7 +103,7 @@ __alloc_dir (int fd, bool close_fd, int flags,
      file system provides a bogus value.  */
   enum { max_buffer_size = 1048576 };
 
-  const size_t allocation_size = 32768;
+  enum { allocation_size = 32768 };
   _Static_assert (allocation_size >= sizeof (struct dirent64),
 		  "allocation_size < sizeof (struct dirent64)");
 
