@@ -192,6 +192,33 @@ elf_machine_lazy_rel (struct link_map *map, struct r_scope_elem *scope[],
 #  define ELF_DYNAMIC_DO_RELA(map, scope, lazy, skip_ifunc) /* Nothing to do.  */
 # endif
 
+# define ELF_DYNAMIC_DO_RELR(map)					      \
+  do {									      \
+    ElfW(Addr) l_addr = (map)->l_addr, base = 0, start;			      \
+    const ElfW(Relr) *r = 0, *end = 0;					      \
+    if (!(map)->l_info[DT_RELR])					      \
+      break;								      \
+    start = D_PTR((map), l_info[DT_RELR]);				      \
+    r = (const ElfW(Relr) *)start;					      \
+    end = (const ElfW(Relr) *)(start + (map)->l_info[DT_RELRSZ]->d_un.d_val); \
+    for (; r < end; ++r) {						      \
+      ElfW(Relr) entry = *r;						      \
+      if ((entry & 1) == 0) {						      \
+	*((ElfW(Addr) *)(l_addr + entry)) += l_addr;			      \
+	base = entry + sizeof(ElfW(Addr));				      \
+	continue;							      \
+      }									      \
+      ElfW(Addr) offset = base;						      \
+      do {								      \
+	entry >>= 1;							      \
+	if ((entry & 1) != 0)						      \
+	  *((ElfW(Addr) *)(l_addr + offset)) += l_addr;			      \
+	offset += sizeof(ElfW(Addr));					      \
+      } while (entry != 0);						      \
+      base += (8 * sizeof(ElfW(Relr)) - 1) * sizeof(ElfW(Addr));	      \
+    }									      \
+  } while (0);
+
 /* This can't just be an inline function because GCC is too dumb
    to inline functions containing inlines themselves.  */
 # define ELF_DYNAMIC_RELOCATE(map, scope, lazy, consider_profile, skip_ifunc) \
@@ -200,6 +227,7 @@ elf_machine_lazy_rel (struct link_map *map, struct r_scope_elem *scope[],
 					      (consider_profile));	      \
     ELF_DYNAMIC_DO_REL ((map), (scope), edr_lazy, skip_ifunc);		      \
     ELF_DYNAMIC_DO_RELA ((map), (scope), edr_lazy, skip_ifunc);		      \
+    ELF_DYNAMIC_DO_RELR ((map));					      \
   } while (0)
 
 #endif

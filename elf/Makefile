@@ -241,6 +241,10 @@ endif
 ifeq ($(have-depaudit),yes)
 tests += tst-audit14 tst-audit15 tst-audit16
 endif
+ifeq ($(have-relr),yes)
+tests += tst-relr
+LDFLAGS-tst-relr += -Wl,--pack-dyn-relocs=relr
+endif
 endif
 tests += $(tests-execstack-$(have-z-execstack))
 ifeq ($(run-built-tests),yes)

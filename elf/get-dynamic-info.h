@@ -87,6 +87,7 @@ elf_get_dynamic_info (struct link_map *l)
 # if ! ELF_MACHINE_NO_REL
       ADJUST_DYN_INFO (DT_REL);
 # endif
+      ADJUST_DYN_INFO (DT_RELR);
       ADJUST_DYN_INFO (DT_JMPREL);
       ADJUST_DYN_INFO (VERSYMIDX (DT_VERSYM));
       ADJUST_DYN_INFO (ADDRIDX (DT_GNU_HASH));
@@ -111,6 +112,8 @@ elf_get_dynamic_info (struct link_map *l)
   if (info[DT_REL] != NULL)
     assert (info[DT_RELENT]->d_un.d_val == sizeof (ElfW(Rel)));
 #endif
+  if (info[DT_RELR] != NULL)
+    assert (info[DT_RELRENT]->d_un.d_val == sizeof (ElfW(Relr)));
 #ifdef RTLD_BOOTSTRAP
   /* Only the bind now flags are allowed.  */
   assert (info[VERSYMIDX (DT_FLAGS_1)] == NULL
