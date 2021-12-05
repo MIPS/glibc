@@ -29,6 +29,9 @@ ASFLAGS-.o += $(pie-default)
 ASFLAGS-.op += $(pie-default)
 ASFLAGS += -O2
 
+CFLAGS-memset.c += -fno-builtin
+CFLAGS-memcpy.c += -fno-builtin
+
 ifeq ($(subdir),elf)
 ifneq ($(o32-fpabi),)
 tests += tst-abi-interlink
