@@ -29,3 +29,7 @@ fi
 
 # Hurd has libpthread as a separate library.
 pthread_in_libc=no
+
+# PIE builds don't work.
+AC_DEFINE(PIE_UNSUPPORTED)
+# work around problem with autoconf and empty lines at the end of files

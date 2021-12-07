@@ -118,7 +118,8 @@ if 'CFLAGS' is specified it must enable optimization.  For example:
      and architecture supports it, static executable are built as static
      PIE and the resulting glibc can be used with the GCC option,
      -static-pie, which is available with GCC 8 or above, to create
-     static PIE.
+     static PIE. PIE is not enabled by default on i686 GNU/Hurd, HPPA,
+     IA64, CSKY and Microblaze targets.
 
 '--enable-cet'
 '--enable-cet=permissive'

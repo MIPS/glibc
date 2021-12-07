@@ -596,7 +596,6 @@ DEFINES
 static_nss
 profile
 libc_cv_multidir
-libc_cv_pie_default
 shared
 static
 ldd_rewrite_script
@@ -6981,9 +6980,26 @@ $as_echo "$libc_cv_cc_pie_default" >&6; }
 config_vars="$config_vars
 cc-pie-default = $libc_cv_cc_pie_default"
 
-libc_cv_pie_default=$default_pie
+if test "x$default_pie" != xno; then
+  # Disable build-pie-default if target does not support it.
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#ifdef PIE_UNSUPPORTED
+# error PIE is not supported
+#endif
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  libc_cv_pie_default=yes
+else
+  libc_cv_pie_default=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+config_vars="$config_vars
+build-pie-default = $libc_cv_pie_default"
 
-if test "x$default_pie" != xno -a "$libc_cv_no_dynamic_linker" = yes; then
+if test "x$libc_cv_pie_default" != xno \
+   -a "$libc_cv_no_dynamic_linker" = yes; then
   # Enable static-pie if available
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
@@ -7004,8 +7020,6 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 fi
 config_vars="$config_vars
 enable-static-pie = $libc_cv_static_pie"
-config_vars="$config_vars
-build-pie-default = $libc_cv_pie_default"
 
 # Set the `multidir' variable by grabbing the variable from the compiler.
 # We do it once and save the result in a generated makefile.

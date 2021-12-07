@@ -147,7 +147,8 @@ executables (PIE).  By default, glibc programs and tests are created as
 position independent executables.  If the toolchain and architecture supports
 it, static executable are built as static PIE and the resulting glibc can be
 used with the GCC option, -static-pie, which is available with GCC 8 or above,
-to create static PIE.
+to create static PIE.  PIE is not enabled by default on i686 GNU/Hurd, HPPA,
+IA64, CSKY and Microblaze targets.
 
 @item --enable-cet
 @itemx --enable-cet=permissive
