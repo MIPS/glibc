@@ -19,3 +19,7 @@ else
 fi
 rm -f conftest*])
 AC_DEFINE_UNQUOTED(ASM_LINE_SEP, $libc_cv_asm_line_sep)
+
+# PIE builds don't work.
+AC_DEFINE(PIE_UNSUPPORTED)
+# work around problem with autoconf and empty lines at the end of files
