@@ -1854,14 +1854,17 @@ fi
 rm -f conftest.*])
 LIBC_CONFIG_VAR([cc-pie-default], [$libc_cv_cc_pie_default])
 
+AC_MSG_CHECKING(if we can build programs as PIE)
 if test "x$default_pie" != xno; then
   # Disable build-pie-default if target does not support it.
   AC_COMPILE_IFELSE([AC_LANG_SOURCE([[#ifdef PIE_UNSUPPORTED
 # error PIE is not supported
 #endif]])], [libc_cv_pie_default=yes], [libc_cv_pie_default=no])
 fi
+AC_MSG_RESULT($libc_cv_pie_default)
 LIBC_CONFIG_VAR([build-pie-default], [$libc_cv_pie_default])
 
+AC_MSG_CHECKING(if we can build static PIE programs)
 if test "x$libc_cv_pie_default" != xno \
    -a "$libc_cv_no_dynamic_linker" = yes; then
   # Enable static-pie if available
@@ -1872,6 +1875,7 @@ if test "x$libc_cv_pie_default" != xno \
     AC_DEFINE(ENABLE_STATIC_PIE)
   fi
 fi
+AC_MSG_RESULT($libc_cv_static_pie)
 LIBC_CONFIG_VAR([enable-static-pie], [$libc_cv_static_pie])
 
 # Set the `multidir' variable by grabbing the variable from the compiler.
