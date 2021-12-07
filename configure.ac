@@ -1865,6 +1865,7 @@ AC_MSG_RESULT($libc_cv_pie_default)
 LIBC_CONFIG_VAR([build-pie-default], [$libc_cv_pie_default])
 
 AC_MSG_CHECKING(if we can build static PIE programs)
+libc_cv_static_pie=$libc_cv_pie_default
 if test "x$libc_cv_pie_default" != xno \
    -a "$libc_cv_no_dynamic_linker" = yes; then
   # Enable static-pie if available

@@ -7004,6 +7004,7 @@ build-pie-default = $libc_cv_pie_default"
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking if we can build static PIE programs" >&5
 $as_echo_n "checking if we can build static PIE programs... " >&6; }
+libc_cv_static_pie=$libc_cv_pie_default
 if test "x$libc_cv_pie_default" != xno \
    -a "$libc_cv_no_dynamic_linker" = yes; then
   # Enable static-pie if available
