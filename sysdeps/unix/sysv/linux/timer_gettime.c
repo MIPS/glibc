@@ -31,11 +31,7 @@
 int
 timer_gettime (timer_t timerid, struct itimerspec *value)
 {
-#undef timer_gettime
-  struct timer *kt = (struct timer *) timerid;
-
-  /* Delete the kernel timer object.  */
-  int res = INLINE_SYSCALL (timer_gettime, 2, kt->ktimerid, value);
-
-  return res;
+  kernel_timer_t ktimerid = timerid_to_kernel_timer (timerid);
+  
+  return INLINE_SYSCALL_CALL (timer_gettime, ktimerid, value);
 }

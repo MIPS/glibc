@@ -33,11 +33,7 @@ timer_settime (timer_t timerid, int flags, const struct itimerspec *value,
 	       struct itimerspec *ovalue)
 {
 #undef timer_settime
-  struct timer *kt = (struct timer *) timerid;
+  kernel_timer_t ktimerid = timerid_to_kernel_timer (timerid);
 
-  /* Delete the kernel timer object.  */
-  int res = INLINE_SYSCALL (timer_settime, 4, kt->ktimerid, flags,
-			    value, ovalue);
-
-  return res;
+  return INLINE_SYSCALL_CALL (timer_settime, ktimerid, flags, value, ovalue);
 }
