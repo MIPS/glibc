@@ -869,6 +869,8 @@ gaih_inet (const char *name, const struct gaih_service *service,
 	  if (req->ai_family == PF_UNSPEC)
 	    fct4 = __nss_lookup_function (nip, "gethostbyname4_r");
 
+	  struct gaih_addrtuple **old_pat = pat;
+
 	  if (fct4 != NULL)
 	    {
 	      size_t length = 1024;
@@ -1039,6 +1041,16 @@ gaih_inet (const char *name, const struct gaih_service *service,
 
 	  if (nss_next_action (nip, status) == NSS_ACTION_RETURN)
 	    break;
+
+	  /* Discard the previous result on CONTINUE.  Allocations will get
+	     freed at the end with func_cleanup, so only adjust PAT and free
+	     CANONBUF if it was allocated.  */
+	  if (nss_next_action (nip, status) == NSS_ACTION_CONTINUE)
+	    {
+	      pat = old_pat;
+	      free (canonbuf);
+	      canon = canonbuf = NULL;
+	    }
 
 	  nip++;
 	  if (nip->module == NULL)
