@@ -223,8 +223,7 @@ convert_hostent_to_gaih_addrtuple (const struct addrinfo *req,
 				   struct hostent *h,
 				   struct gaih_addrtuple **result)
 {
-  while (*result)
-    result = &(*result)->next;
+  assert (*result == NULL);
 
   /* Count the number of addresses in h->h_addr_list.  */
   size_t count = 0;
@@ -299,14 +298,22 @@ convert_hostent_to_gaih_addrtuple (const struct addrinfo *req,
     }									      \
   else if (status == NSS_STATUS_SUCCESS)				      \
     {									      \
+      struct gaih_addrtuple *addrmem = NULL;				      \
       if (!convert_hostent_to_gaih_addrtuple (req, _family, &th, &addrmem))   \
 	{								      \
 	  __resolv_context_put (res_ctx);				      \
 	  result = -EAI_SYSTEM;						      \
 	  goto free_and_return;						      \
 	}								      \
+      if (!func_cleanup_push (&allocs, &nallocs, addrmem))		      \
+	{								      \
+	  free (addrmem);						      \
+	  result = -EAI_MEMORY;						      \
+	  goto free_and_return;						      \
+	}								      \
       *pat = addrmem;							      \
-									      \
+      while (*pat != NULL)						      \
+	pat = &((*pat)->next);						      \
       if (localcanon != NULL && canon == NULL)				      \
 	{								      \
 	  canonbuf = __strdup (localcanon);				      \
@@ -318,7 +325,7 @@ convert_hostent_to_gaih_addrtuple (const struct addrinfo *req,
 	    }								      \
 	  canon = canonbuf;						      \
 	}								      \
-      if (_family == AF_INET6 && *pat != NULL)				      \
+      if (_family == AF_INET6 && addrmem != NULL)			      \
 	got_ipv6 = true;						      \
     }									      \
  }
@@ -788,7 +795,6 @@ gaih_inet (const char *name, const struct gaih_service *service,
     return rc;
 
   bool malloc_name = false;
-  struct gaih_addrtuple *addrmem = NULL;
   char *canonbuf = NULL;
   int result = 0;
 
