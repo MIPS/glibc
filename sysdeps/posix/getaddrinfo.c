@@ -316,7 +316,7 @@ convert_hostent_to_gaih_addrtuple (const struct addrinfo *req,
 	pat = &((*pat)->next);						      \
       if (localcanon != NULL && canon == NULL)				      \
 	{								      \
-	  canonbuf = __strdup (localcanon);				      \
+	  char *canonbuf = __strdup (localcanon);				      \
 	  if (canonbuf == NULL)						      \
 	    {								      \
 	      __resolv_context_put (res_ctx);				      \
@@ -783,7 +783,7 @@ gaih_inet (const char *name, const struct gaih_service *service,
 
   struct gaih_addrtuple *at = NULL;
   bool got_ipv6 = false;
-  const char *canon = NULL;
+  char *canon = NULL;
   const char *orig_name = name;
 
   /* Reserve stack memory for the scratch buffer in the getaddrinfo
@@ -795,7 +795,6 @@ gaih_inet (const char *name, const struct gaih_service *service,
     return rc;
 
   bool malloc_name = false;
-  char *canonbuf = NULL;
   int result = 0;
 
   struct scratch_buffer allocs;
@@ -817,7 +816,7 @@ gaih_inet (const char *name, const struct gaih_service *service,
       if ((at = get_numeric_res (name, req, &allocs, &nallocs, &result))
 	  != NULL)
 	{
-	  canon = canonbuf = at->name;
+	  canon = at->name;
 	  goto process_list;
 	}
       else if (result != 0)
@@ -839,13 +838,15 @@ gaih_inet (const char *name, const struct gaih_service *service,
       if ((at = get_nscd_addresses (name, req, &allocs, &nallocs, &got_ipv6,
 				    &result)) != NULL)
 	{
-	  canon = canonbuf = at->name;
+	  canon = at->name;
 	  goto process_list;
 	}
       else if (result != 0)
 	goto free_and_return;
 #endif
 
+      /* For NSS lookups, use PAT to track the end of the tuple list so that
+	 multiple lookups append to the end of the latest list.  */
       struct gaih_addrtuple **pat = &at;
       int no_data = 0;
       int no_inet6_data = 0;
@@ -923,7 +924,16 @@ gaih_inet (const char *name, const struct gaih_service *service,
 		  no_data = 1;
 
 		  if ((req->ai_flags & AI_CANONNAME) != 0 && canon == NULL)
-		    canon = (*pat)->name;
+		    {
+		      char *canonbuf = __strdup ((*pat)->name);
+		      if (canonbuf == NULL)
+			{
+			  __resolv_context_put (res_ctx);
+			  result = -EAI_MEMORY;
+			  goto free_and_return;
+			}
+		      canon = canonbuf;
+		    }
 
 		  while (*pat != NULL)
 		    {
@@ -1007,7 +1017,7 @@ gaih_inet (const char *name, const struct gaih_service *service,
 		      if ((req->ai_flags & AI_CANONNAME) != 0
 			  && canon == NULL)
 			{
-			  canonbuf = getcanonname (nip, at, name);
+			  char *canonbuf = getcanonname (nip, at, name);
 			  if (canonbuf == NULL)
 			    {
 			      __resolv_context_put (res_ctx);
@@ -1054,8 +1064,8 @@ gaih_inet (const char *name, const struct gaih_service *service,
 	  if (nss_next_action (nip, status) == NSS_ACTION_CONTINUE)
 	    {
 	      pat = old_pat;
-	      free (canonbuf);
-	      canon = canonbuf = NULL;
+	      free (canon);
+	      canon = NULL;
 	    }
 
 	  nip++;
@@ -1135,18 +1145,16 @@ gaih_inet (const char *name, const struct gaih_service *service,
 	/* Only the first entry gets the canonical name.  */
 	if (at2 == at && (req->ai_flags & AI_CANONNAME) != 0)
 	  {
-	    if (canon == NULL)
-	      /* If the canonical name cannot be determined, use
-		 the passed in string.  */
-	      canon = orig_name;
-
 	    bool do_idn = req->ai_flags & AI_CANONIDN;
 	    if (do_idn)
 	      {
 		char *out;
-		int rc = __idna_from_dns_encoding (canon, &out);
+		int rc = __idna_from_dns_encoding (canon ?: orig_name, &out);
 		if (rc == 0)
-		  canon = out;
+		  {
+		    free (canon);
+		    canon = out;
+		  }
 		else if (rc == EAI_IDN_ENCODE)
 		  /* Use the punycode name as a fallback.  */
 		  do_idn = false;
@@ -1156,21 +1164,11 @@ gaih_inet (const char *name, const struct gaih_service *service,
 		    goto free_and_return;
 		  }
 	      }
-	    if (!do_idn)
+	    if (!do_idn && canon == NULL
+		&& (canon = __strdup (orig_name)) == NULL)
 	      {
-		if (canonbuf != NULL)
-		  /* We already allocated the string using malloc, but
-		     the buffer is now owned by canon.  */
-		  canonbuf = NULL;
-		else
-		  {
-		    canon = __strdup (canon);
-		    if (canon == NULL)
-		      {
-			result = -EAI_MEMORY;
-			goto free_and_return;
-		      }
-		  }
+		result = -EAI_MEMORY;
+		goto free_and_return;
 	      }
 	  }
 
@@ -1196,7 +1194,6 @@ gaih_inet (const char *name, const struct gaih_service *service,
 	    ai = *pai = malloc (sizeof (struct addrinfo) + socklen);
 	    if (ai == NULL)
 	      {
-		free ((char *) canon);
 		result = -EAI_MEMORY;
 		goto free_and_return;
 	      }
@@ -1256,7 +1253,7 @@ gaih_inet (const char *name, const struct gaih_service *service,
   if (malloc_name)
     free ((char *) name);
   func_cleanup (&allocs, nallocs);
-  free (canonbuf);
+  free (canon);
 
   return result;
 }
