@@ -41,6 +41,8 @@
 #elif defined(_MIPS_TUNE_I6400) || defined(_MIPS_TUNE_I6500)
  #define CACHE_LINE 64
  #define BLOCK_CYCLES 15
+ #undef LATENCY_CYCLES
+ #define LATENCY_CYCLES 150
 #elif defined(_MIPS_TUNE_P6600)
  #define CACHE_LINE 32
  #define BLOCK_CYCLES 15
