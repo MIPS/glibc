@@ -135,6 +135,7 @@ do_aligned_words (reg_t * a, void * retval, reg_t fill,
 }
 
 void *
+inhibit_loop_to_libcall
 memset (void *a, int ifill, size_t len)
 {
   unsigned long bytes, words;
