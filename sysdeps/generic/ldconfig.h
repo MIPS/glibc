@@ -111,6 +111,13 @@ enum opt_format
 
 extern enum opt_format opt_format;
 
+/* Declared in ldconfig-parse.c */
+typedef void (*ldconfig_parse_config_cb) (const char *line,
+					 const char *from_file, int from_line);
+
+void ldconfig_parse_config (const char *filename, char *opt_chroot,
+			    ldconfig_parse_config_cb cb);
+
 /* Prototypes for a few program-wide used functions.  */
 #include <programs/xmalloc.h>
 

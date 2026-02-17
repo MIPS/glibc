@@ -220,6 +220,7 @@ install-rootsbin += ldconfig
 ldconfig-modules := \
   cache \
   chroot_canon \
+  ldconfig-parse \
   readlib \
   static-stubs \
   stringtable \

@@ -421,6 +421,16 @@ add_dir_1 (const char *line, const char *from_file, int from_line)
 }
 
 static void
+add_dir_callback (const char *line, const char *from_file, int from_line)
+{
+  if (!strncasecmp (line, "hwcap", 5) && isblank (line[5]))
+    error (0, 0, _("%s:%u: hwcap directive ignored"), from_file, from_line);
+  else
+    add_dir_1 (line, from_file, from_line);
+}
+
+
+static void
 add_dir (const char *line)
 {
   add_dir_1 (line, "<builtin>", 0);
@@ -1017,156 +1027,6 @@ search_dirs (void)
 }
 
 
-static void parse_conf_include (const char *config_file, unsigned int lineno,
-				bool do_chroot, const char *pattern);
-
-/* Parse configuration file.  */
-static void
-parse_conf (const char *filename, bool do_chroot)
-{
-  FILE *file = NULL;
-  char *line = NULL;
-  const char *canon;
-  size_t len = 0;
-  unsigned int lineno;
-
-  if (do_chroot && opt_chroot)
-    {
-      canon = chroot_canon (opt_chroot, filename);
-      if (canon)
-	file = fopen (canon, "r");
-      else
-	canon = filename;
-    }
-  else
-    {
-      canon = filename;
-      file = fopen (filename, "r");
-    }
-
-  if (file == NULL)
-    {
-      if (errno != ENOENT)
-	error (0, errno, _("\
-Warning: ignoring configuration file that cannot be opened: %s"),
-	       canon);
-      if (canon != filename)
-	free ((char *) canon);
-      return;
-    }
-
-  /* No threads use this stream.  */
-  __fsetlocking (file, FSETLOCKING_BYCALLER);
-
-  if (canon != filename)
-    free ((char *) canon);
-
-  lineno = 0;
-  do
-    {
-      ssize_t n = getline (&line, &len, file);
-      if (n < 0)
-	break;
-
-      ++lineno;
-      if (line[n - 1] == '\n')
-	line[n - 1] = '\0';
-
-      /* Because the file format does not know any form of quoting we
-	 can search forward for the next '#' character and if found
-	 make it terminating the line.  */
-      *strchrnul (line, '#') = '\0';
-
-      /* Remove leading whitespace.  NUL is no whitespace character.  */
-      char *cp = line;
-      while (isspace (*cp))
-	++cp;
-
-      /* If the line is blank it is ignored.  */
-      if (cp[0] == '\0')
-	continue;
-
-      if (!strncmp (cp, "include", 7) && isblank (cp[7]))
-	{
-	  char *dir;
-	  cp += 8;
-	  while ((dir = strsep (&cp, " \t")) != NULL)
-	    if (dir[0] != '\0')
-	      parse_conf_include (filename, lineno, do_chroot, dir);
-	}
-      else if (!strncasecmp (cp, "hwcap", 5) && isblank (cp[5]))
-	error (0, 0, _("%s:%u: hwcap directive ignored"), filename, lineno);
-      else
-	add_dir_1 (cp, filename, lineno);
-    }
-  while (!feof_unlocked (file));
-
-  /* Free buffer and close file.  */
-  free (line);
-  fclose (file);
-}
-
-/* Handle one word in an `include' line, a glob pattern of additional
-   config files to read.  */
-static void
-parse_conf_include (const char *config_file, unsigned int lineno,
-		    bool do_chroot, const char *pattern)
-{
-  if (opt_chroot != NULL && pattern[0] != '/')
-    error (EXIT_FAILURE, 0,
-	   _("need absolute file name for configuration file when using -r"));
-
-  char *copy = NULL;
-  if (pattern[0] != '/' && strchr (config_file, '/') != NULL)
-    {
-      if (asprintf (&copy, "%s/%s", dirname (strdupa (config_file)),
-		    pattern) < 0)
-	error (EXIT_FAILURE, 0, _("memory exhausted"));
-      pattern = copy;
-    }
-
-  glob64_t gl;
-  int result;
-  if (do_chroot && opt_chroot)
-    {
-      char *canon = chroot_canon (opt_chroot, pattern);
-      if (canon == NULL)
-	return;
-      result = glob64 (canon, 0, NULL, &gl);
-      free (canon);
-    }
-  else
-    result = glob64 (pattern, 0, NULL, &gl);
-
-  switch (result)
-    {
-    case 0:
-      for (size_t i = 0; i < gl.gl_pathc; ++i)
-	parse_conf (gl.gl_pathv[i], false);
-      globfree64 (&gl);
-      break;
-
-    case GLOB_NOMATCH:
-      break;
-
-    case GLOB_NOSPACE:
-      errno = ENOMEM;
-      [[fallthrough]];
-    case GLOB_ABORTED:
-      if (opt_verbose)
-	error (0, errno, _("%s:%u: cannot read directory %s"),
-	       config_file, lineno, pattern);
-      break;
-
-    default:
-      abort ();
-      break;
-    }
-
-  free (copy);
-}
-
-
 int
 main (int argc, char **argv)
 {
@@ -1285,7 +1145,7 @@ main (int argc, char **argv)
 
   if (!opt_only_cline)
     {
-      parse_conf (config_file, true);
+      ldconfig_parse_config (config_file, opt_chroot, add_dir_callback);
 
       /* Always add the standard search paths.  */
       add_system_dir (SLIBDIR);
