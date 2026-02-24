@@ -214,6 +214,7 @@ tests := \
   tst-mkdirat \
   tst-mkfifoat \
   tst-mknodat \
+  tst-nftw-bz33882 \
   tst-open-tmpfile \
   tst-openat \
   tst-posix_fallocate \
