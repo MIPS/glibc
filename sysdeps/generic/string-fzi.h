@@ -22,23 +22,39 @@
 #include <limits.h>
 #include <endian.h>
 #include <string-fza.h>
+#include <string-bitops.h>
+#include <stdbit.h>
 
-static __always_inline int
-clz (find_t c)
+static __always_inline unsigned int
+ctzb (find_t c)
 {
-  if (sizeof (find_t) == sizeof (unsigned long))
-    return __builtin_clzl (c);
+#if HAVE_BITOPTS_WORKING
+  return stdc_trailing_zeros (c) / CHAR_BIT;
+#else
+  if (sizeof (find_t) <= 4)
+    return (((c & -c) >> 7) * 0x00010203) >> 24;
   else
-    return __builtin_clzll (c);
+    return (((c & -c) >> 7) * 0x0001020304050607UL) >> 56;
+#endif
 }
 
-static __always_inline int
-ctz (find_t c)
+static __always_inline unsigned int
+clzb (find_t c)
 {
-  if (sizeof (find_t) == sizeof (unsigned long))
-    return __builtin_ctzl (c);
-  else
-    return __builtin_ctzll (c);
+#if HAVE_BITOPTS_WORKING
+  return stdc_leading_zeros (c) / CHAR_BIT;
+#else
+#  if ULONG_MAX == 0xFFFFFFFFUL
+  c |= c >> 8;
+  c |= c >> 16;
+  return ((c >> 7) * 0x30f0f0f0) >> 28;
+#  else
+  c |= c >> 8;
+  c |= c >> 16;
+  c |= c >> 32;
+  return ((c >> 7) * 0x70f0f0f0f0f0f0f0UL) >> 60;
+#  endif
+#endif
 }
 
 /* A subroutine for the index_zero functions.  Given a test word C, return
@@ -47,12 +63,12 @@ ctz (find_t c)
 static __always_inline unsigned int
 index_first (find_t c)
 {
-  int r;
+  unsigned int r;
   if (__BYTE_ORDER == __LITTLE_ENDIAN)
-    r = ctz (c);
+    r = ctzb (c);
   else
-    r = clz (c);
-  return r / CHAR_BIT;
+    r = clzb (c);
+  return r;
 }
 
 /* Similarly, but return the (memory order) index of the last byte that is
@@ -60,12 +76,12 @@ index_first (find_t c)
 static __always_inline unsigned int
 index_last (find_t c)
 {
-  int r;
+  unsigned int r;
   if (__BYTE_ORDER == __LITTLE_ENDIAN)
-    r = clz (c);
+    r = clzb (c);
   else
-    r = ctz (c);
-  return sizeof (find_t) - 1 - (r / CHAR_BIT);
+    r = ctzb (c);
+  return sizeof (find_t) - 1 - r;
 }
 
 #endif /* STRING_FZI_H */
