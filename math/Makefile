@@ -359,10 +359,14 @@ type-ldouble-yes := ldouble
 type-double-suffix :=
 type-double-routines := \
   branred \
+  e_cosh_data \
+  e_coshsinh_data \
   e_exp_data \
   e_log2_data \
   e_log_data \
   e_pow_log_data \
+  e_sinh_data \
+  e_tanh_data \
   k_rem_pio2 \
   math_err \
   s_asincosh_data \
