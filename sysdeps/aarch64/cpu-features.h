@@ -40,9 +40,6 @@
 #define MIDR_IMPLEMENTOR(midr)	\
 	(((midr) & MIDR_IMPLEMENTOR_MASK) >> MIDR_IMPLEMENTOR_SHIFT)
 
-#define IS_EMAG(midr) (MIDR_IMPLEMENTOR(midr) == 'P'			      \
-                       && MIDR_PARTNUM(midr) == 0x000)
-
 #define IS_KUNPENG920(midr) (MIDR_IMPLEMENTOR(midr) == 'H'			   \
                         && MIDR_PARTNUM(midr) == 0xd01)
 

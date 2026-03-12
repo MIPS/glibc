@@ -44,11 +44,6 @@ struct cpu_list
 static const struct cpu_list cpu_list[] =
 {
 #define CPU_LIST_ENTRY(__str, __num) { __str, sizeof (__str) - 1, __num }
-  CPU_LIST_ENTRY ("thunderxt88",    0x430F0A10),
-  CPU_LIST_ENTRY ("thunderx2t99",   0x431F0AF0),
-  CPU_LIST_ENTRY ("thunderx2t99p1", 0x420F5160),
-  CPU_LIST_ENTRY ("ares",           0x411FD0C0),
-  CPU_LIST_ENTRY ("emag",           0x503F0001),
   CPU_LIST_ENTRY ("kunpeng920",     0x481FD010),
   CPU_LIST_ENTRY ("kunpeng950",     0x480FD060),
   CPU_LIST_ENTRY ("a64fx",          0x460F0010),
