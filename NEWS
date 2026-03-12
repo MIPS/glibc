@@ -12,6 +12,9 @@ Major new features:
 * Additional optimized and correctly rounded mathematical functions have
   been imported from the CORE-MATH project, in particular cosh.
 
+* The SVID handling for cosh was moved to compat symbols, allowing
+  improvements in performance.
+
 Deprecated and removed features, and other changes affecting compatibility:
 
 * Although malloc and related functions currently return pointers

@@ -718,4 +718,8 @@ libm {
     ufromfpx; ufromfpxf; ufromfpxl;
     ufromfpxf32; ufromfpxf64; ufromfpxf32x; ufromfpxf64x; ufromfpxf128;
   }
+  GLIBC_2.44 {
+    # No SVID compatible error handling.
+    cosh;
+  }
 }

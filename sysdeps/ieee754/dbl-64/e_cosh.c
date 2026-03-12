@@ -26,6 +26,8 @@ SOFTWARE.
 
 #include <math.h>
 #include <libm-alias-finite.h>
+#include <libm-alias-double.h>
+#include <math-svid-compat.h>
 #include <ddcoremath.h>
 #include "math_config.h"
 
@@ -159,7 +161,7 @@ as_cosh_database (double x, double f)
 }
 
 double
-__ieee754_cosh (double x)
+__cosh (double x)
 {
   /*
     The function cosh(x) is approximated by a minimax polynomial
@@ -471,4 +473,11 @@ __ieee754_cosh (double x)
     return as_cosh_database (x, rh);
   return rh;
 }
+strong_alias (__cosh, __ieee754_cosh)
+#if LIBM_SVID_COMPAT
+versioned_symbol (libm, __cosh, cosh, GLIBC_2_44);
+libm_alias_double_other (__cosh, cosh)
+#else
+libm_alias_double (__cosh, cosh)
+#endif
 libm_alias_finite (__ieee754_cosh, __cosh)

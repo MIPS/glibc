@@ -1496,3 +1496,4 @@ GLIBC_2.43 ufromfpxl F
 GLIBC_2.43 y0f F
 GLIBC_2.43 y1f F
 GLIBC_2.43 ynf F
+GLIBC_2.44 cosh F
