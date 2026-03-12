@@ -10,7 +10,8 @@ Version 2.44
 Major new features:
 
 * Additional optimized and correctly rounded mathematical functions have
-  been imported from the CORE-MATH project, in particular cosh, and sinh.
+  been imported from the CORE-MATH project, in particular cosh, sinh, and
+  tanh.
 
 * The SVID handling for cosh and sinh were moved to compat symbols, allowing
   improvements in performance.
