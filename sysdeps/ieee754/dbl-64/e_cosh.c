@@ -34,6 +34,10 @@ SOFTWARE.
 #include "e_coshsinh_data.h"
 #include "math_config.h"
 
+#ifndef SECTION
+#  define SECTION
+#endif
+
 static __attribute__ ((noinline)) double as_cosh_database (double, double);
 
 static inline double
@@ -125,6 +129,7 @@ as_cosh_database (double x, double f)
   return f;
 }
 
+SECTION
 double
 __cosh (double x)
 {
@@ -293,11 +298,13 @@ __cosh (double x)
     return as_cosh_database (x, rh);
   return rh;
 }
+#ifndef __cosh
 strong_alias (__cosh, __ieee754_cosh)
-#if LIBM_SVID_COMPAT
+# if LIBM_SVID_COMPAT
 versioned_symbol (libm, __cosh, cosh, GLIBC_2_44);
 libm_alias_double_other (__cosh, cosh)
-#else
+# else
 libm_alias_double (__cosh, cosh)
-#endif
+# endif
 libm_alias_finite (__ieee754_cosh, __cosh)
+#endif

@@ -6,6 +6,7 @@ CFLAGS-e_exp-fma.c = -mfma -mavx2
 CFLAGS-e_log-fma.c = -mfma -mavx2
 CFLAGS-e_log2-fma.c = -mfma -mavx2
 CFLAGS-e_pow-fma.c = -mfma -mavx2
+CFLAGS-e_cosh-fma.c = -mfma -mavx2
 CFLAGS-e_sinh-fma.c = -mfma -mavx2
 CFLAGS-s_atan-fma.c = -mfma -mavx2
 CFLAGS-s_expm1-fma.c = -mfma -mavx2
@@ -73,6 +74,7 @@ libm-sysdep_routines += \
   e_atan2-avx \
   e_atan2-fma \
   e_atanh-fma \
+  e_cosh-fma \
   e_exp-avx \
   e_exp-fma \
   e_exp2f-fma \
