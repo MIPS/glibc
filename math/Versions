@@ -721,5 +721,6 @@ libm {
   GLIBC_2.44 {
     # No SVID compatible error handling.
     cosh;
+    sinh;
   }
 }

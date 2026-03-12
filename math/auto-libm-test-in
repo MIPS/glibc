@@ -9572,6 +9572,7 @@ sinh -0x5.ee9218p-4
 sinh -0x1.bcfc98p+0
 sinh -0x6.9bbb6df7c5d08p-4
 sinh 0x1.250bfep-11
+sinh 0x0.fffffffffffffp-1022
 # the next value generates larger error bounds on x86_64 (ldbl-96)
 sinh 0x2.c5d376167f4052f4p+12
 sinh -0x1.4a3f2b7dff682p+2

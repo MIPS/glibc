@@ -185,6 +185,9 @@ make_double (uint64_t x, int64_t ep, uint64_t s)
 
 /* The result overflows.  */
 attribute_hidden double __math_oflow (uint32_t);
+/* The result overflows, raise the exception, set errno, and returns the
+   value.  */
+attribute_hidden double __math_oflow_value (double);
 /* The result underflows to 0 in nearest rounding mode.  */
 attribute_hidden double __math_uflow (uint32_t);
 /* The result underflows to 0 in some directed rounding mode only.  */

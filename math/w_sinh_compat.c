@@ -19,9 +19,9 @@
 #include <math-svid-compat.h>
 #include <libm-alias-double.h>
 
-#if LIBM_SVID_COMPAT
+#if LIBM_SVID_COMPAT && SHLIB_COMPAT (libm, GLIBC_2_0, GLIBC_2_44)
 double
-__sinh (double x)
+__sinh_compat (double x)
 {
 	double z = __ieee754_sinh (x);
 	if (__builtin_expect (!isfinite (z), 0) && isfinite (x)
@@ -30,5 +30,17 @@ __sinh (double x)
 
 	return z;
 }
-libm_alias_double (__sinh, sinh)
+# ifdef NO_COMPAT_NEEDED
+strong_alias (__sinh_compat, __sinh)
+libm_alias_double (__sinh_compat, sinh)
+# else
+compat_symbol (libm, __sinh_compat, sinh, GLIBC_2_0);
+#  ifdef NO_LONG_DOUBLE
+weak_alias (__sinh_compat, sinhl)
+#  endif
+#  ifdef LONG_DOUBLE_COMPAT
+LONG_DOUBLE_COMPAT_CHOOSE_libm_sinhl (
+  compat_symbol (libm, __sinh_compat, sinhl, FIRST_VERSION_libm_sinhl), );
+#  endif
+# endif
 #endif

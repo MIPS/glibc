@@ -87,7 +87,7 @@ __math_uflow_value (double x)
 #endif
 
 attribute_hidden double
-__math_always_uflow (double x)
+__math_oflow_value (double x)
 {
   return with_errno (x, ERANGE);
 }

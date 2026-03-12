@@ -19,17 +19,26 @@
 #include <sysdeps/x86/isa-level.h>
 #if MINIMUM_X86_ISA_LEVEL < AVX2_X86_ISA_LEVEL
 # include <libm-alias-finite.h>
+# include <libm-alias-double.h>
+# include <math-svid-compat.h>
 
-extern double __redirect_ieee754_sinh (double);
+extern double __redirect_sinh (double);
 
-# define SYMBOL_NAME ieee754_sinh
+# define SYMBOL_NAME sinh
 # include "ifunc-fma.h"
 
-libc_ifunc_redirected (__redirect_ieee754_sinh, __ieee754_sinh,
+libc_ifunc_redirected (__redirect_sinh, __sinh,
 		       IFUNC_SELECTOR ());
 
+strong_alias (__sinh, __ieee754_sinh)
+# if LIBM_SVID_COMPAT
+versioned_symbol (libm, __sinh, sinh, GLIBC_2_44);
+libm_alias_double_other (__sinh, sinh)
+# else
+libm_alias_double (__sinh, sinh)
+# endif
 libm_alias_finite (__ieee754_sinh, __sinh)
 
-# define __ieee754_sinh __ieee754_sinh_sse2
+# define __sinh __sinh_sse2
 #endif
 #include <sysdeps/ieee754/dbl-64/e_sinh.c>

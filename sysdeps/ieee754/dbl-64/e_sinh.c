@@ -27,8 +27,9 @@ SOFTWARE.
 #include <array_length.h>
 #include <math.h>
 #include <stdint.h>
-#include <errno.h>
 #include <libm-alias-finite.h>
+#include <libm-alias-double.h>
+#include <math-svid-compat.h>
 #include <ddcoremath.h>
 #include "math_config.h"
 
@@ -191,7 +192,7 @@ as_sinh_database (double x, double f)
 
 SECTION
 double
-__ieee754_sinh (double x)
+__sinh (double x)
 {
   /*
     The function sinh(x) is approximated by a minimax polynomial for
@@ -372,7 +373,7 @@ __ieee754_sinh (double x)
     { // |x| >~ 710.47586
       if (aix >= EXPONENT_MASK)
 	return x + x; // nan Inf
-      return copysign (0x1p1023, x) * 2.0;
+      return __math_oflow_value (copysign (0x1p1023, x) * 2.0);
     }
   // now 0.25 <= |x| < 710.47586
   // this branch was checked exhaustively with/without FMA
@@ -492,6 +493,13 @@ __ieee754_sinh (double x)
   return rh;
 }
 
-#ifndef __ieee754_sinh
+#ifndef __sinh
+strong_alias (__sinh, __ieee754_sinh)
+# if LIBM_SVID_COMPAT
+versioned_symbol (libm, __sinh, sinh, GLIBC_2_44);
+libm_alias_double_other (__sinh, sinh)
+# else
+libm_alias_double (__sinh, sinh)
+# endif
 libm_alias_finite (__ieee754_sinh, __sinh)
 #endif
