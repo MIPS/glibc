@@ -24,6 +24,11 @@ float: 1
 Function: "cbrt_upward":
 float: 1
 
+# sysdeps/ieee754/dbl-64/e_cosh.c shows 1ulp error even with
+# -fexcess-precision=standard.
+Function: "cosh":
+double: 1
+
 # sysdeps/i386/fpu/s_asinh.S is not correctly rounded
 Function: "asinh":
 double: 1

@@ -5213,6 +5213,20 @@ cosh 0x1.633c457f1e66bp+9
 cosh 0x2.c5d376167f4052f4p+12
 # the next value generates larger error bounds on x86_64 (binary128)
 cosh -0x2.c5d376eefcd4bbeb000452d84662p+12
+# CORE-MATH extra tests
+cosh 0x1.41fe58c623761p+2
+cosh 0x1.424ed1d05dfa7p+2
+cosh 0x1.41a83b901d5bdp+2
+cosh 0x1.40d5c37ff8185p+2
+cosh -0x1.419a5f3fa359p+2
+cosh 0x1.426a50e51bd1ep+2
+cosh -0x1.64c53499192bfp+2
+cosh 0x1.41fe58c623761p+2
+cosh 0x1.424ed1d05dfa7p+2
+cosh 0x1.41a83b901d5bdp+2
+cosh 0x1.40d5c37ff8185p+2
+cosh 0x1.426a50e51bd1ep+2
+cosh -0x1.41311766f07f6p+2
 
 cpow 1 0 0 0 ignore-zero-inf-sign
 cpow 2 0 10 0 ignore-zero-inf-sign

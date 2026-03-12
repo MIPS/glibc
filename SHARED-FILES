@@ -248,6 +248,8 @@ core-math:
   sysdeps/ieee754/dbl-64/e_acosh.c
   # src/binary64/atanh/atanh.c, revision 532e37dc
   sysdeps/ieee754/dbl-64/e_atanh.c
+  # src/binary64/cosh/cosh.c, revision 5d0c89d5
+  sysdeps/ieee754/dbl-64/e_cosh.c
   # src/binary64/tgamma/tgamma.c, revision 0f185e23
   sysdeps/ieee754/dbl-64/e_gamma_r.c
   # src/binary64/lgamma/lgamma.c, revision 0413bb7e
