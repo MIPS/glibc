@@ -30,7 +30,6 @@
 extern __typeof (__redirect_memset) __libc_memset;
 
 extern __typeof (__redirect_memset) __memset_zva64 attribute_hidden;
-extern __typeof (__redirect_memset) __memset_emag attribute_hidden;
 extern __typeof (__redirect_memset) __memset_kunpeng attribute_hidden;
 extern __typeof (__redirect_memset) __memset_a64fx attribute_hidden;
 extern __typeof (__redirect_memset) __memset_generic attribute_hidden;
@@ -60,9 +59,6 @@ select_memset_ifunc (void)
 
   if (IS_KUNPENG920 (midr))
     return __memset_kunpeng;
-
-  if (IS_EMAG (midr))
-    return __memset_emag;
 
   if (zva_size == 64)
     return __memset_zva64;

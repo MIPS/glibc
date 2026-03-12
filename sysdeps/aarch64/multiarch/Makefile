@@ -8,7 +8,6 @@ sysdep_routines += \
   memcpy_sve \
   memmove_mops \
   memset_a64fx \
-  memset_emag \
   memset_generic \
   memset_kunpeng \
   memset_mops \
