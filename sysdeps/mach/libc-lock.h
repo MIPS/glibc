@@ -156,16 +156,6 @@ typedef struct __libc_lock_recursive_opaque__ __libc_lock_recursive_t;
 #define __mach_rwlock_trywrlock		__libc_lock_trylock
 #define __mach_rwlock_unlock		__libc_lock_unlock
 
-#define __libc_rwlock_define		__libc_lock_define
-#define __libc_rwlock_define_initialized __libc_lock_define_initialized
-#define __libc_rwlock_init		__libc_lock_init
-#define __libc_rwlock_fini		__libc_lock_fini
-#define __libc_rwlock_rdlock		__libc_lock_lock
-#define __libc_rwlock_wrlock		__libc_lock_lock
-#define __libc_rwlock_tryrdlock		__libc_lock_trylock
-#define __libc_rwlock_trywrlock		__libc_lock_trylock
-#define __libc_rwlock_unlock		__libc_lock_unlock
-
 struct __libc_cleanup_frame
 {
   void (*__fct) (void *);
