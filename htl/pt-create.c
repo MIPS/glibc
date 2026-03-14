@@ -240,9 +240,9 @@ __pthread_create_internal (struct __pthread **thread,
      could use __thread_setid, however, we only lock for reading as no
      other thread should be using this entry (we also assume that the
      store is atomic).  */
-  __libc_rwlock_rdlock (GL (dl_pthread_threads_lock));
+  __mach_rwlock_rdlock (GL (dl_pthread_threads_lock));
   GL (dl_pthread_threads)[pthread->thread - 1] = pthread;
-  __libc_rwlock_unlock (GL (dl_pthread_threads_lock));
+  __mach_rwlock_unlock (GL (dl_pthread_threads_lock));
 
   /* At this point it is possible to guess our pthread ID.  We have to
      make sure that all functions taking a pthread_t argument can

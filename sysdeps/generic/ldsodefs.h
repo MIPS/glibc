@@ -478,7 +478,7 @@ struct rtld_global
 
   /* Array of __pthread structures and its lock.  */
   EXTERN struct __pthread **_dl_pthread_threads;
-  __libc_rwlock_define (EXTERN, _dl_pthread_threads_lock)
+  __mach_rwlock_define (EXTERN, _dl_pthread_threads_lock)
 #endif
 #ifdef SHARED
 };

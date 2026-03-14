@@ -125,7 +125,7 @@ __pthread_alloc (struct __pthread **pthread)
     }
 
 retry:
-  __libc_rwlock_wrlock (GL (dl_pthread_threads_lock));
+  __mach_rwlock_wrlock (GL (dl_pthread_threads_lock));
 
   if (GL (dl_pthread_num_threads) < __pthread_max_threads)
     {
@@ -134,7 +134,7 @@ retry:
       new->thread = 1 + GL (dl_pthread_num_threads)++;
       GL (dl_pthread_threads)[new->thread - 1] = NULL;
 
-      __libc_rwlock_unlock (GL (dl_pthread_threads_lock));
+      __mach_rwlock_unlock (GL (dl_pthread_threads_lock));
 
       *pthread = new;
       return 0;
@@ -143,7 +143,7 @@ retry:
   else if (GL (dl_pthread_num_threads) >= PTHREAD_THREADS_MAX)
     {
       /* We have reached the limit on the number of threads per process.  */
-      __libc_rwlock_unlock (GL (dl_pthread_threads_lock));
+      __mach_rwlock_unlock (GL (dl_pthread_threads_lock));
 
       free (new);
       return EAGAIN;
@@ -155,7 +155,7 @@ retry:
      memory allocation, since that's a potentially blocking operation.  */
   max_threads = __pthread_max_threads;
 
-  __libc_rwlock_unlock (GL (dl_pthread_threads_lock));
+  __mach_rwlock_unlock (GL (dl_pthread_threads_lock));
 
   /* Allocate a new lookup table that's twice as large.  */
   new_max_threads
@@ -167,13 +167,13 @@ retry:
       return ENOMEM;
     }
 
-  __libc_rwlock_wrlock (GL (dl_pthread_threads_lock));
+  __mach_rwlock_wrlock (GL (dl_pthread_threads_lock));
 
   /* Check if nobody else has already enlarged the table.  */
   if (max_threads != __pthread_max_threads)
     {
       /* Yep, they did.  */
-      __libc_rwlock_unlock (GL (dl_pthread_threads_lock));
+      __mach_rwlock_unlock (GL (dl_pthread_threads_lock));
 
       /* Free the newly allocated table and try again to allocate a slot.  */
       free (threads);
@@ -196,7 +196,7 @@ retry:
   new->thread = 1 + GL (dl_pthread_num_threads)++;
   GL (dl_pthread_threads)[new->thread - 1] = NULL;
 
-  __libc_rwlock_unlock (GL (dl_pthread_threads_lock));
+  __mach_rwlock_unlock (GL (dl_pthread_threads_lock));
 
   free (old_threads);
 
@@ -211,7 +211,7 @@ __pthread_init_static_tls (struct link_map *map)
 {
   int i;
 
-  __libc_rwlock_wrlock (GL (dl_pthread_threads_lock));
+  __mach_rwlock_wrlock (GL (dl_pthread_threads_lock));
   for (i = 0; i < GL (dl_pthread_num_threads); ++i)
     {
       struct __pthread *t = GL (dl_pthread_threads)[i];
@@ -231,6 +231,6 @@ __pthread_init_static_tls (struct link_map *map)
       memset (__mempcpy (dest, map->l_tls_initimage, map->l_tls_initimage_size),
 	      '\0', map->l_tls_blocksize - map->l_tls_initimage_size);
     }
-  __libc_rwlock_unlock (GL (dl_pthread_threads_lock));
+  __mach_rwlock_unlock (GL (dl_pthread_threads_lock));
 }
 libc_hidden_def (__pthread_init_static_tls)

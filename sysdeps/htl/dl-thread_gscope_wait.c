@@ -39,7 +39,7 @@ __thread_gscope_wait (void)
   struct __pthread *t;
   int *gscope_flagp;
 
-  __libc_rwlock_rdlock (GL (dl_pthread_threads_lock));
+  __mach_rwlock_rdlock (GL (dl_pthread_threads_lock));
 
   /* Iterate over the list of threads.  */
   for (i = 0; i < GL (dl_pthread_num_threads); ++i)
@@ -63,5 +63,5 @@ __thread_gscope_wait (void)
       while (*gscope_flagp == THREAD_GSCOPE_FLAG_WAIT);
     }
 
-  __libc_rwlock_unlock (GL (dl_pthread_threads_lock));
+  __mach_rwlock_unlock (GL (dl_pthread_threads_lock));
 }

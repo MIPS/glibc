@@ -178,16 +178,16 @@ libc_hidden_proto (__pthread_max_threads)
 
 #define __pthread_getid(thread) \
   ({ struct __pthread *__t = NULL;                                           \
-     __libc_rwlock_rdlock (GL (dl_pthread_threads_lock));                    \
+     __mach_rwlock_rdlock (GL (dl_pthread_threads_lock));                    \
      if (thread <= __pthread_max_threads)                                    \
        __t = GL (dl_pthread_threads)[thread - 1];                            \
-     __libc_rwlock_unlock (GL (dl_pthread_threads_lock));                    \
+     __mach_rwlock_unlock (GL (dl_pthread_threads_lock));                    \
      __t; })
 
 #define __pthread_setid(thread, pthread) \
-  __libc_rwlock_wrlock (GL (dl_pthread_threads_lock));                       \
+  __mach_rwlock_wrlock (GL (dl_pthread_threads_lock));                       \
   GL (dl_pthread_threads)[thread - 1] = pthread;                             \
-  __libc_rwlock_unlock (GL (dl_pthread_threads_lock));
+  __mach_rwlock_unlock (GL (dl_pthread_threads_lock));
 
 /* Similar to pthread_self, but returns the thread descriptor instead
    of the thread ID.  */

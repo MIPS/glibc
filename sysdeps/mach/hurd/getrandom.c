@@ -20,7 +20,7 @@
 #include <sys/random.h>
 #include <fcntl.h>
 
-__libc_rwlock_define_initialized (static, lock);
+__mach_rwlock_define_initialized (static, lock);
 static file_t random_server, random_server_nonblock,
               urandom_server, urandom_server_nonblock;
 
@@ -75,14 +75,14 @@ __getrandom (void *buffer, size_t length, unsigned int flags)
     return length;
 
 again:
-  __libc_rwlock_rdlock (lock);
+  __mach_rwlock_rdlock (lock);
   server = *cached_server;
   if (MACH_PORT_VALID (server))
     /* Attempt to read some random data using this port.  */
     err = __io_read (server, &data, &nread, -1, length);
   else
     err = MACH_SEND_INVALID_DEST;
-  __libc_rwlock_unlock (lock);
+  __mach_rwlock_unlock (lock);
 
   if (err == MACH_SEND_INVALID_DEST || err == MIG_SERVER_DIED)
     {
@@ -92,13 +92,13 @@ again:
       /* Slow path: the cached port didn't work, or there was no
          cached port in the first place.  */
 
-      __libc_rwlock_wrlock (lock);
+      __mach_rwlock_wrlock (lock);
       server = *cached_server;
       if (server != oldserver)
         {
           /* Someone else must have refetched the port while we were
              waiting for the lock. */
-          __libc_rwlock_unlock (lock);
+          __mach_rwlock_unlock (lock);
           goto again;
         }
 
@@ -111,7 +111,7 @@ again:
                                       MACH_PORT_RIGHT_SEND, &urefs);
           if (!err && urefs > 0)
             {
-              __libc_rwlock_unlock (lock);
+              __mach_rwlock_unlock (lock);
               goto again;
             }
 
@@ -121,7 +121,7 @@ again:
 
       server = *cached_server = __file_name_lookup (random_source,
                                                     open_flags, 0);
-      __libc_rwlock_unlock (lock);
+      __mach_rwlock_unlock (lock);
       if (!MACH_PORT_VALID (server))
 	{
 	  if (errno == ENOENT)

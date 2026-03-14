@@ -20,4 +20,4 @@
 
 int _dl_pthread_num_threads;
 struct __pthread **_dl_pthread_threads;
-__libc_rwlock_define_initialized (, _dl_pthread_threads_lock)
+__mach_rwlock_define_initialized (, _dl_pthread_threads_lock)
