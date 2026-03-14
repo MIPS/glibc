@@ -19,24 +19,31 @@
 #include <pthread.h>
 #include <time.h>
 
+#include <shlib-compat.h>
+#include <rt-libc.h>
+
 #include "posix-timer.h"
 
 
 /* Get expiration overrun for timer TIMERID.  */
 int
-timer_getoverrun (timer_t timerid)
+__timer_getoverrun (timer_t timerid)
 {
   struct timer_node *timer;
   int retval = -1;
 
-  pthread_mutex_lock (&__timer_mutex);
+  __pthread_mutex_lock (&__timer_mutex);
 
   if (! timer_valid (timer = timer_id2ptr (timerid)))
     __set_errno (EINVAL);
   else
     retval = timer->overrun_count;
 
-  pthread_mutex_unlock (&__timer_mutex);
+  __pthread_mutex_unlock (&__timer_mutex);
 
   return retval;
 }
+versioned_symbol (libc, __timer_getoverrun, timer_getoverrun, RT_IN_LIBC);
+#if OTHER_SHLIB_COMPAT (librt, GLIBC_2_2, RT_IN_LIBC)
+compat_symbol (librt, __timer_getoverrun, timer_getoverrun, GLIBC_2_2);
+#endif

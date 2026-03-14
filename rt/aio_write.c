@@ -28,6 +28,7 @@
 
 #include <aio_misc.h>
 #include <shlib-compat.h>
+#include <rt-libc.h>
 
 int
 __aio_write (struct aiocb *aiocbp)
@@ -36,20 +37,13 @@ __aio_write (struct aiocb *aiocbp)
 	  ? -1 : 0);
 }
 
-#if PTHREAD_IN_LIBC
-versioned_symbol (libc, __aio_write, aio_write, GLIBC_2_34);
-# if __WORDSIZE == 64
-versioned_symbol (libc, __aio_write, aio_write64, GLIBC_2_34);
-# endif
-# if OTHER_SHLIB_COMPAT (librt, GLIBC_2_1, GLIBC_2_34)
-compat_symbol (librt, __aio_write, aio_write, GLIBC_2_1);
-#  if __WORDSIZE == 64
-compat_symbol (librt, __aio_write, aio_write64, GLIBC_2_1);
-#  endif
-# endif
-#else /* !PTHREAD_IN_LIBC */
-strong_alias (__aio_write, aio_write)
-# if __WORDSIZE == 64
-weak_alias (__aio_write, aio_write64)
+versioned_symbol (libc, __aio_write, aio_write, RT_IN_LIBC);
+#if __WORDSIZE == 64
+versioned_symbol (libc, __aio_write, aio_write64, RT_IN_LIBC);
 #endif
-#endif  /* !PTHREAD_IN_LIBC */
+#if OTHER_SHLIB_COMPAT (librt, GLIBC_2_1, RT_IN_LIBC)
+compat_symbol (librt, __aio_write, aio_write, GLIBC_2_1);
+# if __WORDSIZE == 64
+compat_symbol (librt, __aio_write, aio_write64, GLIBC_2_1);
+# endif
+#endif

@@ -29,6 +29,8 @@
 
 #include "posix-timer.h"
 #include <timer_routines.h>
+#include <register-atfork.h>
+#include <dso_handle.h>
 
 #ifndef DELAYTIMER_MAX
 # define DELAYTIMER_MAX INT_MAX
@@ -145,15 +147,15 @@ thread_init (struct thread_node *thread, const pthread_attr_t *attr, clockid_t c
     thread->attr = *attr;
   else
     {
-      pthread_attr_init (&thread->attr);
-      pthread_attr_setdetachstate (&thread->attr, PTHREAD_CREATE_DETACHED);
+      __pthread_attr_init (&thread->attr);
+      __pthread_attr_setdetachstate (&thread->attr, PTHREAD_CREATE_DETACHED);
     }
 
   thread->exists = 0;
   INIT_LIST_HEAD (&thread->timer_queue);
   __pthread_cond_init (&thread->cond, 0);
   thread->current_timer = 0;
-  thread->captured = pthread_self ();
+  thread->captured = __pthread_self ();
   thread->clock_id = clock_id;
 }
 
@@ -202,7 +204,7 @@ void
 __timer_init_once (void)
 {
   init_module ();
-  pthread_atfork (0, 0, reinit_after_fork);
+  __register_atfork (0, 0, reinit_after_fork, __dso_handle);
 }
 
 
@@ -317,9 +319,9 @@ thread_expire_timer (struct thread_node *self, struct timer_node *timer)
 	INLINE_SYSCALL (rt_sigqueueinfo, 3, info.si_pid, info.si_signo, &info);
       }
 #else
-      if (pthread_kill (self->captured, timer->event.sigev_signo) != 0)
+      if (__pthread_kill (self->captured, timer->event.sigev_signo) != 0)
 	{
-	  if (pthread_kill (self->id, timer->event.sigev_signo) != 0)
+	  if (__pthread_kill (self->id, timer->event.sigev_signo) != 0)
 	    abort ();
         }
 #endif
@@ -470,8 +472,8 @@ __timer_thread_start (struct thread_node *thread)
   sigfillset (&set);
   __pthread_sigmask (SIG_SETMASK, &set, &oset);
 
-  if (pthread_create (&thread->id, &thread->attr,
-		      (void *(*) (void *)) thread_func, thread) != 0)
+  if (__pthread_create (&thread->id, &thread->attr,
+			(void *(*) (void *)) thread_func, thread) != 0)
     {
       thread->exists = 0;
       retval = -1;

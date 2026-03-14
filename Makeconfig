@@ -1456,16 +1456,12 @@ endif
 sysd-rules-targets := $(sort $(foreach p,$(sysd-rules-patterns),\
 					 $(firstword $(subst :, ,$p))))
 
-# $(libpthread-routines-var) and $(librt-routines-var) are the make
-# variable to which pthread routines need to be added to land in the
+# $(libanl-routines-var) is the make
+# variable to which libanl routines need to be added to land in the
 # right library.
 ifeq ($(pthread-in-libc),yes)
-libpthread-routines-var = routines
-librt-routines-var = routines
 libanl-routines-var = routines
 else
-libpthread-routines-var = libpthread-routines
-librt-routines-var = librt-routines
 libanl-routines-var = libanl-routines
 endif
 

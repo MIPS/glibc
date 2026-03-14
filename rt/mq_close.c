@@ -17,13 +17,19 @@
 
 #include <errno.h>
 #include <mqueue.h>
+#include <shlib-compat.h>
+#include <rt-libc.h>
 
 /* Removes the association between message queue descriptor MQDES and its
    message queue.  */
 int
-mq_close (mqd_t mqdes)
+__mq_close (mqd_t mqdes)
 {
   __set_errno (ENOSYS);
   return -1;
 }
+versioned_symbol (libc, __mq_close, mq_close, RT_IN_LIBC);
 stub_warning (mq_close)
+#if OTHER_SHLIB_COMPAT (librt, GLIBC_2_3_4, RT_IN_LIBC)
+compat_symbol (librt, __mq_close, mq_close, GLIBC_2_3_4);
+#endif

@@ -1,5 +1,5 @@
 ifeq ($(subdir),rt)
-librt-sysdep_routines += timer_routines
+sysdep_routines += timer_routines
 endif
 
 ifeq ($(subdir),posix)

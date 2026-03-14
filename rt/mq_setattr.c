@@ -17,15 +17,21 @@
 
 #include <errno.h>
 #include <mqueue.h>
+#include <shlib-compat.h>
+#include <rt-libc.h>
 
 /* Set attributes associated with message queue MQDES and if OMQSTAT is
    not NULL also query its old attributes.  */
 int
-mq_setattr (mqd_t mqdes, const struct mq_attr *__restrict mqstat,
-	    struct mq_attr *__restrict omqstat)
+__mq_setattr (mqd_t mqdes, const struct mq_attr *__restrict mqstat,
+	      struct mq_attr *__restrict omqstat)
 {
   __set_errno (ENOSYS);
   return -1;
 }
-hidden_def (mq_setattr)
+versioned_symbol (libc, __mq_setattr, mq_setattr, RT_IN_LIBC);
+libc_hidden_ver (__mq_setattr, mq_setattr)
 stub_warning (mq_setattr)
+#if OTHER_SHLIB_COMPAT (librt, GLIBC_2_3_4, RT_IN_LIBC)
+compat_symbol (librt, __mq_setattr, mq_setattr, GLIBC_2_3_4);
+#endif

@@ -17,14 +17,20 @@
 
 #include <errno.h>
 #include <mqueue.h>
+#include <shlib-compat.h>
+#include <rt-libc.h>
 
 /* Receive the oldest from highest priority messages in message queue
    MQDES.  */
 ssize_t
-mq_receive (mqd_t mqdes, char *msg_ptr, size_t msg_len,
-	    unsigned int *msg_prio)
+__mq_receive (mqd_t mqdes, char *msg_ptr, size_t msg_len,
+	      unsigned int *msg_prio)
 {
   __set_errno (ENOSYS);
   return -1;
 }
+versioned_symbol (libc, __mq_receive, mq_receive, RT_IN_LIBC);
 stub_warning (mq_receive)
+#if OTHER_SHLIB_COMPAT (librt, GLIBC_2_3_4, RT_IN_LIBC)
+compat_symbol (librt, __mq_receive, mq_receive, GLIBC_2_3_4);
+#endif

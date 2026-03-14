@@ -17,12 +17,18 @@
 
 #include <errno.h>
 #include <mqueue.h>
+#include <shlib-compat.h>
+#include <rt-libc.h>
 
 /* Remove message queue named NAME.  */
 int
-mq_unlink (const char *name)
+__mq_unlink (const char *name)
 {
   __set_errno (ENOSYS);
   return -1;
 }
+versioned_symbol (libc, __mq_unlink, mq_unlink, RT_IN_LIBC);
 stub_warning (mq_unlink)
+#if OTHER_SHLIB_COMPAT (librt, GLIBC_2_3_4, RT_IN_LIBC)
+compat_symbol (librt, __mq_unlink, mq_unlink, GLIBC_2_3_4);
+#endif

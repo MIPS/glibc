@@ -30,6 +30,7 @@
 #include <aio_misc.h>
 #include <pthreadP.h>
 #include <shlib-compat.h>
+#include <rt-libc.h>
 
 int
 __aio_error (const struct aiocb *aiocbp)
@@ -45,14 +46,9 @@ __aio_error (const struct aiocb *aiocbp)
   return ret;
 }
 
-#if PTHREAD_IN_LIBC
-versioned_symbol (libc, __aio_error, aio_error, GLIBC_2_34);
-versioned_symbol (libc, __aio_error, aio_error64, GLIBC_2_34);
-# if OTHER_SHLIB_COMPAT (librt, GLIBC_2_1, GLIBC_2_34)
+versioned_symbol (libc, __aio_error, aio_error, RT_IN_LIBC);
+versioned_symbol (libc, __aio_error, aio_error64, RT_IN_LIBC);
+#if OTHER_SHLIB_COMPAT (librt, GLIBC_2_1, RT_IN_LIBC)
 compat_symbol (librt, __aio_error, aio_error, GLIBC_2_1);
 compat_symbol (librt, __aio_error, aio_error64, GLIBC_2_1);
-# endif
-#else /* !PTHREAD_IN_LIBC */
-strong_alias (__aio_error, aio_error)
-weak_alias (__aio_error, aio_error64)
-#endif /* !PTHREAD_IN_LIBC */
+#endif

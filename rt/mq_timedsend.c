@@ -17,17 +17,22 @@
 
 #include <errno.h>
 #include <mqueue.h>
+#include <shlib-compat.h>
+#include <rt-libc.h>
 
 /* Add message pointed by MSG_PTR to message queue MQDES, stop blocking
    on full message queue if ABS_TIMEOUT expires.  */
 int
 __mq_timedsend (mqd_t mqdes, const char *msg_ptr, size_t msg_len,
-	      unsigned int msg_prio, const struct timespec *abs_timeout)
+	        unsigned int msg_prio, const struct timespec *abs_timeout)
 {
   __set_errno (ENOSYS);
   return -1;
 }
 hidden_def (__mq_timedsend)
-weak_alias (__mq_timedsend, mq_timedsend)
-hidden_weak (mq_timedsend)
+versioned_symbol (libc, __mq_timedsend, mq_timedsend, RT_IN_LIBC);
+libc_hidden_ver (__mq_timedsend, mq_timedsend)
+#if OTHER_SHLIB_COMPAT (librt, GLIBC_2_3_4, RT_IN_LIBC)
+compat_symbol (librt, __mq_timedsend, mq_timedsend, GLIBC_2_3_4);
+#endif
 stub_warning (mq_timedsend)

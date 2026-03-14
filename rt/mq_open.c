@@ -18,6 +18,8 @@
 #include <errno.h>
 #include <mqueue.h>
 #include <stdio.h>
+#include <shlib-compat.h>
+#include <rt-libc.h>
 
 /* Establish connection between a process and a message queue NAME and
    return message queue descriptor or (mqd_t) -1 on error.  OFLAG determines
@@ -32,11 +34,14 @@ __mq_open (const char *name, int oflag, ...)
   __set_errno (ENOSYS);
   return (mqd_t) -1;
 }
-strong_alias (__mq_open, mq_open);
+versioned_symbol (libc, __mq_open, mq_open, RT_IN_LIBC);
 stub_warning (mq_open)
+#if OTHER_SHLIB_COMPAT (librt, GLIBC_2_3_4, RT_IN_LIBC)
+compat_symbol (librt, __mq_open, mq_open, GLIBC_2_3_4);
+#endif
 
 mqd_t
-__mq_open_2 (const char *name, int oflag)
+___mq_open_2 (const char *name, int oflag)
 {
   if (oflag & O_CREAT)
     __fortify_fail ("invalid mq_open call: O_CREAT without mode and attr");
@@ -44,3 +49,7 @@ __mq_open_2 (const char *name, int oflag)
   return __mq_open (name, oflag);
 }
 stub_warning (__mq_open_2)
+versioned_symbol (libc, ___mq_open_2, __mq_open_2, RT_IN_LIBC);
+#if OTHER_SHLIB_COMPAT (librt, GLIBC_2_7, RT_IN_LIBC)
+compat_symbol (librt, ___mq_open_2, __mq_open_2, GLIBC_2_7);
+#endif

@@ -16,11 +16,11 @@
    License along with the GNU C Library; if not, see
    <https://www.gnu.org/licenses/>.  */
 
-#if PTHREAD_IN_LIBC
-# include <shlib-compat.h>
-# include <sys/cdefs.h>
+#include <shlib-compat.h>
+#include <sys/cdefs.h>
+#include <rt-libc.h>
 
-# if SHLIB_COMPAT (librt, GLIBC_2_1, GLIBC_2_34)
+#if SHLIB_COMPAT (librt, GLIBC_2_1, RT_IN_LIBC)
 void
 attribute_compat_text_section
 __attribute_used__
@@ -30,26 +30,24 @@ __librt_version_placeholder_1 (void)
 
 compat_symbol (librt, __librt_version_placeholder_1,
                __librt_version_placeholder, GLIBC_2_1);
-# endif
+#endif
 
-# if SHLIB_COMPAT (librt, GLIBC_2_2, GLIBC_2_34)
+#if SHLIB_COMPAT (librt, GLIBC_2_2, RT_IN_LIBC)
 compat_symbol (librt, __librt_version_placeholder_1,
                __librt_version_placeholder, GLIBC_2_2);
-# endif
+#endif
 
-# if SHLIB_COMPAT (librt, GLIBC_2_3_4, GLIBC_2_34)
+#if SHLIB_COMPAT (librt, GLIBC_2_3_4, RT_IN_LIBC)
 compat_symbol (librt, __librt_version_placeholder_1,
                __librt_version_placeholder, GLIBC_2_3_4);
-# endif
+#endif
 
-# if SHLIB_COMPAT (librt, GLIBC_2_4, GLIBC_2_34)
+#if SHLIB_COMPAT (librt, GLIBC_2_4, RT_IN_LIBC)
 compat_symbol (librt, __librt_version_placeholder_1,
                __librt_version_placeholder, GLIBC_2_4);
-# endif
+#endif
 
-# if SHLIB_COMPAT (librt, GLIBC_2_7, GLIBC_2_34)
+#if SHLIB_COMPAT (librt, GLIBC_2_7, RT_IN_LIBC)
 compat_symbol (librt, __librt_version_placeholder_1,
                __librt_version_placeholder, GLIBC_2_7);
-# endif
-
 #endif

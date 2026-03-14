@@ -1,6 +1,5 @@
 libc {
   GLIBC_2.1 {
-%if PTHREAD_IN_LIBC
     aio_init;
     aio_cancel;
     aio_cancel64;
@@ -18,21 +17,17 @@ libc {
     aio_write64;
     lio_listio;
     lio_listio64;
-%endif
   }
   GLIBC_2.2 {
-%if PTHREAD_IN_LIBC
     timer_create;
     timer_delete;
     timer_getoverrun;
     timer_gettime;
     timer_settime;
-%endif
     shm_open;
     shm_unlink;
   }
   GLIBC_2.3.4 {
-%if PTHREAD_IN_LIBC
     mq_close;
     mq_getattr;
     mq_notify;
@@ -43,21 +38,15 @@ libc {
     mq_timedreceive;
     mq_timedsend;
     mq_unlink;
-%endif
   }
   GLIBC_2.4 {
-%if PTHREAD_IN_LIBC
     lio_listio;
     lio_listio64;
-%endif
   }
   GLIBC_2.7 {
-%if PTHREAD_IN_LIBC
    __mq_open_2;
-%endif
   }
   GLIBC_2.34 {
-%if PTHREAD_IN_LIBC
     __mq_open_2;
     aio_cancel64;
     aio_cancel;
@@ -91,16 +80,11 @@ libc {
     timer_getoverrun;
     timer_gettime;
     timer_settime;
-%endif
     shm_open;
     shm_unlink;
   }
-}
-librt {
-  GLIBC_2.1 {
-%if PTHREAD_IN_LIBC
-    __librt_version_placeholder;
-%else
+  GLIBC_2.44 {
+    __mq_open_2;
     aio_cancel;
     aio_cancel64;
     aio_error;
@@ -118,23 +102,6 @@ librt {
     aio_write64;
     lio_listio;
     lio_listio64;
-%endif
-  }
-  GLIBC_2.2 {
-%if PTHREAD_IN_LIBC
-    __librt_version_placeholder;
-%else
-    timer_create;
-    timer_delete;
-    timer_getoverrun;
-    timer_gettime;
-    timer_settime;
-%endif
-  }
-  GLIBC_2.3.4 {
-%if PTHREAD_IN_LIBC
-    __librt_version_placeholder;
-%else
     mq_close;
     mq_getattr;
     mq_notify;
@@ -145,21 +112,27 @@ librt {
     mq_timedreceive;
     mq_timedsend;
     mq_unlink;
-%endif
+    timer_create;
+    timer_delete;
+    timer_getoverrun;
+    timer_gettime;
+    timer_settime;
+  }
+}
+librt {
+  GLIBC_2.1 {
+    __librt_version_placeholder;
+  }
+  GLIBC_2.2 {
+    __librt_version_placeholder;
+  }
+  GLIBC_2.3.4 {
+    __librt_version_placeholder;
   }
   GLIBC_2.4 {
-%if PTHREAD_IN_LIBC
     __librt_version_placeholder;
-%else
-    lio_listio;
-    lio_listio64;
-%endif
   }
   GLIBC_2.7 {
-%if PTHREAD_IN_LIBC
     __librt_version_placeholder;
-%else
-   __mq_open_2;
-%endif
   }
 }

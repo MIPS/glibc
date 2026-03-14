@@ -19,19 +19,22 @@
 #include <pthread.h>
 #include <time.h>
 
+#include <shlib-compat.h>
+#include <rt-libc.h>
+
 #include "posix-timer.h"
 
 
 /* Get current value of timer TIMERID and store it in VALUE.  */
 int
-timer_gettime (timer_t timerid, struct itimerspec *value)
+__timer_gettime (timer_t timerid, struct itimerspec *value)
 {
   struct timer_node *timer;
   struct timespec now, expiry;
   int retval = -1, armed = 0, valid;
   clock_t clock = 0;
 
-  pthread_mutex_lock (&__timer_mutex);
+  __pthread_mutex_lock (&__timer_mutex);
 
   timer = timer_id2ptr (timerid);
   valid = timer_valid (timer);
@@ -43,7 +46,7 @@ timer_gettime (timer_t timerid, struct itimerspec *value)
     value->it_interval = timer->value.it_interval;
   }
 
-  pthread_mutex_unlock (&__timer_mutex);
+  __pthread_mutex_unlock (&__timer_mutex);
 
   if (valid)
     {
@@ -71,3 +74,7 @@ timer_gettime (timer_t timerid, struct itimerspec *value)
 
   return retval;
 }
+versioned_symbol (libc, __timer_gettime, timer_gettime, RT_IN_LIBC);
+#if OTHER_SHLIB_COMPAT (librt, GLIBC_2_2, RT_IN_LIBC)
+compat_symbol (librt, __timer_gettime, timer_gettime, GLIBC_2_2);
+#endif

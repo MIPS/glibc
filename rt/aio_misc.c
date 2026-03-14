@@ -27,20 +27,8 @@
 #include <sys/stat.h>
 #include <sys/time.h>
 #include <aio_misc.h>
-
-#if !PTHREAD_IN_LIBC
-/* The available function names differ outside of libc.  (In libc, we
-   need to use hidden aliases to avoid the PLT.)  */
-# define __pread __libc_pread
-# define __pthread_attr_destroy pthread_attr_destroy
-# define __pthread_attr_init pthread_attr_init
-# define __pthread_attr_setdetachstate pthread_attr_setdetachstate
-# define __pthread_cond_signal pthread_cond_signal
-# define __pthread_cond_timedwait pthread_cond_timedwait
-# define __pthread_getschedparam pthread_getschedparam
-# define __pthread_setschedparam pthread_setschedparam
-# define __pwrite __libc_pwrite
-#endif
+#include <shlib-compat.h>
+#include <rt-libc.h>
 
 #ifndef aio_create_helper_thread
 # define aio_create_helper_thread __aio_create_helper_thread
@@ -694,9 +682,6 @@ handle_fildes_io (void *arg)
 
 
 /* Free allocated resources.  */
-#if !PTHREAD_IN_LIBC
-__attribute__ ((__destructor__)) static
-#endif
 void
 __aio_freemem (void)
 {
@@ -737,11 +722,7 @@ add_request_to_runlist (struct requestlist *newrequest)
     }
 }
 
-#if PTHREAD_IN_LIBC
-versioned_symbol (libc, __aio_init, aio_init, GLIBC_2_34);
-# if OTHER_SHLIB_COMPAT (librt, GLIBC_2_1, GLIBC_2_34)
+versioned_symbol (libc, __aio_init, aio_init, RT_IN_LIBC);
+#if OTHER_SHLIB_COMPAT (librt, GLIBC_2_1, RT_IN_LIBC)
 compat_symbol (librt, __aio_init, aio_init, GLIBC_2_1);
-# endif
-#else /* !PTHREAD_IN_LIBC */
-weak_alias (__aio_init, aio_init)
-#endif /* !PTHREAD_IN_LIBC */
+#endif

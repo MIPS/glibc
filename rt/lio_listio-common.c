@@ -46,6 +46,7 @@
 #include <aio_misc.h>
 
 #include <shlib-compat.h>
+#include <rt-libc.h>
 
 
 /* We need this special structure to handle asynchronous I/O.  */
@@ -160,16 +161,16 @@ lio_listio_internal (int mode, struct AIOCB *const list[], int nent,
       /* Since `pthread_cond_wait'/`pthread_cond_timedwait' are cancellation
 	 points we must be careful.  We added entries to the waiting lists
 	 which we must remove.  So defer cancellation for now.  */
-      pthread_setcancelstate (PTHREAD_CANCEL_DISABLE, &oldstate);
+      __pthread_setcancelstate (PTHREAD_CANCEL_DISABLE, &oldstate);
 
       while (total > 0)
-	pthread_cond_wait (&cond, &__aio_requests_mutex);
+	__pthread_cond_wait (&cond, &__aio_requests_mutex);
 
       /* Now it's time to restore the cancellation state.  */
-      pthread_setcancelstate (oldstate, NULL);
+      __pthread_setcancelstate (oldstate, NULL);
 
       /* Release the conditional variable.  */
-      if (pthread_cond_destroy (&cond) != 0)
+      if (__pthread_cond_destroy (&cond) != 0)
 	/* This must never happen.  */
 	abort ();
 #endif
@@ -265,20 +266,13 @@ LIO_LISTIO_NEW (int mode, struct AIOCB *const list[], int nent,
   return lio_listio_internal (mode, list, nent, sig);
 }
 
-#if PTHREAD_IN_LIBC
-versioned_symbol (libc, LIO_LISTIO_NEW, LIO_LISTIO, GLIBC_2_34);
-# if __WORDSIZE == 64
-versioned_symbol (libc, LIO_LISTIO_NEW, lio_listio64, GLIBC_2_34);
-# endif
-# if OTHER_SHLIB_COMPAT (librt, GLIBC_2_4, GLIBC_2_34)
+versioned_symbol (libc, LIO_LISTIO_NEW, LIO_LISTIO, RT_IN_LIBC);
+#if __WORDSIZE == 64
+versioned_symbol (libc, LIO_LISTIO_NEW, lio_listio64, RT_IN_LIBC);
+#endif
+#if OTHER_SHLIB_COMPAT (librt, GLIBC_2_4, RT_IN_LIBC)
 compat_symbol (librt, LIO_LISTIO_NEW, LIO_LISTIO, GLIBC_2_4);
-#  if __WORDSIZE == 64
-compat_symbol (librt, LIO_LISTIO_NEW, lio_listio64, GLIBC_2_4);
-#  endif
-# endif /* OTHER_SHLIB_COMPAT */
-#else /* !PTHREAD_IN_LIBC */
-versioned_symbol (librt, LIO_LISTIO_NEW, LIO_LISTIO, GLIBC_2_4);
 # if __WORDSIZE == 64
-versioned_symbol (librt, LIO_LISTIO_NEW, lio_listio64, GLIBC_2_4);
+compat_symbol (librt, LIO_LISTIO_NEW, lio_listio64, GLIBC_2_4);
 # endif
-#endif /* !PTHREAD_IN_LIBC */
+#endif /* OTHER_SHLIB_COMPAT */

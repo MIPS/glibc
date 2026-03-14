@@ -21,12 +21,14 @@
 #include <time.h>
 #include <unistd.h>
 
-#include "posix-timer.h"
+#include <shlib-compat.h>
+#include <rt-libc.h>
 
+#include "posix-timer.h"
 
 /* Create new per-process timer using CLOCK.  */
 int
-timer_create (clockid_t clock_id, struct sigevent *evp, timer_t *timerid)
+__timer_create (clockid_t clock_id, struct sigevent *evp, timer_t *timerid)
 {
   int retval = -1;
   struct timer_node *newtimer = NULL;
@@ -53,7 +55,7 @@ timer_create (clockid_t clock_id, struct sigevent *evp, timer_t *timerid)
       return -1;
     }
 
-  pthread_once (&__timer_init_once_control, __timer_init_once);
+  __pthread_once (&__timer_init_once_control, __timer_init_once);
 
   if (__timer_init_failed)
     {
@@ -61,7 +63,7 @@ timer_create (clockid_t clock_id, struct sigevent *evp, timer_t *timerid)
       return -1;
     }
 
-  pthread_mutex_lock (&__timer_mutex);
+  __pthread_mutex_lock (&__timer_mutex);
 
   newtimer = __timer_alloc ();
   if (__glibc_unlikely (newtimer == NULL))
@@ -106,10 +108,10 @@ timer_create (clockid_t clock_id, struct sigevent *evp, timer_t *timerid)
       if (evp->sigev_notify_attributes)
 	newtimer->attr = *(pthread_attr_t *) evp->sigev_notify_attributes;
       else
-	pthread_attr_init (&newtimer->attr);
+	__pthread_attr_init (&newtimer->attr);
 
       /* Ensure thread attributes call for detached thread.  */
-      pthread_attr_setdetachstate (&newtimer->attr, PTHREAD_CREATE_DETACHED);
+      __pthread_attr_setdetachstate (&newtimer->attr, PTHREAD_CREATE_DETACHED);
 
       /* Try to find existing thread having the right attributes.  */
       thread = __timer_thread_find_matching (&newtimer->attr, clock_id);
@@ -159,7 +161,11 @@ timer_create (clockid_t clock_id, struct sigevent *evp, timer_t *timerid)
 	}
     }
 
-  pthread_mutex_unlock (&__timer_mutex);
+  __pthread_mutex_unlock (&__timer_mutex);
 
   return retval;
 }
+versioned_symbol (libc, __timer_create, timer_create, RT_IN_LIBC);
+#if OTHER_SHLIB_COMPAT (librt, GLIBC_2_2, RT_IN_LIBC)
+compat_symbol (librt, __timer_create, timer_create, GLIBC_2_2);
+#endif

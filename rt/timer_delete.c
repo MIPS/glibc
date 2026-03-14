@@ -20,17 +20,20 @@
 #include <pthread.h>
 #include <time.h>
 
+#include <shlib-compat.h>
+#include <rt-libc.h>
+
 #include "posix-timer.h"
 
 
 /* Delete timer TIMERID.  */
 int
-timer_delete (timer_t timerid)
+__timer_delete (timer_t timerid)
 {
   struct timer_node *timer;
   int retval = -1;
 
-  pthread_mutex_lock (&__timer_mutex);
+  __pthread_mutex_lock (&__timer_mutex);
 
   timer = timer_id2ptr (timerid);
   if (! timer_valid (timer))
@@ -49,7 +52,7 @@ timer_delete (timer_t timerid)
 
 	  /* If timer is currently being serviced, wait for it to finish.  */
 	  while (thread->current_timer == timer)
-	    pthread_cond_wait (&thread->cond, &__timer_mutex);
+	    __pthread_cond_wait (&thread->cond, &__timer_mutex);
 
 	  pthread_cleanup_pop (0);
         }
@@ -61,7 +64,11 @@ timer_delete (timer_t timerid)
       retval = 0;
     }
 
-  pthread_mutex_unlock (&__timer_mutex);
+  __pthread_mutex_unlock (&__timer_mutex);
 
   return retval;
 }
+versioned_symbol (libc, __timer_delete, timer_delete, RT_IN_LIBC);
+#if OTHER_SHLIB_COMPAT (librt, GLIBC_2_2, RT_IN_LIBC)
+compat_symbol (librt, __timer_delete, timer_delete, GLIBC_2_2);
+#endif

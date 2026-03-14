@@ -19,13 +19,16 @@
 #include <pthread.h>
 #include <time.h>
 
+#include <shlib-compat.h>
+#include <rt-libc.h>
+
 #include "posix-timer.h"
 
 
 /* Set timer TIMERID to VALUE, returning old value in OVLAUE.  */
 int
-timer_settime (timer_t timerid, int flags, const struct itimerspec *value,
-	       struct itimerspec *ovalue)
+__timer_settime (timer_t timerid, int flags, const struct itimerspec *value,
+	         struct itimerspec *ovalue)
 {
   struct timer_node *timer;
   struct thread_node *thread = NULL;
@@ -56,7 +59,7 @@ timer_settime (timer_t timerid, int flags, const struct itimerspec *value,
       have_now = 1;
     }
 
-  pthread_mutex_lock (&__timer_mutex);
+  __pthread_mutex_lock (&__timer_mutex);
   timer_addref (timer);
 
   /* One final check of timer validity; this one is possible only
@@ -76,10 +79,10 @@ timer_settime (timer_t timerid, int flags, const struct itimerspec *value,
 	{
 	  if (! have_now)
 	    {
-	      pthread_mutex_unlock (&__timer_mutex);
+	      __pthread_mutex_unlock (&__timer_mutex);
 	      __clock_gettime (timer->clock, &now);
 	      have_now = 1;
-	      pthread_mutex_lock (&__timer_mutex);
+	      __pthread_mutex_lock (&__timer_mutex);
 	      timer_addref (timer);
 	    }
 
@@ -120,7 +123,7 @@ timer_settime (timer_t timerid, int flags, const struct itimerspec *value,
 
 unlock_bail:
   timer_delref (timer);
-  pthread_mutex_unlock (&__timer_mutex);
+  __pthread_mutex_unlock (&__timer_mutex);
 
 bail:
   if (thread != NULL && need_wakeup)
@@ -128,3 +131,7 @@ bail:
 
   return retval;
 }
+versioned_symbol (libc, __timer_settime, timer_settime, RT_IN_LIBC);
+#if OTHER_SHLIB_COMPAT (librt, GLIBC_2_2, RT_IN_LIBC)
+compat_symbol (librt, __timer_settime, timer_settime, GLIBC_2_2);
+#endif

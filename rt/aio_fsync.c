@@ -31,6 +31,7 @@
 
 #include <aio_misc.h>
 #include <shlib-compat.h>
+#include <rt-libc.h>
 
 int
 __aio_fsync (int op, struct aiocb *aiocbp)
@@ -53,14 +54,9 @@ __aio_fsync (int op, struct aiocb *aiocbp)
 	  ? -1 : 0);
 }
 
-#if PTHREAD_IN_LIBC
-versioned_symbol (libc, __aio_fsync, aio_fsync, GLIBC_2_34);
-versioned_symbol (libc, __aio_fsync, aio_fsync64, GLIBC_2_34);
-# if OTHER_SHLIB_COMPAT (librt, GLIBC_2_1, GLIBC_2_34)
+versioned_symbol (libc, __aio_fsync, aio_fsync, RT_IN_LIBC);
+versioned_symbol (libc, __aio_fsync, aio_fsync64, RT_IN_LIBC);
+#if OTHER_SHLIB_COMPAT (librt, GLIBC_2_1, RT_IN_LIBC)
 compat_symbol (librt, __aio_fsync, aio_fsync, GLIBC_2_1);
 compat_symbol (librt, __aio_fsync, aio_fsync64, GLIBC_2_1);
-# endif
-#else /* !PTHREAD_IN_LIBC */
-strong_alias (__aio_fsync, aio_fsync)
-weak_alias (__aio_fsync, aio_fsync64)
-#endif /* !PTHREAD_IN_LIBC */
+#endif

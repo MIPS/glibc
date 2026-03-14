@@ -37,6 +37,7 @@
 #include <aio_misc.h>
 #include <pthreadP.h>
 #include <shlib-compat.h>
+#include <rt-libc.h>
 
 
 struct clparam
@@ -85,7 +86,7 @@ cleanup (void *arg)
 
 #ifndef DONT_NEED_AIO_MISC_COND
   /* Release the conditional variable.  */
-  (void) pthread_cond_destroy (param->cond);
+  (void) __pthread_cond_destroy (param->cond);
 #endif
 
   /* Release the mutex.  */
@@ -185,11 +186,7 @@ ___aio_suspend_time64 (const struct aiocb *const list[], int nent,
 	  .nent = nent
 	};
 
-#if PTHREAD_IN_LIBC
       __libc_cleanup_region_start (1, cleanup, &clparam);
-#else
-      __pthread_cleanup_push (cleanup, &clparam);
-#endif
 
 #ifdef DONT_NEED_AIO_MISC_COND
       result = do_aio_misc_wait (&cntr, timeout == NULL ? NULL : &ts);
@@ -200,11 +197,7 @@ ___aio_suspend_time64 (const struct aiocb *const list[], int nent,
 					 timeout == NULL ? NULL : &ts32);
 #endif
 
-#if PTHREAD_IN_LIBC
       __libc_cleanup_region_end (0);
-#else
-      pthread_cleanup_pop (0);
-#endif
     }
 
   /* Now remove the entry in the waiting list for all requests
@@ -228,7 +221,7 @@ ___aio_suspend_time64 (const struct aiocb *const list[], int nent,
 
 #ifndef DONT_NEED_AIO_MISC_COND
   /* Release the conditional variable.  */
-  if (__glibc_unlikely (pthread_cond_destroy (&cond) != 0))
+  if (__glibc_unlikely (__pthread_cond_destroy (&cond) != 0))
     /* This must never happen.  */
     abort ();
 #endif
@@ -257,14 +250,10 @@ ___aio_suspend_time64 (const struct aiocb *const list[], int nent,
 #if __TIMESIZE == 64
 strong_alias (___aio_suspend_time64, __aio_suspend)
 #else /* __TIMESIZE != 64 */
-# if PTHREAD_IN_LIBC
 libc_hidden_ver (___aio_suspend_time64, __aio_suspend_time64)
-/* The conditional is slightly wrong: PTHREAD_IN_LIBC is a stand-in
-   for whether time64 support is needed.  */
-versioned_symbol (libc, ___aio_suspend_time64, __aio_suspend_time64, GLIBC_2_34);
-# else
-librt_hidden_ver (___aio_suspend_time64, __aio_suspend_time64)
-# endif
+#ifndef __PTHREAD_HTL
+versioned_symbol (libc, ___aio_suspend_time64, __aio_suspend_time64, RT_IN_LIBC);
+#endif
 
 int
 __aio_suspend (const struct aiocb *const list[], int nent,
@@ -279,14 +268,9 @@ __aio_suspend (const struct aiocb *const list[], int nent,
 }
 #endif /* __TIMESPEC64 != 64 */
 
-#if PTHREAD_IN_LIBC
-versioned_symbol (libc, __aio_suspend, aio_suspend, GLIBC_2_34);
-versioned_symbol (libc, __aio_suspend, aio_suspend64, GLIBC_2_34);
-# if OTHER_SHLIB_COMPAT (librt, GLIBC_2_1, GLIBC_2_34)
+versioned_symbol (libc, __aio_suspend, aio_suspend, RT_IN_LIBC);
+versioned_symbol (libc, __aio_suspend, aio_suspend64, RT_IN_LIBC);
+#if OTHER_SHLIB_COMPAT (librt, GLIBC_2_1, RT_IN_LIBC)
 compat_symbol (librt, __aio_suspend, aio_suspend, GLIBC_2_1);
 compat_symbol (librt, __aio_suspend, aio_suspend64, GLIBC_2_1);
-# endif
-#else /* !PTHREAD_IN_LIBC */
-weak_alias (__aio_suspend, aio_suspend)
-weak_alias (__aio_suspend, aio_suspend64)
-#endif /* !PTHREAD_IN_LIBC */
+#endif

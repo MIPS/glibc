@@ -17,18 +17,23 @@
 
 #include <errno.h>
 #include <mqueue.h>
+#include <shlib-compat.h>
+#include <rt-libc.h>
 
 /* Receive the oldest from highest priority messages in message queue
    MQDES, stop waiting if ABS_TIMEOUT expires.  */
 ssize_t
 __mq_timedreceive (mqd_t mqdes, char *__restrict msg_ptr, size_t msg_len,
-		 unsigned int *__restrict msg_prio,
-		 const struct timespec *__restrict abs_timeout)
+		   unsigned int *__restrict msg_prio,
+		   const struct timespec *__restrict abs_timeout)
 {
   __set_errno (ENOSYS);
   return -1;
 }
 hidden_def (__mq_timedreceive)
-weak_alias (__mq_timedreceive, mq_timedreceive)
-hidden_weak (mq_timedreceive)
+versioned_symbol (libc, __mq_timedreceive, mq_timedreceive, RT_IN_LIBC);
+libc_hidden_ver (__mq_timedreceive, mq_timedreceive)
+#if OTHER_SHLIB_COMPAT (librt, GLIBC_2_3_4, RT_IN_LIBC)
+compat_symbol (librt, __mq_timedreceive, mq_timedreceive, GLIBC_2_3_4);
+#endif
 stub_warning (mq_timedreceive)

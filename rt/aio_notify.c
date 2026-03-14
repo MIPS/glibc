@@ -23,11 +23,6 @@
 #include <aio_misc.h>
 #include <signal.h>
 
-#if !PTHREAD_IN_LIBC
-# define __pthread_attr_init pthread_attr_init
-# define __pthread_attr_setdetachstate pthread_attr_setdetachstate
-#endif
-
 #ifndef aio_start_notify_thread
 # define aio_start_notify_thread() do { } while (0)
 #endif
@@ -142,7 +137,7 @@ __aio_notify (struct requestlist *req)
 	  /* Decrement the counter.  */
 	  --*waitlist->counterp;
 
-	  pthread_cond_signal (waitlist->cond);
+	  __pthread_cond_signal (waitlist->cond);
 #endif
 	}
       else

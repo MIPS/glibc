@@ -22,6 +22,7 @@
 # include <aio.h>
 # include <aio_misc.h>
 # include <shlib-compat.h>
+# include <rt-libc.h>
 
 int
 __aio_read64 (struct aiocb64 *aiocbp)
@@ -30,12 +31,8 @@ __aio_read64 (struct aiocb64 *aiocbp)
 	  ? -1 : 0);
 }
 
-# if PTHREAD_IN_LIBC
-versioned_symbol (libc, __aio_read64, aio_read64, GLIBC_2_34);
-#  if OTHER_SHLIB_COMPAT (librt, GLIBC_2_1, GLIBC_2_34)
+versioned_symbol (libc, __aio_read64, aio_read64, RT_IN_LIBC);
+# if OTHER_SHLIB_COMPAT (librt, GLIBC_2_1, RT_IN_LIBC)
 compat_symbol (librt, __aio_read64, aio_read64, GLIBC_2_1);
-#  endif
-# else /* !PTHREAD_IN_LIBC */
-strong_alias (__aio_read64, aio_read64)
 # endif
 #endif /* __WORDSIZE != 64 */

@@ -17,13 +17,19 @@
 
 #include <errno.h>
 #include <mqueue.h>
+#include <shlib-compat.h>
+#include <rt-libc.h>
 
 /* Register notification upon message arrival to an empty message queue
    MQDES.  */
 int
-mq_notify (mqd_t mqdes, const struct sigevent *notification)
+__mq_notify (mqd_t mqdes, const struct sigevent *notification)
 {
   __set_errno (ENOSYS);
   return -1;
 }
+versioned_symbol (libc, __mq_notify, mq_notify, RT_IN_LIBC);
 stub_warning (mq_notify)
+#if OTHER_SHLIB_COMPAT (librt, GLIBC_2_3_4, RT_IN_LIBC)
+compat_symbol (librt, __mq_notify, mq_notify, GLIBC_2_3_4);
+#endif

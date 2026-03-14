@@ -17,13 +17,19 @@
 
 #include <errno.h>
 #include <mqueue.h>
+#include <shlib-compat.h>
+#include <rt-libc.h>
 
 /* Add message pointed by MSG_PTR to message queue MQDES.  */
 int
-mq_send (mqd_t mqdes, const char *msg_ptr, size_t msg_len,
-	 unsigned int msg_prio)
+__mq_send (mqd_t mqdes, const char *msg_ptr, size_t msg_len,
+	   unsigned int msg_prio)
 {
   __set_errno (ENOSYS);
   return -1;
 }
+versioned_symbol (libc, __mq_send, mq_send, RT_IN_LIBC);
 stub_warning (mq_send)
+#if OTHER_SHLIB_COMPAT (librt, GLIBC_2_3_4, RT_IN_LIBC)
+compat_symbol (librt, __mq_send, mq_send, GLIBC_2_3_4);
+#endif
