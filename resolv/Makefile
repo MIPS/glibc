@@ -34,6 +34,12 @@ routines := \
   dns-canon \
   dns-host \
   dns-network \
+  gai_cancel \
+  gai_error \
+  gai_misc \
+  gai_notify \
+  gai_suspend \
+  getaddrinfo_a \
   herror \
   inet_addr \
   inet_ntop \
@@ -208,15 +214,6 @@ extra-libs += libanl
 libanl-routines += libanl-compat
 libanl-shared-only-routines += libanl-compat
 endif
-
-$(libanl-routines-var) += \
-  gai_cancel \
-  gai_error \
-  gai_misc \
-  gai_notify \
-  gai_suspend \
-  getaddrinfo_a \
-  # $(libanl-routines-var)
 
 # Pretend that libanl.so is a linker script, so that the symbolic link
 # is not installed.

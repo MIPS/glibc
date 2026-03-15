@@ -16,9 +16,8 @@
    License along with the GNU C Library; if not, see
    <https://www.gnu.org/licenses/>.  */
 
-#if PTHREAD_IN_LIBC
-# include <shlib-compat.h>
-# include <sys/cdefs.h>
+#include <shlib-compat.h>
+#include <sys/cdefs.h>
 
 /* This file is used to keep specific symbol versions occupied, so
    that ld does not generate weak symbol version definitions.  */
@@ -32,4 +31,3 @@ __libanl_version_placeholder_1 (void)
 
 compat_symbol (libanl, __libanl_version_placeholder_1,
                __libanl_version_placeholder, GLIBC_2_2_3);
-#endif

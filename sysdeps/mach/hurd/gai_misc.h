@@ -39,11 +39,11 @@ __gai_create_helper_thread (pthread_t *threadp, void *(*tf) (void *),
   pthread_attr_t attr;
 
   /* Make sure the thread is created detached.  */
-  pthread_attr_init (&attr);
-  pthread_attr_setdetachstate (&attr, PTHREAD_CREATE_DETACHED);
+  __pthread_attr_init (&attr);
+  __pthread_attr_setdetachstate (&attr, PTHREAD_CREATE_DETACHED);
 
   /* The helper thread needs only very little resources.  */
-  (void) pthread_attr_setstacksize (&attr, 0x10000);
+  (void) __pthread_attr_setstacksize (&attr, 0x10000);
 
   /* Block all signals in the helper thread.  To do this thoroughly we
      temporarily have to block all signals here.  */
@@ -54,13 +54,13 @@ __gai_create_helper_thread (pthread_t *threadp, void *(*tf) (void *),
   sigerr = __pthread_sigmask (SIG_SETMASK, &ss, &oss);
   assert_perror (sigerr);
 
-  int ret = pthread_create (threadp, &attr, tf, arg);
+  int ret = __pthread_create (threadp, &attr, tf, arg);
 
   /* Restore the signal mask.  */
   sigerr = __pthread_sigmask (SIG_SETMASK, &oss, NULL);
   assert_perror (sigerr);
 
-  (void) pthread_attr_destroy (&attr);
+  (void) __pthread_attr_destroy (&attr);
   return ret;
 }
 

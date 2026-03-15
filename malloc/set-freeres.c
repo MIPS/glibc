@@ -170,11 +170,9 @@ __libc_freeres (void)
       call_function_static_weak (__libc_tzset_freemem);
       call_function_static_weak (__libc_localealias_freemem);
 
-#if PTHREAD_IN_LIBC
       call_function_static_weak (__gai_freemem);
 
       call_function_static_weak (__aio_freemem);
-#endif
 
       call_function_static_weak (__libpthread_freeres);
 

@@ -22,6 +22,7 @@
 #include <unistd.h>
 
 #include <gai_misc.h>
+#include <resolv-libc.h>
 
 
 /* We need this special structure to handle asynchronous I/O.  */
@@ -126,7 +127,7 @@ __getaddrinfo_a (int mode, struct gaicb *list[], int ent, struct sigevent *sig)
 	  int not_used __attribute__ ((unused));
 	  GAI_MISC_WAIT (not_used, total, NULL, 1);
 #else
-	  pthread_cond_wait (&cond, &__gai_requests_mutex);
+	  __pthread_cond_wait (&cond, &__gai_requests_mutex);
 #endif
 	}
 
@@ -135,7 +136,7 @@ __getaddrinfo_a (int mode, struct gaicb *list[], int ent, struct sigevent *sig)
 
 #ifndef DONT_NEED_GAI_MISC_COND
       /* Release the conditional variable.  */
-      if (pthread_cond_destroy (&cond) != 0)
+      if (__pthread_cond_destroy (&cond) != 0)
 	/* This must never happen.  */
 	abort ();
 #endif
@@ -179,12 +180,8 @@ __getaddrinfo_a (int mode, struct gaicb *list[], int ent, struct sigevent *sig)
 
   return result;
 }
-#if PTHREAD_IN_LIBC
-versioned_symbol (libc, __getaddrinfo_a, getaddrinfo_a, GLIBC_2_34);
+versioned_symbol (libc, __getaddrinfo_a, getaddrinfo_a, ANL_IN_LIBC);
 
-# if OTHER_SHLIB_COMPAT (libanl, GLIBC_2_2_3, GLIBC_2_34)
+#if OTHER_SHLIB_COMPAT (libanl, GLIBC_2_2_3, ANL_IN_LIBC)
 compat_symbol (libanl, __getaddrinfo_a, getaddrinfo_a, GLIBC_2_2_3);
-# endif
-#else /* !PTHREAD_IN_LIBC */
-strong_alias (__getaddrinfo_a, getaddrinfo_a)
-#endif /* !PTHREAD_IN_LIBC */
+#endif

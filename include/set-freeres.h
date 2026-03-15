@@ -81,11 +81,9 @@ extern void __libc_dlerror_result_free (void) attribute_hidden;
 /* From either libc.so or libpthread.so  */
 extern void __libpthread_freeres (void) attribute_hidden;
 /* From either libc.so or libanl.so  */
-#if PTHREAD_IN_LIBC
 extern void __gai_freemem (void) attribute_hidden;
 /* From either libc.so or librt.so  */
 extern void __aio_freemem (void) attribute_hidden;
-#endif
 
 /* From libc.so  */
 extern char * __libc_fgetgrent_freemem_ptr attribute_hidden;

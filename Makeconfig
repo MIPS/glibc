@@ -1456,15 +1456,6 @@ endif
 sysd-rules-targets := $(sort $(foreach p,$(sysd-rules-patterns),\
 					 $(firstword $(subst :, ,$p))))
 
-# $(libanl-routines-var) is the make
-# variable to which libanl routines need to be added to land in the
-# right library.
-ifeq ($(pthread-in-libc),yes)
-libanl-routines-var = routines
-else
-libanl-routines-var = libanl-routines
-endif
-
 # A sysdeps Makeconfig fragment may set libc-reentrant to yes.
 ifeq (yes,$(libc-reentrant))
 defines += -D_LIBC_REENTRANT

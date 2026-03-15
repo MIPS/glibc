@@ -19,16 +19,7 @@
 #include <pthread.h>
 #include <stdlib.h>
 #include <gai_misc.h>
-
-#if !PTHREAD_IN_LIBC
-/* The available function names differ outside of libc.  (In libc, we
-   need to use hidden aliases to avoid the PLT.)  */
-#define __pthread_attr_init pthread_attr_init
-#define __pthread_attr_setdetachstate pthread_attr_setdetachstate
-#define __pthread_cond_signal pthread_cond_signal
-#define __pthread_cond_timedwait pthread_cond_timedwait
-#define __pthread_create pthread_create
-#endif
+#include <resolv-libc.h>
 
 struct notify_func
   {
@@ -119,7 +110,7 @@ __gai_notify (struct requestlist *req)
 	  /* Decrement the counter.  */
 	  --*waitlist->counterp;
 
-	  pthread_cond_signal (waitlist->cond);
+	  __pthread_cond_signal (waitlist->cond);
 #endif
 	}
       else

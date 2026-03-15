@@ -22,6 +22,7 @@
 #include <sys/time.h>
 
 #include <gai_misc.h>
+#include <resolv-libc.h>
 
 int
 ___gai_suspend_time64 (const struct gaicb *const list[], int ent,
@@ -97,7 +98,7 @@ ___gai_suspend_time64 (const struct gaicb *const list[], int ent,
       GAI_MISC_WAIT (result, cntr, timeout == NULL ? NULL : &ts, 1);
 #else
       struct timespec ts32 = valid_timespec64_to_timespec (ts);
-      result = pthread_cond_timedwait (&cond, &__gai_requests_mutex,
+      result = __pthread_cond_timedwait (&cond, &__gai_requests_mutex,
                                        timeout == NULL ? NULL : &ts32);
 #endif
 
@@ -124,7 +125,7 @@ ___gai_suspend_time64 (const struct gaicb *const list[], int ent,
 
 #ifndef DONT_NEED_GAI_MISC_COND
       /* Release the conditional variable.  */
-      if (pthread_cond_destroy (&cond) != 0)
+      if (__pthread_cond_destroy (&cond) != 0)
 	/* This must never happen.  */
 	abort ();
 #endif
@@ -150,25 +151,15 @@ ___gai_suspend_time64 (const struct gaicb *const list[], int ent,
 }
 
 #if __TIMESIZE == 64
-# if PTHREAD_IN_LIBC
-versioned_symbol (libc, ___gai_suspend_time64, gai_suspend, GLIBC_2_34);
-#  if OTHER_SHLIB_COMPAT (libanl, GLIBC_2_2_3, GLIBC_2_34)
+versioned_symbol (libc, ___gai_suspend_time64, gai_suspend, ANL_IN_LIBC);
+# if OTHER_SHLIB_COMPAT (libanl, GLIBC_2_2_3, ANL_IN_LIBC)
 compat_symbol (libanl, ___gai_suspend_time64, gai_suspend, GLIBC_2_2_3);
-#  endif
-# else
-weak_alias (___gai_suspend_time64, gai_suspend)
-# endif /* PTHREAD_IN_LIBC */
+# endif
 
 #else /* __TIMESIZE != 64 */
-# if PTHREAD_IN_LIBC
 libc_hidden_ver (___gai_suspend_time64, __gai_suspend_time64)
 versioned_symbol (libc, ___gai_suspend_time64, __gai_suspend_time64,
-		  GLIBC_2_34);
-# else /* !PTHREAD_IN_LIBC */
-# if IS_IN (libanl)
-hidden_ver (___gai_suspend_time64, __gai_suspend_time64)
-# endif
-#endif /* !PTHREAD_IN_LIBC */
+		  ANL_IN_LIBC);
 
 int
 ___gai_suspend (const struct gaicb *const list[], int ent,
@@ -181,12 +172,8 @@ ___gai_suspend (const struct gaicb *const list[], int ent,
 
   return __gai_suspend_time64 (list, ent, timeout != NULL ? &ts64 : NULL);
 }
-#if PTHREAD_IN_LIBC
-versioned_symbol (libc, ___gai_suspend, gai_suspend, GLIBC_2_34);
-# if OTHER_SHLIB_COMPAT (libanl, GLIBC_2_2_3, GLIBC_2_34)
+versioned_symbol (libc, ___gai_suspend, gai_suspend, ANL_IN_LIBC);
+# if OTHER_SHLIB_COMPAT (libanl, GLIBC_2_2_3, ANL_IN_LIBC)
 compat_symbol (libanl, ___gai_suspend, gai_suspend, GLIBC_2_2_3);
 # endif
-# else
-weak_alias (___gai_suspend, gai_suspend)
-# endif /* !PTHREAD_IN_LIBC */
 #endif /* __TIMESIZE != 64 */
