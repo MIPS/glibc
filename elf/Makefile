@@ -2235,9 +2235,6 @@ endif
 ifeq ($(have-thread-library),yes)
 localplt-built-dso += $(filter-out %_nonshared.a, $(shared-thread-library))
 endif
-ifneq ($(pthread-in-libc),yes)
-localplt-built-dso += $(addprefix $(common-objpfx), rt/librt.so)
-endif
 
 vpath localplt.data $(+sysdep_dirs)
 
