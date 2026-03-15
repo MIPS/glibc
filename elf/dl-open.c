@@ -408,7 +408,7 @@ TLS generation counter wrapped!  Please report this."));
 	  _dl_update_slotinfo (imap->l_tls_modid, newgen);
 #endif
 
-	  dl_init_static_tls (imap);
+	  _dl_init_static_tls (imap);
 	  assert (imap->l_need_tls_init == 0);
 	}
     }

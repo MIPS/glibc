@@ -123,8 +123,6 @@ _init_routine (void *stack)
 
   __register_atfork (NULL, NULL, reset_pthread_total, __dso_handle);
 
-  GL(dl_init_static_tls) = &__pthread_init_static_tls;
-
   /* Make MiG code thread aware.  */
   __mig_init (thread->stackaddr);
 }

@@ -177,9 +177,6 @@ size_t _dl_stack_cache_actsize;
 uintptr_t _dl_in_flight_stack;
 int _dl_stack_cache_lock;
 #endif
-#if !PTHREAD_IN_LIBC
-void (*_dl_init_static_tls) (struct link_map *) = &_dl_nothread_init_static_tls;
-#endif
 struct dl_scope_free_list *_dl_scope_free_list;
 
 #ifdef NEED_DL_SYSINFO

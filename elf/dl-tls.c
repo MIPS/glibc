@@ -29,8 +29,9 @@
 #include <dl-tls.h>
 #include <ldsodefs.h>
 #include <dl-tls_block_align.h>
+#include <pthreadP.h>
 
-#if PTHREAD_IN_LIBC
+#ifdef __PTHREAD_NPTL
 # include <list.h>
 #endif
 
@@ -1300,7 +1301,7 @@ cannot create TLS data structures"));
   return true;
 }
 
-#if PTHREAD_IN_LIBC
+#ifdef __PTHREAD_NPTL
 static inline void __attribute__((always_inline))
 init_one_static_tls (struct pthread *curp, struct link_map *map)
 {
@@ -1333,4 +1334,4 @@ _dl_init_static_tls (struct link_map *map)
 
   lll_unlock (GL (dl_stack_cache_lock), LLL_PRIVATE);
 }
-#endif /* PTHREAD_IN_LIBC */
+#endif /* __PTHREAD_NPTL */

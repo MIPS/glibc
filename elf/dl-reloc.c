@@ -119,7 +119,7 @@ _dl_try_allocate_static_tls (struct link_map *map, bool optional)
 	(void) _dl_update_slotinfo (map->l_tls_modid, GL(dl_tls_generation));
 #endif
 
-      dl_init_static_tls (map);
+      _dl_init_static_tls (map);
     }
   else
     map->l_need_tls_init = 1;
@@ -141,27 +141,6 @@ _dl_allocate_static_tls (struct link_map *map)
 cannot allocate memory in static TLS block"));
     }
 }
-
-#if !PTHREAD_IN_LIBC
-/* Initialize static TLS area and DTV for current (only) thread.
-   libpthread implementations should provide their own hook
-   to handle all threads.  */
-void
-_dl_nothread_init_static_tls (struct link_map *map)
-{
-#if TLS_TCB_AT_TP
-  void *dest = (char *) THREAD_SELF - map->l_tls_offset;
-#elif TLS_DTV_AT_TP
-  void *dest = (char *) THREAD_SELF + map->l_tls_offset + TLS_PRE_TCB_SIZE;
-#else
-# error "Either TLS_TCB_AT_TP or TLS_DTV_AT_TP must be defined"
-#endif
-
-  /* Initialize the memory.  */
-  memset (__mempcpy (dest, map->l_tls_initimage, map->l_tls_initimage_size),
-	  '\0', map->l_tls_blocksize - map->l_tls_initimage_size);
-}
-#endif /* !PTHREAD_IN_LIBC */
 
 static __always_inline lookup_t
 resolve_map (lookup_t l, struct r_scope_elem *scope[], const ElfW(Sym) **ref,

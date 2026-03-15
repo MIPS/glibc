@@ -18,7 +18,7 @@
 
 #include <ldsodefs.h>
 #include <pthread.h>
-#include <htl/pt-internal.h>
+#include <pt-internal.h>
 
 static inline int *
 thread_gscope_flag (struct __pthread *t)

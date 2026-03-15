@@ -307,7 +307,6 @@ libc {
     __pthread_block_intr;
     __pthread_create;
     __pthread_init_thread;
-    __pthread_init_static_tls;
     __pthread_default_attr;
     __pthread_attr_init;
     __pthread_attr_getstacksize;

@@ -28,9 +28,6 @@
 /* Attribute to indicate thread creation was issued from C11 thrd_create.  */
 #define ATTR_C11_THREAD ((void*)(uintptr_t)-1)
 
-extern void __pthread_init_static_tls (struct link_map *);
-libc_hidden_proto (__pthread_init_static_tls)
-
 /* These represent the interface used by glibc itself.  */
 
 extern int __pthread_barrier_destroy (pthread_barrier_t *__barrier);

@@ -21,9 +21,6 @@
 void
 __tls_pre_init_tp (void)
 {
-#if !PTHREAD_IN_LIBC
-  GL(dl_init_static_tls) = &_dl_nothread_init_static_tls;
-#endif
 }
 
 void

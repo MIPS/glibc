@@ -441,10 +441,6 @@ struct rtld_global
   /* Generation counter for the dtv.  */
   EXTERN size_t _dl_tls_generation;
 
-#if !PTHREAD_IN_LIBC
-  EXTERN void (*_dl_init_static_tls) (struct link_map *);
-#endif
-
   /* Scopes to free after next THREAD_GSCOPE_WAIT ().  */
   EXTERN struct dl_scope_free_list
   {
@@ -1239,8 +1235,6 @@ extern bool __rtld_tls_init_tp_called attribute_hidden;
 extern void _dl_deallocate_tls (void *tcb, bool dealloc_tcb);
 rtld_hidden_proto (_dl_deallocate_tls)
 
-extern void _dl_nothread_init_static_tls (struct link_map *) attribute_hidden;
-
 /* Get a pointer to _dl_main_map.  */
 extern struct link_map * _dl_get_dl_main_map (void) attribute_hidden;
 
@@ -1321,21 +1315,10 @@ extern void _dl_aux_init (ElfW(auxv_t) *av)
      attribute_hidden;
 
 /* Initialize the static TLS space for the link map in all existing
-   threads. */
-#if PTHREAD_IN_LIBC
+   threads.
+   The stack list is available to ld.so, so the initialization can
+   be handled within ld.so directly.  */
 void _dl_init_static_tls (struct link_map *map) attribute_hidden;
-#endif
-static inline void
-dl_init_static_tls (struct link_map *map)
-{
-#if PTHREAD_IN_LIBC
-  /* The stack list is available to ld.so, so the initialization can
-     be handled within ld.so directly.  */
-  _dl_init_static_tls (map);
-#else
-  GL (dl_init_static_tls) (map);
-#endif
-}
 
 #ifndef SHARED
 /* Called before relocating ld.so during static dlopen.  This can be
