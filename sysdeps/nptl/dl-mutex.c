@@ -16,7 +16,7 @@
    License along with the GNU C Library; if not, see
    <https://www.gnu.org/licenses/>.  */
 
-/* Use the mutex implementation in libc (assuming PTHREAD_IN_LIBC).  */
+/* Use the mutex implementation in libc.  */
 
 #include <assert.h>
 #include <first-versions.h>
