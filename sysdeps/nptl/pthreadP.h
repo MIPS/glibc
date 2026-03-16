@@ -18,8 +18,6 @@
 #ifndef _PTHREADP_H
 #define _PTHREADP_H	1
 
-#define __PTHREAD_NPTL
-
 #include <pthread.h>
 #include <setjmp.h>
 #include <stdbool.h>

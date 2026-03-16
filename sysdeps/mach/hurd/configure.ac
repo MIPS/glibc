@@ -46,7 +46,5 @@ if test -n "$sysheaders"; then
   CPPFLAGS=$OLD_CPPFLAGS
 fi
 
-# Hurd has libpthread as a separate library.
-pthread_in_libc=no
 # Hurd already provides abort implementation for the loader
 abort_in_ld=yes

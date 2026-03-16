@@ -19,8 +19,6 @@
 #ifndef _PTHREADP_H
 #define _PTHREADP_H	1
 
-#define __PTHREAD_HTL
-
 #include <pthread.h>
 #include <link.h>
 #include <bits/cancelation.h>

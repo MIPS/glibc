@@ -216,8 +216,11 @@
    multiple symbol versions for one symbol.  */
 #define SYMVER_NEEDS_ALIAS 0
 
-/* Define to 1 if libpthread actually resides in libc.  */
-#define PTHREAD_IN_LIBC 0
+/* Define to 1 if libpthread is provided by nptl.  */
+#define __PTHREAD_NPTL 0
+
+/* Define to 1 if libpthread is provided by htl.  */
+#define __PTHREAD_HTL 0
 
 /* An integer used to scale the timeout of test programs.  */
 #define TIMEOUTFACTOR 1

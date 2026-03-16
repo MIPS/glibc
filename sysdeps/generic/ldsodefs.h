@@ -447,7 +447,7 @@ struct rtld_global
     size_t count;
     void *list[50];
   } *_dl_scope_free_list;
-#if !defined __PTHREAD_HTL
+#if __PTHREAD_NPTL
   /* List of active thread stacks, with memory managed by glibc.  */
   EXTERN list_t _dl_stack_used;
 
@@ -467,7 +467,8 @@ struct rtld_global
 
   /* Mutex protecting the stack lists.  */
   EXTERN int _dl_stack_cache_lock;
-#else
+#endif
+#if __PTHREAD_HTL
   /* The total number of thread IDs currently in use, or on the list of
      available thread IDs.  */
   EXTERN int _dl_pthread_num_threads;
@@ -1435,13 +1436,11 @@ _dl_audit_objclose (struct link_map *l)
 }
 #endif /* !SHARED */
 
-#if PTHREAD_IN_LIBC && defined SHARED
+#if __PTHREAD_NPTL && defined SHARED
 /* Recursive locking implementation for use within the dynamic loader.
    Used to define the __rtld_lock_lock_recursive and
    __rtld_lock_unlock_recursive via <libc-lock.h>.  Initialized to a
-   no-op dummy implementation early.  Similar
-   to GL (dl_rtld_lock_recursive) and GL (dl_rtld_unlock_recursive)
-   in !PTHREAD_IN_LIBC builds.  */
+   no-op dummy implementation early.  */
 extern int (*___rtld_mutex_lock) (pthread_mutex_t *) attribute_hidden;
 extern int (*___rtld_mutex_unlock) (pthread_mutex_t *lock) attribute_hidden;
 
@@ -1449,14 +1448,14 @@ extern int (*___rtld_mutex_unlock) (pthread_mutex_t *lock) attribute_hidden;
    Used to initialize the function pointers to the actual
    implementations.  */
 void __rtld_mutex_init (void) attribute_hidden;
-#else /* !PTHREAD_IN_LIBC */
+#else /* !__PHREAD_NPTL */
 static inline void
 __rtld_mutex_init (void)
 {
-  /* The initialization happens later (!PTHREAD_IN_LIBC) or is not
+  /* The initialization happens later (!__PHREAD_NPTL) or is not
      needed at all (!SHARED).  */
 }
-#endif /* !PTHREAD_IN_LIBC */
+#endif /* !__PHREAD_NPTL */
 
 /* Implementation of GL (dl_libc_freeres).  */
 void __rtld_libc_freeres (void) attribute_hidden;

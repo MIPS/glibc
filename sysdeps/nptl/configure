@@ -1,0 +1,1 @@
+printf "%s\n" "#define __PTHREAD_NPTL 1" >>confdefs.h

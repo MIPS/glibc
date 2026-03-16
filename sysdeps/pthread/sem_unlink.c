@@ -40,12 +40,14 @@ __sem_unlink (const char *name)
     __set_errno (EACCES);
   return ret;
 }
-#ifndef __PTHREAD_HTL
+#if __PTHREAD_NPTL
 versioned_symbol (libc, __sem_unlink, sem_unlink, GLIBC_2_34);
 # if OTHER_SHLIB_COMPAT (libpthread, GLIBC_2_1_1, GLIBC_2_34)
 compat_symbol (libpthread, __sem_unlink, sem_unlink, GLIBC_2_1_1);
 # endif
-#else /* __PTHREAD_HTL */
+#endif
+
+#if __PTHREAD_HTL
 versioned_symbol (libc, __sem_unlink, sem_unlink, GLIBC_2_43);
 # if OTHER_SHLIB_COMPAT (libpthread, GLIBC_2_12, GLIBC_2_43)
 compat_symbol (libpthread, __sem_unlink, sem_unlink, GLIBC_2_12);

@@ -251,7 +251,7 @@ ___aio_suspend_time64 (const struct aiocb *const list[], int nent,
 strong_alias (___aio_suspend_time64, __aio_suspend)
 #else /* __TIMESIZE != 64 */
 libc_hidden_ver (___aio_suspend_time64, __aio_suspend_time64)
-#ifndef __PTHREAD_HTL
+#if __PTHREAD_NPTL
 versioned_symbol (libc, ___aio_suspend_time64, __aio_suspend_time64, RT_IN_LIBC);
 #endif
 
