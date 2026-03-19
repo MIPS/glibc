@@ -1,9 +1,9 @@
 /* Implementation of the gamma function for binary32.
 
-Copyright (c) 2023-2024 Alexei Sibidanov.
+Copyright (c) 2023-2026 Alexei Sibidanov.
 
 The original version of this file was copied from the CORE-MATH
-project (file src/binary32/tgamma/tgammaf.c, revision a48e352).
+project (file src/binary32/tgamma/tgammaf.c, revision 8ea8ea35).
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -97,7 +97,12 @@ __tgammaf (float x)
     return __math_oflowf (0);
   /* compute k only after the overflow check, otherwise the case to integer
      might overflow */
-  int k = fx;
+  int k;
+  if (__glibc_unlikely (x <= -0x1p+31f))
+    k = INT32_MIN;
+  else
+    k = fx;
+
   if (__glibc_unlikely (fx == x))
     { /* x is integer */
       if (x < 0.0f)
