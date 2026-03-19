@@ -31,11 +31,8 @@ __feclearexcept (int excepts)
   /* Read the complete control word.  */
   _FPU_GETCW (cw);
 
-  /* Clear exception flag bits and cause bits.  If the cause bit is not
-     cleared, the next CTC instruction (just below) will re-generate the
-     exception.  */
-
-  cw &= ~(excepts | (excepts << CAUSE_SHIFT));
+  /* Clear exception flag bits.  */
+  cw &= ~excepts;
 
   /* Put the new data in effect.  */
   _FPU_SETCW (cw);
