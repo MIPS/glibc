@@ -272,7 +272,7 @@ core-math:
   sysdeps/ieee754/flt-32/e_coshf.c
   # src/binary32/tgamma/tgammaf.c, revision 8ea8ea35
   sysdeps/ieee754/flt-32/e_gammaf_r.c
-  # src/binary32/lgamma/lgammaf.c, revision bc385c2
+  # src/binary32/lgamma/lgammaf.c, revision 8ea8ea35
   sysdeps/ieee754/flt-32/e_lgammaf_r.c
   # src/binary32/log10/log10f.c, revision ebff4c43
   sysdeps/ieee754/flt-32/e_log10f.c

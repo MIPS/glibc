@@ -1,10 +1,10 @@
 /* Correctly-rounded logarithm of the absolute value of the gamma function
    for binary32 value.
 
-Copyright (c) 2023, 2024 Alexei Sibidanov.
+Copyright (c) 2023-2026 Alexei Sibidanov.
 
 This file is part of the CORE-MATH project
-project (file src/binary32/lgamma/lgammaf.c, revision bc385c2).
+project (file src/binary32/lgamma/lgammaf.c, revision 8ea8ea35).
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -159,7 +159,7 @@ __lgammaf_r (float x, int *signgamp)
       return x + x; /* nan */
     }
   if (__glibc_unlikely (fx == x))
-    {
+    { /* x integer */
       if (x <= 0.0f)
 	{
 	  *signgamp = asuint (x) >> 31 ? -1 : 1;
@@ -204,15 +204,11 @@ __lgammaf_r (float x, int *signgamp)
       f = (c0 * s) * as_r8 (s, rn) / as_r8 (s, rd) - as_ln (z);
     }
   else
-    {
+    { /* |x| >= 0x1.52p-1 */
       if (ax > 0x1.afc1ap+1f)
 	{
-	  if (__glibc_unlikely (x > 0x1.895f1cp+121f))
+	  if (__glibc_unlikely (x >= 0x1.895f1cp+121f))
 	    return __math_oflowf (0);
-
-	  /* |x|>=2**23, must be -integer */
-	  if (__glibc_unlikely (x < 0.0f && ax > 0x1p+23f))
-	    return __math_divzerof (0);
 	  double lz = as_ln (z);
 	  f = (z - 0.5) * (lz - 1) + 0x1.acfe390c97d69p-2;
 	  if (ax < 0x1.0p+20f)
@@ -270,12 +266,6 @@ __lgammaf_r (float x, int *signgamp)
 	      -0x1.3a6c8295b4445p-1, -0x1.da44e8b810024p-3,
 	      -0x1.9061e81c77e4ap-5
 	    };
-	  if (x < 0.0f)
-	    {
-	      int ni = floorf (-2 * x);
-	      if ((ni & 1) == 0 && ni == -2 * x)
-		return __math_divzerof (0);
-	    }
 	  const double c0 = 0x1.3cc0e6a0106b3p+2;
 	  static const double rd[] =
 	    {
@@ -351,15 +341,15 @@ __lgammaf_r (float x, int *signgamp)
   if (__glibc_unlikely (tl <= 31u))
     {
       t = asuint (x);
-      int a = 0, b = array_length (tb) - 1;
-      while (a < b)
-	{ /* Binary search.  */
-	  int m = (a + b) >> 1;
-	  uint32_t tbi = asuint (tb[m].x);
-	  if (t > tbi)
-	    a = m + 1;
+      int a = 0, b = array_length (tb);
+      /* invariant: t.u < tb[0].x.u or tb[a].x.u <= t.u < tb[b].x.u */
+      while (a + 1 < b)
+	{
+	  int i = (a + b) / 2;
+	  if (t < asuint (tb[i].x))
+	    b = i;
 	  else
-	    b = m;
+	    a = i;
 	}
       if (t == asuint (tb[a].x))
 	return tb[a].f + tb[a].df;
