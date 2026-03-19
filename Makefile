@@ -594,7 +594,35 @@ define summarize-tests
 @grep -E '^[A-Z]+:' $(objpfx)$1 | grep -E -v '^(PASS|XFAIL):' || true
 @echo "		=== Summary of results$2 ==="
 @sed -e '/:.*/!d' -e 's/:.*//' < $(objpfx)$1 | sort | uniq -c
-@! grep -E '^[A-Z]+:' $(objpfx)$1 | grep -E -q -v '^(X?PASS|XFAIL|UNSUPPORTED):'
+@{ \
+	grep -E '^[A-Z]+:' $(objpfx)$1 | \
+	grep -E -v '^(X?PASS|XFAIL|UNSUPPORTED):' | \
+	( \
+	  if ! test -f $(..)allowed-failures.txt; then \
+	    read -r _; exit $$(( $$? == 0 )); \
+	  fi; \
+	  status=0; \
+	  while IFS= read -r line; do \
+	    case "$$line" in \
+	      FAIL:*) \
+	        name=$${line#FAIL: }; \
+	        escaped_name=`printf '%s' "$$name" | sed 's/[.+]/\\&/g'`; \
+	        if grep -Eq -- "^$${escaped_name}[[:space:]]*#" \
+	          $(..)allowed-failures.txt; then \
+	          echo "Ignoring allowed FAIL: $${name}"; \
+	          continue; \
+	        fi; \
+	        echo "Unallowed FAIL: $${name}"; \
+	        status=1; \
+	        ;; \
+	      *) \
+	        status=1; \
+	        ;; \
+	    esac; \
+	  done; \
+	  exit $$status; \
+	); \
+      }
 endef
 
 # The intention here is to do ONE install of our build into the
