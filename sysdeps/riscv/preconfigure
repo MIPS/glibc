@@ -57,8 +57,17 @@ riscv*)
     esac
 
     if test -n "$vector"; then
-	version=`$CC $CFLAGS $CPPFLAGS -E -dM -xc /dev/null | sed -n 's/^#define __GNUC__ \(.*\)/\1/p'`
-	test $version -lt 15 && as_fn_error 1 "glibc requires GCC 15 or later for the V extension" "$LINENO" 5
+    	is_clang=`$CC $CFLAGS $CPPFLAGS -E -dM -xc /dev/null | grep -q '__clang__' && echo yes || echo no`
+	if test "$is_clang" = "yes"; then
+	    # Check clang version
+	    version=`$CC $CFLAGS $CPPFLAGS -E -dM -xc /dev/null | sed -n 's/^#define __clang_major__ \(.*\)/\1/p'`
+	    test $version -lt 21 && as_fn_error 1 "glibc requires Clang 21 or later for the V extension" "$LINENO" 5
+	else
+	    # Check GCC version
+	    version=`$CC $CFLAGS $CPPFLAGS -E -dM -xc /dev/null | sed -n 's/^#define __GNUC__ \(.*\)/\1/p'`
+	    test $version -lt 15 && as_fn_error 1 "glibc requires GCC 15 or later for the V extension" "$LINENO" 5
+	fi
+
 	test $vector -lt "1000000" && as_fn_error 1 "glibc requires at least RVV 1.0 for the V extension" "$LINENO" 5
 	float_machine=rvv
     fi
