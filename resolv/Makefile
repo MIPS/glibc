@@ -114,6 +114,7 @@ tests += \
   tst-resolv-basic \
   tst-resolv-binary \
   tst-resolv-byaddr \
+  tst-resolv-dns-section \
   tst-resolv-edns \
   tst-resolv-invalid-cname \
   tst-resolv-network \
@@ -125,6 +126,7 @@ tests += \
   tst-resolv-semi-failure \
   tst-resolv-short-response \
   tst-resolv-trailing \
+  # tests
 
 # This test calls __res_context_send directly, which is not exported
 # from libresolv.
@@ -299,6 +301,8 @@ $(objpfx)tst-resolv-aliases: $(objpfx)libresolv.so $(shared-thread-library)
 $(objpfx)tst-resolv-basic: $(objpfx)libresolv.so $(shared-thread-library)
 $(objpfx)tst-resolv-binary: $(objpfx)libresolv.so $(shared-thread-library)
 $(objpfx)tst-resolv-byaddr: $(objpfx)libresolv.so $(shared-thread-library)
+$(objpfx)tst-resolv-dns-section: $(objpfx)libresolv.so \
+  $(shared-thread-library)
 $(objpfx)tst-resolv-edns: $(objpfx)libresolv.so $(shared-thread-library)
 $(objpfx)tst-resolv-network: $(objpfx)libresolv.so $(shared-thread-library)
 $(objpfx)tst-resolv-res_init: $(objpfx)libresolv.so
