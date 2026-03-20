@@ -25,7 +25,7 @@
 #define ip1 x17
 #define lr  x30
 
-/* RELA relocatons are 3 pointers */
+/* RELA relocations are 3 pointers */
 #define RELA_SIZE 24
 
 	.text

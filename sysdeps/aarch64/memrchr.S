@@ -79,7 +79,7 @@ L(start_loop):
 	subs	cntrem, src, srcin
 	b.ls	L(nomatch)
 
-	/* Make sure that it won't overread by a 16-byte chunk */
+	/* Make sure that it won't over-read by a 16-byte chunk */
 	sub	cntrem, cntrem, 1
 	tbz	cntrem, 4, L(loop32_2)
 	add	src, src, 16

@@ -275,7 +275,7 @@ __ptmalloc_init (void)
     __always_fail_morecore = true;
 #endif
 
-  /* Enable THP if DEFAULT_THP_PAGESIZE is non-zero.  Avoid quering the THP
+  /* Enable THP if DEFAULT_THP_PAGESIZE is non-zero.  Avoid querying the THP
      page size or mode since accessing /sys/kernel/mm is relatively slow and
      might not be accessible in containers.  */
   if (DEFAULT_THP_PAGESIZE > 0)

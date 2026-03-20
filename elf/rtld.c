@@ -2251,7 +2251,7 @@ dl_main (const ElfW(Phdr) *phdr,
 
   int consider_profiling = GLRO(dl_profile) != NULL;
 
-  /* If we are profiling we also must do lazy reloaction.  */
+  /* If we are profiling we also must do lazy relocation.  */
   GLRO(dl_lazy) |= consider_profiling;
 
   /* If libc.so has been loaded, relocate it early, after the dynamic
@@ -2291,7 +2291,7 @@ dl_main (const ElfW(Phdr) *phdr,
 	_dl_relocate_object (l, l->l_scope, GLRO(dl_lazy) ? RTLD_LAZY : 0,
 			     consider_profiling);
 
-	/* Add object to slot information data if necessasy.  */
+	/* Add object to slot information data if necessary.  */
 	if (l->l_tls_blocksize != 0 && __rtld_tls_init_tp_called)
 	  _dl_add_to_slotinfo (l, true);
       }

@@ -82,7 +82,7 @@ L(start_loop):
 	subs	cntrem, cntin, tmp
 	b.lo	L(nomatch)
 
-	/* Make sure that it won't overread by a 16-byte chunk */
+	/* Make sure that it won't over-read by a 16-byte chunk */
 	tbz	cntrem, 4, L(loop32_2)
 	sub	src, src, 16
 	.p2align 4
