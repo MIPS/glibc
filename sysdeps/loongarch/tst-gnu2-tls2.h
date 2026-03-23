@@ -25,17 +25,23 @@
 /* The instruction between BEFORE_TLSDESC_CALL and _dl_tlsdesc_dynamic,
    and the instruction between _dl_tlsdesc_dynamic and AFTER_TLSDESC_CALL,
    may modified most of the general-purpose register.  */
-#define	SAVE_REGISTER(src)						\
-  asm volatile ("st.d $r3, %0" :"=m"(src) :);
+
+#if LOONGARCH_ABI_GRLEN == 64
+# define SAVE_REGISTER(src) asm volatile ("st.d $r3, %0" :"=m"(src) :);
+#elif LOONGARCH_ABI_GRLEN == 32
+# define SAVE_REGISTER(src) asm volatile ("st.w $r3, %0" :"=m"(src) :);
+#else
+# error LOONGARCH_ABI_GRLEN must equal 32 or 64
+#endif
 
 #ifdef __loongarch_soft_float
 
 #define BEFORE_TLSDESC_CALL()						\
-  uint64_t src;								\
+  unsigned long src;							\
   SAVE_REGISTER (src);
 
 #define AFTER_TLSDESC_CALL()						\
-  uint64_t restore;							\
+  unsigned long restore;						\
   SAVE_REGISTER (restore);						\
   if (src != restore)							\
     abort ();
@@ -53,12 +59,12 @@
   asm volatile ("movcf2gr %0, $fcc7" :"=r"(src[7]));	\
 
 #define LOAD_REGISTER_FCSR()				\
-  uint64_t src_fcsr = 0x01010101;			\
-  asm volatile ("li.d $t0, 0x01010101" ::: "$t0");	\
+  unsigned int src_fcsr = 0x01010101;			\
+  asm volatile ("li.w $t0, 0x01010101" ::: "$t0");	\
   asm volatile ("movgr2fcsr $fcsr0, $t0" :::);
 
 #define SAVE_REGISTER_FCSR()						\
-  uint64_t restore_fcsr;						\
+  unsigned int restore_fcsr;						\
   asm volatile ("movfcsr2gr %0, $fcsr0" :"=r"(restore_fcsr));		\
   if (src_fcsr != restore_fcsr)						\
     {									\
@@ -70,7 +76,7 @@
   unsigned long hwcap = getauxval (AT_HWCAP);
 
 #define	LOAD_REGISTER_FLOAT()						\
-  for (int i = 0; i < 32; i++)						\
+  for (int i = 0; i < 24; i++)						\
     src_float[i] = i + 1;						\
   asm volatile ("fld.d $f0, %0" ::"m"(src_float[0]) :"$f0");		\
   asm volatile ("fld.d $f1, %0" ::"m"(src_float[1]) :"$f1"); 		\
@@ -96,17 +102,9 @@
   asm volatile ("fld.d $f21, %0" ::"m"(src_float[21]) :"$f21");		\
   asm volatile ("fld.d $f22, %0" ::"m"(src_float[22]) :"$f22");		\
   asm volatile ("fld.d $f23, %0" ::"m"(src_float[23]) :"$f23");		\
-  asm volatile ("fld.d $f24, %0" ::"m"(src_float[24]) :"$f24");		\
-  asm volatile ("fld.d $f25, %0" ::"m"(src_float[25]) :"$f25");		\
-  asm volatile ("fld.d $f26, %0" ::"m"(src_float[26]) :"$f26");		\
-  asm volatile ("fld.d $f27, %0" ::"m"(src_float[27]) :"$f27");		\
-  asm volatile ("fld.d $f28, %0" ::"m"(src_float[28]) :"$f28");		\
-  asm volatile ("fld.d $f29, %0" ::"m"(src_float[29]) :"$f29");		\
-  asm volatile ("fld.d $f30, %0" ::"m"(src_float[30]) :"$f30");		\
-  asm volatile ("fld.d $f31, %0" ::"m"(src_float[31]) :"$f31");
 
 #define	SAVE_REGISTER_FLOAT()						\
-  double restore_float[32];						\
+  double restore_float[24];						\
   asm volatile ("fst.d $f0, %0" :"=m"(restore_float[0]));		\
   asm volatile ("fst.d $f1, %0" :"=m"(restore_float[1])); 		\
   asm volatile ("fst.d $f2, %0" :"=m"(restore_float[2])); 		\
@@ -131,14 +129,6 @@
   asm volatile ("fst.d $f21, %0" :"=m"(restore_float[21]));		\
   asm volatile ("fst.d $f22, %0" :"=m"(restore_float[22]));		\
   asm volatile ("fst.d $f23, %0" :"=m"(restore_float[23]));		\
-  asm volatile ("fst.d $f24, %0" :"=m"(restore_float[24]));		\
-  asm volatile ("fst.d $f25, %0" :"=m"(restore_float[25]));		\
-  asm volatile ("fst.d $f26, %0" :"=m"(restore_float[26]));		\
-  asm volatile ("fst.d $f27, %0" :"=m"(restore_float[27]));		\
-  asm volatile ("fst.d $f28, %0" :"=m"(restore_float[28]));		\
-  asm volatile ("fst.d $f29, %0" :"=m"(restore_float[29]));		\
-  asm volatile ("fst.d $f30, %0" :"=m"(restore_float[30]));		\
-  asm volatile ("fst.d $f31, %0" :"=m"(restore_float[31]));		\
   if (memcmp (src_float, restore_float, sizeof (src_float)) != 0)	\
     {									\
       printf ("Float registers compare failed!\n");			\
@@ -186,8 +176,8 @@
 
 #ifdef HAVE_LOONGARCH_VEC_COM
   #define	SAVE_REGISTER_LSX()					\
-    int src_lsx[32][4];							\
-    int restore_lsx[32][4];						\
+    unsigned int src_lsx[32][4];					\
+    unsigned int restore_lsx[32][4];					\
     asm volatile ("vst $vr0, %0" :"=m"(restore_lsx[0]));		\
     asm volatile ("vst $vr1, %0" :"=m"(restore_lsx[1])); 		\
     asm volatile ("vst $vr2, %0" :"=m"(restore_lsx[2])); 		\
@@ -275,8 +265,8 @@
 
 #ifdef HAVE_LOONGARCH_VEC_COM
   #define	SAVE_REGISTER_LASX()					\
-    int src_lasx[32][8];						\
-    int restore_lasx[32][8];						\
+    unsigned int src_lasx[32][8];					\
+    unsigned int restore_lasx[32][8];					\
     asm volatile ("xvst $xr0, %0" :"=m"(restore_lasx[0]));		\
     asm volatile ("xvst $xr1, %0" :"=m"(restore_lasx[1])); 		\
     asm volatile ("xvst $xr2, %0" :"=m"(restore_lasx[2])); 		\
@@ -325,9 +315,9 @@
 #endif
 
 #define BEFORE_TLSDESC_CALL()						\
-  uint64_t src;								\
-  double src_float[32];							\
-  uint64_t src_fcc[8];							\
+  unsigned long src;							\
+  double src_float[24];							\
+  unsigned int src_fcc[8];						\
   SAVE_REGISTER (src);							\
 									\
   if (hwcap & HWCAP_LOONGARCH_LASX)					\
@@ -349,8 +339,8 @@
 
 
 #define AFTER_TLSDESC_CALL()						\
-  uint64_t restore;							\
-  uint64_t restore_fcc[8];						\
+  unsigned long restore;						\
+  unsigned int restore_fcc[8];						\
 									\
   SAVE_REGISTER (restore);						\
   if (src != restore)							\

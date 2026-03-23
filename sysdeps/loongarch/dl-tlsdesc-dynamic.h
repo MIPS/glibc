@@ -53,14 +53,14 @@
 _dl_tlsdesc_dynamic:
 	/* Save just enough registers to support fast path, if we fall
 	   into slow path we will save additional registers.  */
-	ADDI	sp, sp, -32
-	cfi_adjust_cfa_offset (32)
+	ADDI	sp, sp, -(4 * SZREG)
+	cfi_adjust_cfa_offset (4 * SZREG)
 	REG_S	t0, sp, 0
-	REG_S	t1, sp, 8
-	REG_S	t2, sp, 16
+	REG_S	t1, sp, SZREG
+	REG_S	t2, sp, 2 * SZREG
 	cfi_rel_offset (12, 0)
-	cfi_rel_offset (13, 8)
-	cfi_rel_offset (14, 16)
+	cfi_rel_offset (13, SZREG)
+	cfi_rel_offset (14, 2 * SZREG)
 
 /* Runtime Storage Layout of Thread-Local Storage
    TP point to the start of TLS block.
@@ -81,11 +81,11 @@ Hign address	dynamic_block1 <----- dtv5  */
 	bltu	t2, t1, .Lslow
 
 	REG_L	t1, a0, TLSDESC_MODID /* t1 = td->tlsinfo.ti_module */
-	/* t1 = t1 * sizeof(dtv_t) = t1 * (2 * sizeof(void*)) */
-	slli.d	t1, t1, 4
-	add.d	t1, t1, t0  /* t1 = dtv[td->tlsinfo.ti_module] */
+	/* t1 = t1 * sizeof(dtv_pointer) = t1 * (2 * sizeof(void*)) */
+	SLLI	t1, t1, (PTRLOG + 1)
+	ADD	t1, t1, t0  /* t1 = dtv[td->tlsinfo.ti_module] */
 	REG_L	t1, t1, 0   /* t1 = dtv[td->tlsinfo.ti_module].pointer.val */
-	li.d	t2, TLS_DTV_UNALLOCATED
+	LI	t2, TLS_DTV_UNALLOCATED
 	/* If dtv[td->tlsinfo.ti_module].pointer.val is TLS_DTV_UNALLOCATED,
 	   goto slow path.  */
 	beq	t1, t2, .Lslow
@@ -93,14 +93,14 @@ Hign address	dynamic_block1 <----- dtv5  */
 	cfi_remember_state
 	REG_L	t2, a0, TLSDESC_MODOFF	/* t2 = td->tlsinfo.ti_offset */
 	/* dtv[td->tlsinfo.ti_module].pointer.val + td->tlsinfo.ti_offset */
-	add.d	a0, t1, t2
+	ADD	a0, t1, t2
 .Lret:
-	sub.d	a0, a0, tp
+	SUB	a0, a0, tp
 	REG_L	t0, sp, 0
-	REG_L	t1, sp, 8
-	REG_L	t2, sp, 16
-	ADDI	sp, sp, 32
-	cfi_adjust_cfa_offset (-32)
+	REG_L	t1, sp, SZREG
+	REG_L	t2, sp, 2 * SZREG
+	ADDI	sp, sp, 4 * SZREG
+	cfi_adjust_cfa_offset (-(4 * SZREG))
 	RET
 
 .Lslow:
@@ -147,7 +147,8 @@ Hign address	dynamic_block1 <----- dtv5  */
 	   Only one physical fcsr0 register, fcsr1-fcsr3 are aliases
 	   of some fields in fcsr0.  */
 	movfcsr2gr  t0, fcsr0
-	st.w	t0, sp, FRAME_SIZE + 24 /* Use the spare slot above t2.  */
+	/* Use the spare slot above t2.  */
+	st.w	t0, sp, FRAME_SIZE + 3 * SZREG
 
 #ifdef USE_LASX
   #define V_REG_S xvst
@@ -194,7 +195,7 @@ Hign address	dynamic_block1 <----- dtv5  */
 	cfi_adjust_cfa_offset (-V_SPACE)
 
 	/* Restore fcsr0 register.  */
-	ld.w	t0, sp, FRAME_SIZE + 24
+	ld.w	t0, sp, FRAME_SIZE + 3 * SZREG
 	movgr2fcsr  fcsr0, t0
 
 #endif /* #ifndef __loongarch_soft_float */

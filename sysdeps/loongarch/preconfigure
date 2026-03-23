@@ -26,7 +26,8 @@ loongarch*)
 
     case "$abi" in
     ilp32)
-	as_fn_error 1 "loongarch does not yet support ilp32 ABI!!" "$LINENO" 5
+	grlen=32
+	machine=loongarch/ilp32
 	;;
     lp64)
 	grlen=64

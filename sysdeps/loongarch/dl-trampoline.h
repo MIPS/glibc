@@ -160,7 +160,7 @@ ENTRY (_dl_runtime_profile)
 	/* Save arguments to stack. */
 	ADDI	sp, sp, -SF_SIZE
 	REG_S	ra, sp, 0
-	REG_S	fp, sp, 8
+	REG_S	fp, sp, SZREG
 
 	or	fp, sp, zero
 
@@ -270,7 +270,7 @@ ENTRY (_dl_runtime_profile)
 1:
 	/* The new frame size is in t3.  */
 	SUB	sp, fp, t3
-	BSTRINS sp, zero, 3, 0
+	REG_ALIGN_ASM (sp, 4)
 
 	REG_S	a0, fp, OFFSET_T1
 

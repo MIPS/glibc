@@ -34,7 +34,7 @@
 	cfi_startproc
 	.align 2
 _dl_tlsdesc_return:
-	REG_L  a0, a0, 8
+	REG_L  a0, a0, SZREG
 	RET
 	cfi_endproc
 	.size	_dl_tlsdesc_return, .-_dl_tlsdesc_return
@@ -53,8 +53,8 @@ _dl_tlsdesc_return:
 	cfi_startproc
 	.align  2
 _dl_tlsdesc_undefweak:
-	REG_L	a0, a0, 8
-	sub.d	a0, a0, tp
+	REG_L	a0, a0, SZREG
+	SUB	a0, a0, tp
 	RET
 	cfi_endproc
 	.size	_dl_tlsdesc_undefweak, .-_dl_tlsdesc_undefweak

@@ -30,12 +30,21 @@
 typedef unsigned long long int hp_timing_t;
 
 /* Read the stable counter.  */
+#ifdef __loongarch64
 #define HP_TIMING_NOW(Var) \
   ({ \
     unsigned long long int _count; \
     asm volatile ("rdtime.d\t%0,$r0" : "=r" (_count)); \
     (Var) = _count; \
   })
+#else
+#define HP_TIMING_NOW(Var) \
+  ({ unsigned int _countl,_counth ; \
+     asm volatile ("rdtimel.w\t%0,$r0\n\trdtimeh.w\t%1,$r0" \
+		    : "=r" (_countl), "=r"(_counth)); \
+     (Var) = ((_counth & -1ULL << 32 ) | _countl); \
+  })
+#endif
 
 #include <hp-timing-common.h>
 

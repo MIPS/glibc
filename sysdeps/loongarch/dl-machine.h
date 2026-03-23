@@ -98,6 +98,8 @@ static inline ElfW (Addr) elf_machine_dynamic (void)
   return (ElfW(Addr)) _DYNAMIC - elf_machine_load_address ();
 }
 
+#define STRINGXP(X) __STRING (X)
+
 /* Initial entry point code for the dynamic linker.
    The C function `_dl_start' is the real entry point;
    its return value is the user program's entry point.  */
@@ -112,19 +114,19 @@ static inline ElfW (Addr) elf_machine_dynamic (void)
 	# Stash user entry point in s0.   \n\
 	or	$s0, $a0, $zero   \n\
 	# Load the original argument count.   \n\
-	ld.d	$a1, $sp, 0   \n\
+	" STRINGXP (REG_L) "	$a1, $sp, 0   \n\
 	# Call _dl_init (struct link_map *main_map, int argc, \
 			 char **argv, char **env)    \n\
 	la	$a0, _rtld_local   \n\
-	ld.d	$a0, $a0, 0   \n\
-	addi.d	$a2, $sp, 8   \n\
-	slli.d	$a3, $a1, 3   \n\
-	add.d	$a3, $a3, $a2   \n\
-	addi.d	$a3, $a3, 8   \n\
+	" STRINGXP (REG_L) "	$a0, $a0, 0   \n\
+	" STRINGXP (ADDI) "	$a2, $sp, " STRINGXP (SZREG) "   \n\
+	" STRINGXP (SLLI) "	$a3, $a1, " STRINGXP (PTRLOG) "   \n\
+	" STRINGXP (ADD) "	$a3, $a3, $a2   \n\
+	" STRINGXP (ADDI) "	$a3, $a3, " STRINGXP (SZREG) "   \n\
 	# Stash the stack pointer in s1.\n\
 	or	$s1, $sp, $zero	\n\
 	# Adjust $sp for 16-aligned   \n\
-	bstrins.d	$sp, $zero, 3, 0  \n\
+	" REG_ALIGN_C ($sp, 4) " \n\
 	# Call the function to run the initializers.   \n\
 	bl	_dl_init   \n\
 	# Restore the stack pointer for _start.\n\

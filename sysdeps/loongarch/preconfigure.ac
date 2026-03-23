@@ -26,7 +26,8 @@ loongarch*)
 
     case "$abi" in
     ilp32)
-	AC_MSG_ERROR([loongarch does not yet support ilp32 ABI!!], 1)
+	grlen=32
+	machine=loongarch/ilp32
 	;;
     lp64)
 	grlen=64
