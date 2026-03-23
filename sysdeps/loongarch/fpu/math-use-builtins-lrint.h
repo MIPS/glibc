@@ -1,4 +1,4 @@
-#if __GNUC_PREREQ (13, 0)
+#if __GNUC_PREREQ (13, 0) && __loongarch_grlen == 64
 # define USE_LRINT_BUILTIN 1
 # define USE_LRINTF_BUILTIN 1
 #else
