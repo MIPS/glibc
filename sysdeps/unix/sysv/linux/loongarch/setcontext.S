@@ -30,22 +30,22 @@
 	.text
 LEAF (__setcontext)
 
-	addi.d		sp, sp, -16
-	st.d		a0, sp, 0	/* Save ucp to stack */
+	ADDI		sp, sp, -16
+	REG_S		a0, sp, 0	/* Save ucp to stack */
 
 /* rt_sigprocmask (SIG_SETMASK, &ucp->uc_sigmask, NULL, _NSIG8) */
-	li.d		a3, _NSIG8
-	li.d		a2, 0
-	li.d		a1, UCONTEXT_SIGMASK
-	add.d		a1, a1, a0
-	li.d		a0, SIG_SETMASK
+	LI		a3, _NSIG8
+	LI		a2, 0
+	LI		a1, UCONTEXT_SIGMASK
+	ADD		a1, a1, a0
+	LI		a0, SIG_SETMASK
 
-	li.d		a7, SYS_ify (rt_sigprocmask)
+	LI		a7, SYS_ify (rt_sigprocmask)
 	syscall		0
 
 	blt		a0, $r0, 99f
 
-	ld.d		t0, sp, 0	/* Load ucp to t0 */
+	REG_L		t0, sp, 0	/* Load ucp to t0 */
 	cfi_def_cfa (12, 0)
 
 /* Note the contents of argument registers will be random
@@ -72,11 +72,11 @@ LEAF (__setcontext)
 	RESTORE_INT_REG(s7,  30, t0)
 	RESTORE_INT_REG(s8,  31, t0)
 
-	ld.d		t1, t0, MCONTEXT_PC
+	REG_L		t1, t0, MCONTEXT_PC
 	jirl		$r0,t1,0
 
 99:
-	addi.d		sp, sp, 16
+	ADDI		sp, sp, 16
 	b		__syscall_error
 
 PSEUDO_END (__setcontext)
@@ -92,7 +92,7 @@ LEAF (__start_context)
 
 	/* Invoke subsequent context if present, else exit(0).  */
 	ori		a0, s2, 0
-	beqz		s2, 1f
+	beq		s2, zero, 1f
 	bl		__setcontext
 1:
 	b		HIDDEN_JUMPTARGET(exit)

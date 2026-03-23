@@ -17,6 +17,9 @@
    <https://www.gnu.org/licenses/>.  */
 
 
+int process_elf32_file (const char *file_name, const char *lib,
+			int *flag, unsigned int *isa_level, char **soname,
+			void *file_contents, size_t file_length);
 int process_elf64_file (const char *file_name, const char *lib,
 			int *flag, unsigned int *isa_level, char **soname,
 			void *file_contents, size_t file_length);
@@ -31,6 +34,7 @@ process_elf_file (const char *file_name, const char *lib, int *flag,
 		  size_t file_length)
 {
   ElfW(Ehdr) *elf_header = (ElfW(Ehdr) *) file_contents;
+  Elf32_Ehdr *elf32_header = (Elf32_Ehdr *) elf_header;
   Elf64_Ehdr *elf64_header = (Elf64_Ehdr *) elf_header;
   int ret;
   long flags;
@@ -38,15 +42,24 @@ process_elf_file (const char *file_name, const char *lib, int *flag,
   /* LoongArch libraries are always libc.so.6+.  */
   *flag = FLAG_ELF_LIBC6;
 
-  ret = process_elf64_file (file_name, lib, flag, isa_level, soname,
+  if (elf_header->e_ident[EI_CLASS] == ELFCLASS32)
+    {
+      ret = process_elf32_file (file_name, lib, flag, isa_level, soname,
+				file_contents, file_length);
+      flags = elf32_header->e_flags & ~EF_LARCH_OBJABI_V1;
+    }
+  else
+    {
+      ret = process_elf64_file (file_name, lib, flag, isa_level, soname,
 				file_contents, file_length);
 
-  /* The EF_LARCH_OBJABI_V1 flag indicate which set of static relocations
-   the object might use and it only considered during static linking,
-   it does not reflect in runtime relocations.  However some binutils
-   version might set it on dynamic shared object, so clear it to avoid
-   see the SO as unsupported.  */
-  flags = elf64_header->e_flags & ~EF_LARCH_OBJABI_V1;
+      /* The EF_LARCH_OBJABI_V1 flag indicate which set of static relocations
+       the object might use and it only considered during static linking,
+       it does not reflect in runtime relocations.  However some binutils
+       version might set it on dynamic shared object, so clear it to avoid
+       see the SO as unsupported.  */
+      flags = elf64_header->e_flags & ~EF_LARCH_OBJABI_V1;
+    }
 
   /* LoongArch linkers encode the floating point ABI as part of the ELF headers.  */
   switch (flags & SUPPORTED_ELF_FLAGS)
@@ -68,6 +81,12 @@ process_elf_file (const char *file_name, const char *lib, int *flag,
 
   return ret;
 }
+
+#undef __ELF_NATIVE_CLASS
+#undef process_elf_file
+#define process_elf_file process_elf32_file
+#define __ELF_NATIVE_CLASS 32
+#include "elf/readelflib.c"
 
 #undef __ELF_NATIVE_CLASS
 #undef process_elf_file

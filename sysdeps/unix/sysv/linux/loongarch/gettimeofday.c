@@ -17,6 +17,7 @@
    License along with the GNU C Library.  If not, see
    <https://www.gnu.org/licenses/>.  */
 
-
-#define USE_IFUNC_GETTIMEOFDAY
+#ifdef __loongarch64
+# define USE_IFUNC_GETTIMEOFDAY
+#endif
 #include <sysdeps/unix/sysv/linux/gettimeofday.c>

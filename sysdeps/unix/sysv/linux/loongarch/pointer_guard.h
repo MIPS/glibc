@@ -19,26 +19,16 @@
 #ifndef POINTER_GUARD_H
 #define POINTER_GUARD_H
 
-/* Load a got-relative EXPR into register G.  */
-#define LD_GLOBAL(G, EXPR) \
-  la.global G,  EXPR; \
-  REG_L     G,  G,  0;
-
-/* Load a pc-relative EXPR into register G.  */
-#define LD_PCREL(G, EXPR) \
-  pcalau12i G, %pc_hi20(EXPR); \
-  REG_L     G, G, %pc_lo12(EXPR);
-
 #if (IS_IN (rtld) \
      || (!defined SHARED && (IS_IN (libc) \
      || IS_IN (libpthread))))
 
 #ifdef __ASSEMBLER__
 #define PTR_MANGLE(dst, src, guard) \
-  LD_PCREL (guard, __pointer_chk_guard_local); \
+  LOAD_LOCAL (guard, __pointer_chk_guard_local); \
   PTR_MANGLE2 (dst, src, guard);
 #define PTR_DEMANGLE(dst, src, guard) \
-  LD_PCREL (guard, __pointer_chk_guard_local); \
+  LOAD_LOCAL (guard, __pointer_chk_guard_local); \
   PTR_DEMANGLE2 (dst, src, guard);
 /* Use PTR_MANGLE2 for efficiency if guard is already loaded.  */
 #define PTR_MANGLE2(dst, src, guard) \
@@ -57,10 +47,10 @@ extern uintptr_t __pointer_chk_guard_local attribute_relro attribute_hidden;
 
 #ifdef __ASSEMBLER__
 #define PTR_MANGLE(dst, src, guard) \
-  LD_GLOBAL (guard, __pointer_chk_guard); \
+  LOAD_GLOBAL (guard, __pointer_chk_guard); \
   PTR_MANGLE2 (dst, src, guard);
 #define PTR_DEMANGLE(dst, src, guard) \
-  LD_GLOBAL (guard, __pointer_chk_guard); \
+  LOAD_GLOBAL (guard, __pointer_chk_guard); \
   PTR_DEMANGLE2 (dst, src, guard);
 /* Use PTR_MANGLE2 for efficiency if guard is already loaded.  */
 #define PTR_MANGLE2(dst, src, guard) \

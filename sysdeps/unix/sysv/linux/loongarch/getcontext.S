@@ -36,16 +36,16 @@ LEAF (__getcontext)
 	SAVE_INT_REG (s6,  29, a0)
 	SAVE_INT_REG (s7,  30, a0)
 	SAVE_INT_REG (s8,  31, a0)
-	st.d		ra, a0, MCONTEXT_PC
+	REG_S		ra, a0, MCONTEXT_PC
 
 /* rt_sigprocmask (SIG_BLOCK, NULL, &ucp->uc_sigmask, _NSIG8) */
-	li.d		a3, _NSIG8
-	li.d		a2, UCONTEXT_SIGMASK
-	add.d		a2, a2, a0
+	LI		a3, _NSIG8
+	LI		a2, UCONTEXT_SIGMASK
+	ADD		a2, a2, a0
 	ori		a1, zero,0
-	li.d		a0, SIG_BLOCK
+	LI		a0, SIG_BLOCK
 
-	li.d		a7, SYS_ify (rt_sigprocmask)
+	LI		a7, SYS_ify (rt_sigprocmask)
 	syscall		0
 	blt		a0, zero, 99f
 

@@ -33,13 +33,13 @@
 ENTRY (__clone)
 
 	/* Align stack to 16.  */
-	BSTRINS		a1, zero, 3, 0
+	REG_ALIGN_ASM (a1, 4)
 
 	/* Sanity check arguments.  */
-	beqz		a0, L (invalid) /* No NULL function pointers.  */
-	beqz		a1, L (invalid) /* No NULL stack pointers.  */
+	beq		a0, zero, L (invalid) /* No NULL function pointers.  */
+	beq		a1, zero, L (invalid) /* No NULL stack pointers.  */
 
-	ADDI 		a1, a1, -16 /* Reserve argument save space.  */
+	ADDI 		a1, a1, -STACK_ALIGN /* Reserve argument save space.  */
 	REG_S		a0, a1, 0   /* Save function pointer.  */
 	REG_S		a3, a1, SZREG   /* Save argument pointer.  */
 
@@ -54,7 +54,7 @@ ENTRY (__clone)
 	syscall		0
 
 	blt		a0, zero ,L (error)
-	beqz		a0,L (thread_start)
+	beq		a0, zero, L (thread_start)
 
 	/* Successful return from the parent.  */
 	ret

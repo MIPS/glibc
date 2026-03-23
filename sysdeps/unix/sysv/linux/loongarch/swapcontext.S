@@ -22,8 +22,8 @@
 
 LEAF (__swapcontext)
 	ori		a2, sp, 0		/* Save sp to a2 */
-	addi.d		sp, sp, -16
-	st.d		a1, sp, 0
+	ADDI		sp, sp, -16
+	REG_S		a1, sp, 0
 	ori		t0, a1, 0
 
 	SAVE_INT_REG (ra,   1, a0)
@@ -41,22 +41,22 @@ LEAF (__swapcontext)
 	SAVE_INT_REG (s7,  30, a0)
 	SAVE_INT_REG (s8,  31, a0)
 
-	st.d		ra, a0, MCONTEXT_PC
+	REG_S		ra, a0, MCONTEXT_PC
 
 /* rt_sigprocmask (SIG_SETMASK, &ucp->uc_sigmask, &oucp->uc_sigmask, _NSIG8) */
-	li.d		a3, _NSIG8
-	li.d		a2, UCONTEXT_SIGMASK
-	add.d		a2, a2, a0
-	li.d		a1, UCONTEXT_SIGMASK
-	add.d		a1, a1, t0
-	li.d		a0, SIG_SETMASK
+	LI		a3, _NSIG8
+	LI		a2, UCONTEXT_SIGMASK
+	ADD		a2, a2, a0
+	LI		a1, UCONTEXT_SIGMASK
+	ADD		a1, a1, t0
+	LI		a0, SIG_SETMASK
 
-	li.d		a7, SYS_ify (rt_sigprocmask)
+	LI		a7, SYS_ify (rt_sigprocmask)
 	syscall		0
 
 	blt		a0, zero, 99f
 
-	ld.d		t0, sp, 0		/* Load a1 to t0 */
+	REG_L		t0, sp, 0		/* Load a1 to t0 */
 
 /* Note the contents of argument registers will be random
    unless makecontext() has been called.  */
@@ -82,12 +82,12 @@ LEAF (__swapcontext)
 	RESTORE_INT_REG (s7,  30, t0)
 	RESTORE_INT_REG (s8,  31, t0)
 
-	ld.d		t1, t0, MCONTEXT_PC
+	REG_L		t1, t0, MCONTEXT_PC
 	jirl		$r0, t1, 0
 
 
 99:
-	addi.d		sp, sp, 16
+	ADDI		sp, sp, 16
 	b		__syscall_error
 
 PSEUDO_END (__swapcontext)

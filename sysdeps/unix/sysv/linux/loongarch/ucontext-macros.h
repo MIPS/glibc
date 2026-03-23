@@ -23,10 +23,12 @@
 #include <sys/asm.h>
 #include "ucontext_i.h"
 
+/* mcontext_t.__gregs is unsigned long long on la32 and la64,
+   use 8 instead of SZREG.  */
 #define SAVE_INT_REG(name, num, base) \
-  REG_S name, base, ((num) *SZREG + MCONTEXT_GREGS)
+  REG_S name, base, ((num) * 8 + MCONTEXT_GREGS)
 
 #define RESTORE_INT_REG(name, num, base) \
-  REG_L name, base, ((num) *SZREG + MCONTEXT_GREGS)
+  REG_L name, base, ((num) * 8 + MCONTEXT_GREGS)
 
 #endif /* _LINUX_LOONGARCH_UCONTEXT_MACROS_H */

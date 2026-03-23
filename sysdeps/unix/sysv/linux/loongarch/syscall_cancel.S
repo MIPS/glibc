@@ -28,7 +28,7 @@ __syscall_cancel_arch_start:
 	     __syscall_do_cancel()  */
 	ld.w	t0, a0, 0
 	andi	t0, t0, TCB_CANCELED_BITMASK
-	bnez	t0, 1f
+	bne	t0, zero, 1f
 
 	/* Issue a 6 argument syscall.  */
 	move	t1, a1

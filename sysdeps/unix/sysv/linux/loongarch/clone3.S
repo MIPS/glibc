@@ -33,15 +33,15 @@
 ENTRY (__clone3)
 
 	/* Sanity check arguments.  */
-	beqz		a0, L (invalid)	/* No NULL cl_args pointer.  */
-	beqz		a2, L (invalid)	/* No NULL function pointer.  */
+	beq		a0, zero, L (invalid)	/* No NULL cl_args pointer.  */
+	beq		a2, zero, L (invalid)	/* No NULL function pointer.  */
 
 	/* Do the system call.  */
 	LI		a7, __NR_clone3
 	syscall		0
 
 	blt		a0, zero ,L (error)
-	beqz		a0, L (thread_start3)
+	beq		a0, zero, L (thread_start3)
 
 	/* Successful return from the parent.  */
 	ret
@@ -67,7 +67,7 @@ L (thread_start3):
 	cfi_undefined (1)
 
 	/* Align stack to 16.  */
-	BSTRINS		sp, zero, 3, 0
+	REG_ALIGN_ASM (sp, 4)
 
 	/* Set up arguments for the function call.  */
 	move		a0, a3		/* Argument.  */

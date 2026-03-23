@@ -28,11 +28,11 @@
 
 ENTRY (__vfork)
 
-	li.d	a0, 0x4111 /* CLONE_VM | CLONE_VFORK | SIGCHLD */
-	add.d   a1, zero, sp
+	LI	a0, 0x4111 /* CLONE_VM | CLONE_VFORK | SIGCHLD */
+	ADD   a1, zero, sp
 
 	/* Do the system call.  */
-	li.d	a7, __NR_clone
+	LI	a7, __NR_clone
 	syscall	0
 
 	blt	a0, zero ,L (error)
