@@ -115,20 +115,20 @@ static __always_inline int
 libc_feupdateenv_test_loongarch (fenv_t *envp, int excepts)
 {
   /* int ret = fetestexcept (excepts); feupdateenv (envp); return ret; */
-  int cw, temp;
+  int held_ex, cw = envp->__fp_control_register;
 
-  /* Get current control word.  */
-  _FPU_GETCW (cw);
+  /* Get the current flag, i.e. all exceptions raised since we started
+     to hold the exceptions.  We don't care CAUSE.  */
+  _FPU_GET_FLAGS_CAUSE (held_ex);
 
-  /* Set flag bits (which are accumulative), and *also* set the
-     cause bits.  The setting of the cause bits is what actually causes
-     the hardware to generate the exception, if the corresponding enable
-     bit is set as well.  */
-  temp = cw & FE_ALL_EXCEPT;
-  temp |= envp->__fp_control_register | (temp << CAUSE_SHIFT);
+  /* Set flag bits (which are accumulative).  */
+  cw |= held_ex;
+  _FPU_SETCW (cw);
 
-  /* Set new state.  */
-  _FPU_SETCW (temp);
+  /* Raise SIGFPE for any new exceptions since the hold, in case any is
+     enabled.  */
+  if (__glibc_unlikely (((cw & ENABLE_MASK) << ENABLE_SHIFT) & held_ex))
+    __feraiseexcept (held_ex);
 
   return cw & excepts & FE_ALL_EXCEPT;
 }

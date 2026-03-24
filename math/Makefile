@@ -563,6 +563,7 @@ tests = \
   test-nan-overflow \
   test-nan-payload \
   test-narrow-macros \
+  test-narrowing-trap \
   test-nearbyint-except \
   test-nearbyint-except-2 \
   test-powl \
@@ -1171,6 +1172,8 @@ CFLAGS-test-nan-payload.c += -fno-builtin
 CFLAGS-test-ceil-except-2.c += -fno-builtin
 CFLAGS-test-floor-except-2.c += -fno-builtin
 CFLAGS-test-trunc-except-2.c += -fno-builtin
+
+CFLAGS-test-narrowing-trap.c += -fno-builtin
 
 include ../Rules
 
