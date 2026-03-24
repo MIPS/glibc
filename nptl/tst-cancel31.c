@@ -43,7 +43,9 @@ writeopener (void *arg)
   for (;;)
     {
       fd = open (arg, O_WRONLY);
+      pthread_setcancelstate (PTHREAD_CANCEL_DISABLE, 0);
       xclose (fd);
+      pthread_setcancelstate (PTHREAD_CANCEL_ENABLE, 0);
     }
   return NULL;
 }
@@ -74,7 +76,7 @@ do_test (void)
 
   srand (1);
 
-  xpthread_create (NULL, writeopener, name);
+  pthread_t tw = xpthread_create (NULL, writeopener, name);
   for (int i = 0; i < iter_count; i++)
     {
       pthread_t td = xpthread_create (NULL, leaker, name);
@@ -87,6 +89,9 @@ do_test (void)
       pthread_cancel (td);
       xpthread_join (td);
     }
+
+  pthread_cancel (tw);
+  xpthread_join (tw);
 
   support_descriptors_check (descrs);
 
