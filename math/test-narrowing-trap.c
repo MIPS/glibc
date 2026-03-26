@@ -26,6 +26,7 @@
 static int
 do_test (void)
 {
+#ifdef FE_INVALID
   pid_t pid;
 
   if (!EXCEPTION_ENABLE_SUPPORTED (FE_INVALID))
@@ -50,6 +51,9 @@ do_test (void)
     }
 
   return 0;
+#else
+  FAIL_UNSUPPORTED ("FE_INVALID is not defined");
+#endif
 }
 
 #include <support/test-driver.c>
