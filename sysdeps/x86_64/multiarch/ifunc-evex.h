@@ -1,4 +1,4 @@
-/* Common definition for ifunc selection optimized with EVEX.
+/* Common definition for ifunc selection optimized with EVEX and EVEX512.
    All versions must be listed in ifunc-impl-list.c.
    Copyright (C) 2017-2026 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
@@ -22,6 +22,10 @@
 extern __typeof (REDIRECT_NAME) OPTIMIZE (evex) attribute_hidden;
 extern __typeof (REDIRECT_NAME) OPTIMIZE (evex_rtm) attribute_hidden;
 
+#ifdef USE_EVEX512
+extern __typeof (REDIRECT_NAME) OPTIMIZE (evex512) attribute_hidden;
+#endif
+
 extern __typeof (REDIRECT_NAME) OPTIMIZE (avx2) attribute_hidden;
 extern __typeof (REDIRECT_NAME) OPTIMIZE (avx2_rtm) attribute_hidden;
 
@@ -42,6 +46,11 @@ IFUNC_SELECTOR (void)
       if (X86_ISA_CPU_FEATURE_USABLE_P (cpu_features, AVX512VL)
 	  && X86_ISA_CPU_FEATURE_USABLE_P (cpu_features, AVX512BW))
 	{
+#ifdef USE_EVEX512
+      if (CPU_FEATURES_ARCH_P (cpu_features, Prefer_EVEX512))
+        return OPTIMIZE (evex512);
+#endif
+
 	  if (CPU_FEATURE_USABLE_P (cpu_features, RTM))
 	    return OPTIMIZE (evex_rtm);
 

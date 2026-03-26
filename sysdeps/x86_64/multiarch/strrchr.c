@@ -23,6 +23,7 @@
 # undef strrchr
 
 # define SYMBOL_NAME strrchr
+# define USE_EVEX512 1
 # include "ifunc-avx2.h"
 
 libc_ifunc_redirected (__redirect_strrchr, strrchr, IFUNC_SELECTOR ());

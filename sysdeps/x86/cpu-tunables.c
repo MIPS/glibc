@@ -203,6 +203,12 @@ TUNABLE_CALLBACK (set_hwcaps) (tunable_val_t *valp)
 						     11);
 	    }
 	  break;
+	case 14:
+	    {
+	      CHECK_GLIBC_IFUNC_PREFERRED_NEED_BOTH
+		(n, cpu_features, Prefer_EVEX512, AVX512F, 14);
+	    }
+	  break;
 	case 15:
 	    {
 	      CHECK_GLIBC_IFUNC_PREFERRED_BOTH (n, cpu_features,

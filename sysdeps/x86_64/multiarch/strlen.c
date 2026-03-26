@@ -24,6 +24,7 @@
 # undef strlen
 
 # define SYMBOL_NAME strlen
+# define USE_EVEX512 1
 # include "ifunc-avx2.h"
 
 libc_ifunc_redirected (__redirect_strlen, strlen, IFUNC_SELECTOR ());

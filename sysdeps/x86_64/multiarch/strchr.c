@@ -27,6 +27,7 @@
 # include <init-arch.h>
 
 extern __typeof (REDIRECT_NAME) OPTIMIZE (evex) attribute_hidden;
+extern __typeof (REDIRECT_NAME) OPTIMIZE (evex512) attribute_hidden;
 
 extern __typeof (REDIRECT_NAME) OPTIMIZE (avx2) attribute_hidden;
 extern __typeof (REDIRECT_NAME) OPTIMIZE (avx2_rtm) attribute_hidden;
@@ -46,7 +47,12 @@ IFUNC_SELECTOR (void)
     {
       if (X86_ISA_CPU_FEATURE_USABLE_P (cpu_features, AVX512VL)
 	  && X86_ISA_CPU_FEATURE_USABLE_P (cpu_features, AVX512BW))
-	return OPTIMIZE (evex);
+	{
+	  if (CPU_FEATURES_ARCH_P (cpu_features, Prefer_EVEX512))
+	    return OPTIMIZE (evex512);
+
+	  return OPTIMIZE (evex);
+	}
 
       if (CPU_FEATURE_USABLE_P (cpu_features, RTM))
 	return OPTIMIZE (avx2_rtm);

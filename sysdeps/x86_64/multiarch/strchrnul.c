@@ -26,6 +26,7 @@
 # undef strchrnul
 
 # define SYMBOL_NAME strchrnul
+# define USE_EVEX512 1
 # include "ifunc-avx2.h"
 
 libc_ifunc_redirected (__redirect_strchrnul, __strchrnul,

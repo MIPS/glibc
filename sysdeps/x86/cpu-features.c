@@ -1009,6 +1009,12 @@ disable_tsx:
       cpu_features->preferred[index_arch_Avoid_Non_Temporal_Memset]
 	  &= ~bit_arch_Avoid_Non_Temporal_Memset;
 
+      /* Prefer EVEX512 string/memory variants on AMD Zen5 (Family 0x1A)
+         when AVX-512 is usable. */
+      if (family == 0x1A && CPU_FEATURE_USABLE_P (cpu_features, AVX512F))
+          cpu_features->preferred[index_arch_Prefer_EVEX512]
+            |= bit_arch_Prefer_EVEX512;
+
       if (CPU_FEATURE_USABLE_P (cpu_features, AVX))
 	{
 	  /* Since the FMA4 bit is in CPUID_INDEX_80000001 and

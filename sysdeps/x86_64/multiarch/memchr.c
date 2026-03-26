@@ -24,6 +24,7 @@
 # undef memchr
 
 # define SYMBOL_NAME memchr
+# define USE_EVEX512 1
 # include "ifunc-evex.h"
 
 libc_ifunc_redirected (__redirect_memchr, memchr, IFUNC_SELECTOR ());
