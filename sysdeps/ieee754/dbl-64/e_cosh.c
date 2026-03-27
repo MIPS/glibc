@@ -74,7 +74,7 @@ as_exp_accurate (double x, double t, double th, double tl, double *l)
   double fl = dxh
 	      * (0x1.5555555555555p-5
 		 + dxh * (0x1.11111113e93e9p-7 + dxh * 0x1.6c16c169400a7p-10));
-  double fh = polydd (dxh, dxl, 3, ch, &fl);
+  double fh = polydd_cosh (dxh, dxl, 3, ch, &fl);
   fh = muldd2 (dxh, dxl, fh, fl, &fl);
   fh = muldd2 (th, tl, fh, fl, &fl);
   double zh = th + fh, zl = (th - zh) + fh;
