@@ -216,8 +216,9 @@ __lgammaf_r (float x, int *signgamp)
 		 and does not overflow for x = 0x1.895f1cp+121 and rounding
 		 towards zero */
 	      float r = fmaf (x, 0x1.4d3398p+6f, 0x1.10f35ep+103f);
-	      if (x > 0x1.895f1cp+121f || (x == 0x1.895f1cp+121f &&
-					   x * 5.0f >= 0x1.ebb6e4p+123))
+	      if (x > 0x1.895f1cp+121f
+		  || (x == 0x1.895f1cp+121f
+		      && math_narrow_eval (x * 5.0f) >= 0x1.ebb6e4p+123))
 		return __math_oflowf (0);
 	      return r;
 	    }
