@@ -3,7 +3,7 @@
 Copyright (c) 2023-2026 Alexei Sibidanov.
 
 The original version of this file was copied from the CORE-MATH
-project (file src/binary64/sinh/sinh.c, revision 8c2c3473).
+project (file src/binary64/sinh/sinh.c, revision e756933f).
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -23,6 +23,11 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
+
+/* The correctness of this code is proven in this document:
+   The CORE-MATH sinh is correctly rounded,
+   Guillaume Melquiond and Paul Zimmermann,
+   https://core-math.gitlabpages.inria.fr/sinh.pdf, March 2026 */
 
 #include <array_length.h>
 #include <math.h>
@@ -151,7 +156,7 @@ __sinh (double x)
 	}
       /* With p = c[0]*x^3 + c[1]*x^5 + c[2]*x^7 + c[3]*x^9 + c[4]*x^11,
 	 q = x + p is a minimax approximation of sinh(x) on [x0,1/4] such that
-	 |q - sinh(x)|/x^3 < 2^-56.5839 */
+	 |q - sinh(x)|/x^3 < 2^-56.584 */
       static const double c[] = { 0x1.5555555555555p-3, 0x1.111111111151ep-7,
 				  0x1.a01a019d0c767p-13, 0x1.71de444a96e11p-19,
 				  0x1.ae8465375242p-26 };
@@ -159,7 +164,7 @@ __sinh (double x)
 	     p = x3
 	       * ((c[0] + x2 * c[1]) + x4 * ((c[2] + x2 * c[3]) + x4 * c[4]));
       // fails with e = x3*0x1.5p-53 and x=0x1.71c5b3515d069p-8 (rndz, no fma)
-      double e = x3 * 0x2.1p-53, lb = x + (p - e), ub = x + (p + e);
+      double e = x3 * 0x1.cp-53, lb = x + (p - e), ub = x + (p + e);
       if (lb == ub)
 	return lb;
       return as_sinh_zero (x);
