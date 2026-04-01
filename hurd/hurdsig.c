@@ -452,7 +452,7 @@ _hurdsig_abort_rpcs (struct hurd_sigstate *ss, int signo, int sigthread,
               /* The interrupt didn't work.
                  Destroy the receive right the thread is blocked on, and
                  replace it with a dead name to keep the name from reuse until
-                 the therad is done with it.  To do this atomically, first
+                 the thread is done with it.  To do this atomically, first
                  insert a send right, and then destroy the receive right,
                  turning the send right into a dead name.  */
               err = __mach_port_insert_right (__mach_task_self (),
@@ -465,12 +465,15 @@ _hurdsig_abort_rpcs (struct hurd_sigstate *ss, int signo, int sigthread,
             }
 
           /* The system call return value register now contains
-             MACH_RCV_INTERRUPTED; when mach_msg resumes, it will retry the
-             call.  Since we have just destroyed the receive right, the retry
-             will fail with MACH_RCV_INVALID_NAME.  Instead, just change the
-             return value here to EINTR so mach_msg will not retry and the
-             EINTR error code will propagate up.  */
-          state->basic.SYSRETURN = EINTR;
+             MACH_RCV_INTERRUPTED; when mach_msg resumes, it will
+             retry the call.  Since we have just destroyed the receive
+             right, the retry would fail with MACH_RCV_INVALID_NAME.
+             Instead, just change the return value here so mach_msg
+             will not retry. We cannot return EINTR because we do not
+             know what state the server is in and we cannot wait for
+             its reply. EIEIO instead indicates a fatal result for the
+             operation. */
+          state->basic.SYSRETURN = EIEIO;
           *state_change = 1;
 	}
       else if (reply)
@@ -479,7 +482,8 @@ _hurdsig_abort_rpcs (struct hurd_sigstate *ss, int signo, int sigthread,
       /* All threads whose RPCs were interrupted by the interrupt_operation
          call above will retry their RPCs unless we clear SS->intr_port.  So we
          clear it for the thread taking a signal when SA_RESTART is clear, so
-         that its call returns EINTR.  */
+         that its call returns the server's response to the RPC (which includes
+         the possibility of EINTR).  */      
       if (! signo || !(_hurd_sigstate_actions (ss) [signo].sa_flags & SA_RESTART))
         ss->intr_port = MACH_PORT_NULL;
     }
@@ -528,17 +532,8 @@ abort_all_rpcs (int signo, struct machine_thread_all_state *state, int live)
 	reply_ports[nthreads] = _hurdsig_abort_rpcs (ss, signo, 1,
 						     state, &state_changed,
 						     NULL);
-	if (live)
+	if (live && state_changed)
 	  {
-	    if (reply_ports[nthreads] != MACH_PORT_NULL)
-	      {
-		/* We will wait for the reply to this RPC below, so the
-		   thread must issue a new RPC rather than waiting for the
-		   reply to the one it sent.  */
-		state->basic.SYSRETURN = EINTR;
-		state_changed = 1;
-	      }
-	    if (state_changed)
 	      /* Aborting the RPC needed to change this thread's state,
 		 and it might ever run again.  So write back its state.  */
 	      __thread_set_state (ss->thread, MACHINE_THREAD_STATE_FLAVOR,
@@ -547,23 +542,50 @@ abort_all_rpcs (int signo, struct machine_thread_all_state *state, int live)
 	  }
       }
 
+  /* All threads (except this one) are suspended, so _hurd_sigstates
+     cannot have changed and therefore indexes into reply_ports still
+     match the _hurd_sigstates sequence. */
+  nthreads = 0;
+
   /* Wait for replies from all the successfully interrupted RPCs.  */
-  while (nthreads-- > 0)
+  for (ss = _hurd_sigstates; ss != NULL; ss = ss->next, nthreads += 1)
     if (reply_ports[nthreads] != MACH_PORT_NULL)
       {
+	mach_msg_header_t* head;
+	mach_port_t rcv_port;
+	mach_msg_option_t option;
+	mach_msg_timeout_t timeout;
+	mach_msg_size_t rcv_size;
 	error_t err;
-	mach_msg_header_t head;
-	err = __mach_msg (&head, MACH_RCV_MSG|MACH_RCV_TIMEOUT, 0, sizeof head,
-			  reply_ports[nthreads],
-			  _hurd_interrupted_rpc_timeout, MACH_PORT_NULL);
-	switch (err)
-	  {
-	  case MACH_RCV_TIMED_OUT:
-	  case MACH_RCV_TOO_LARGE:
-	    break;
 
-	  default:
-	    assert_perror (err);
+	machine_get_basic_state (ss->thread, state);
+
+	if (MSG_EXAMINE (&state->basic, &head, &rcv_port, &rcv_size,
+			 &option, &timeout) == 0)
+	  {
+	    assert (head != NULL && rcv_size >= sizeof(mach_msg_header_t));
+	    /* We use the message header/rcv_size supplied to the
+	       thread that initiated the RPC so that the reply is
+	       available to it if it resumes. */
+
+	    err = __mach_msg (head, MACH_RCV_MSG|MACH_RCV_TIMEOUT, 0,
+			      rcv_size, reply_ports[nthreads],
+			      _hurd_interrupted_rpc_timeout, MACH_PORT_NULL);
+	  }
+	else
+	  {
+	    /* Faulted trying to find the RPC parameters. */
+	    err = EIEIO;
+	  }
+
+	if (live)
+	  {
+	    /* The RPC might have any result including success. The
+	       suspended thread must deal with the outcome. */
+	    state->basic.SYSRETURN = err;
+	    __thread_set_state (ss->thread, MACHINE_THREAD_STATE_FLAVOR,
+				(natural_t *) &state->basic,
+				MACHINE_THREAD_STATE_COUNT);
 	  }
       }
 }
