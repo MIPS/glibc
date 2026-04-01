@@ -92,27 +92,24 @@
 
 
 /* This cannot be an inline function because it calls setjmp.  */
-#define MSG_EXAMINE(state, msgid, rcvname, send_name, opt, tmout)	      \
+#define MSG_EXAMINE(state, msghdr, rcvname, rcvsz, opt, tmout)  	      \
 ({									      \
   int ret = 0;								      \
   const struct machine_thread_state *s = (state);			      \
-  const mach_msg_header_t *msg = (const void *) s->rdi;			      \
+  mach_msg_header_t *msg = (void *) s->rdi;				      \
+  *(msghdr) = msg;   							      \
   *(rcvname) = s->r8;							      \
   *(opt) = s->rsi;							      \
   *(tmout) = s->r9;							      \
-  if (msg == 0)								      \
-    {									      \
-      *(send_name) = MACH_PORT_NULL;					      \
-      *(msgid) = 0;							      \
-    }									      \
-  else									      \
+  *(rcvsz) = s->r10;							      \
+  if (msg != NULL)							      \
     {									      \
       ret = _hurdsig_catch_memory_fault (msg) ? -1 : 0;			      \
       if (ret == 0)							      \
         {								      \
-          *(send_name) = msg->msgh_remote_port;				      \
-          *(msgid) = msg->msgh_id;					      \
-          _hurdsig_end_catch_fault ();					      \
+	    /* Access memory at msg to ensure validity */		      \
+	    *((volatile mach_msg_id_t *) &msg->msgh_id) = msg->msgh_id;       \
+	    _hurdsig_end_catch_fault ();				      \
 	}								      \
     }									      \
   ret;									      \

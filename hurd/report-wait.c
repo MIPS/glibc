@@ -155,16 +155,29 @@ _S_msg_report_wait (mach_port_t msgport, thread_t thread,
 	  assert (count == MACHINE_THREAD_STATE_COUNT);
 	  if (SYSCALL_EXAMINE (&state, msgid))
 	    {
+	      mach_msg_header_t* msghdr;
 	      mach_port_t send_port, rcv_port;
+	      mach_msg_size_t rcv_sz;
 	      mach_msg_option_t option;
 	      mach_msg_timeout_t timeout;
 
 	      /* Blocked in a system call.  */
 	      if (*msgid == -25
 		  /* mach_msg system call.  Examine its parameters.  */
-		  && MSG_EXAMINE (&state, msgid, &rcv_port, &send_port,
+		  && MSG_EXAMINE (&state, &msghdr, &rcv_port, &rcv_sz,
 				  &option, &timeout) == 0)
 		{
+		  if (msghdr != NULL)
+		    {
+		      send_port = msghdr->msgh_remote_port;
+		      *msgid = msghdr->msgh_id;
+		    }
+		  else
+		    {
+		      send_port = MACH_PORT_NULL;
+		      *msgid = 0;
+		    }
+
 		  if (send_port != MACH_PORT_NULL && *msgid != 0)
 		    {
 		      /* For the normal case of RPCs, we consider the

@@ -106,30 +106,29 @@ struct mach_msg_trap_args
 
 
 /* This cannot be an inline function because it calls setjmp.  */
-#define MSG_EXAMINE(state, msgid, rcvname, send_name, opt, tmout)	      \
+#define MSG_EXAMINE(state, msghdr, rcvname, rcvsz, opt, tmout)		      \
 ({									      \
   const struct mach_msg_trap_args *args = (const void *) (state)->uesp;	      \
-  mach_msg_header_t *msg;						      \
-  _hurdsig_catch_memory_fault (args) ? -1 :				      \
-    ({									      \
-      msg = args->msg;							      \
+  int ret = _hurdsig_catch_memory_fault (args) ? -1 : 0;		      \
+  if (ret == 0)								      \
+    {									      \
+      mach_msg_header_t *msg = args->msg;				      \
+      *(msghdr) = msg;							      \
       *(opt) = args->option;						      \
       *(tmout) = args->timeout;						      \
       *(rcvname) = args->rcv_name;					      \
+      *(rcvsz) = args->rcv_size;					      \
       _hurdsig_end_catch_fault ();					      \
-      if (msg == 0)							      \
+      if (msg != NULL)							      \
 	{								      \
-	  *(send_name) = MACH_PORT_NULL;				      \
-	  *(msgid) = 0;							      \
+	  ret = _hurdsig_catch_memory_fault (msg) ? -1 : 0;		      \
+	  if (ret == 0)							      \
+	    {								      \
+	      /* Access memory at msg to ensure validity */		      \
+	      *((volatile mach_msg_id_t *) &msg->msgh_id) = msg->msgh_id;     \
+	      _hurdsig_end_catch_fault ();				      \
+	    }								      \
 	}								      \
-      else								      \
-	{								      \
-	  if (_hurdsig_catch_memory_fault (msg))			      \
-	    return -1;							      \
-	  *(send_name) = msg->msgh_remote_port;				      \
-	  *(msgid) = msg->msgh_id;					      \
-	  _hurdsig_end_catch_fault ();					      \
-	}								      \
-      0;								      \
-    });									      \
+    }									      \
+    ret;								      \
 })
